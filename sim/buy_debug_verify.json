@@ -1,0 +1,122 @@
+{
+  "pass": true,
+  "checks": [
+    {
+      "id": "SUPER_PRIZE_defined",
+      "ok": true,
+      "detail": "found SUPER_PRIZE = 70000000000"
+    },
+    {
+      "id": "QTY_EXPS_gone",
+      "ok": true,
+      "detail": "QTY_EXPS absent (good)"
+    },
+    {
+      "id": "MAX_EXP_68",
+      "ok": true,
+      "detail": "MAX_EXP = 68"
+    },
+    {
+      "id": "MAX_TICKETS_pow10_68",
+      "ok": true,
+      "detail": "MAX_TICKETS = Math.pow(10, MAX_EXP)"
+    },
+    {
+      "id": "no_1e15_cap",
+      "ok": true,
+      "detail": "no old 1e15 MAX_TICKETS assignment"
+    },
+    {
+      "id": "qtyExp_plusplus",
+      "ok": true,
+      "detail": "qtyUp handler contains S.qtyExp++"
+    },
+    {
+      "id": "qtyUp_increments_by_1",
+      "ok": true,
+      "detail": "qtyUp: if qtyExp < MAX_EXP then qtyExp++ (10x tickets each step)"
+    },
+    {
+      "id": "qty_steps_count",
+      "ok": true,
+      "detail": "steps=69 expected=69 (0..68)"
+    },
+    {
+      "id": "qty_steps_powers_of_10",
+      "ok": true,
+      "detail": "exp12=1000000000000 exp13=10000000000000 exp14=100000000000000; no jump 1兆→京 (10兆/100兆 present)"
+    },
+    {
+      "id": "MAX_TICKETS_value",
+      "ok": true,
+      "detail": "MAX_TICKETS=1e+68 qtyPow(68)=1e+68"
+    },
+    {
+      "id": "buy_small_1",
+      "ok": true,
+      "detail": "bought=1 tpAfter=0 ok=true"
+    },
+    {
+      "id": "buy_1cho_exp12",
+      "ok": true,
+      "detail": "bought=1000000000000 want=1000000000000 tpAfter=0"
+    },
+    {
+      "id": "buy_10cho_exp13",
+      "ok": true,
+      "detail": "bought=10000000000000 want=10000000000000 tpAfter=0"
+    },
+    {
+      "id": "buy_100cho_exp14",
+      "ok": true,
+      "detail": "bought=100000000000000 want=100000000000000 tpAfter=0 expectedTP=0"
+    },
+    {
+      "id": "buy_max_500cho",
+      "ok": true,
+      "detail": "bought=16666666666666 can=16666666666666 MAX_TICKETS=1e+68 tpAfter=20"
+    },
+    {
+      "id": "buy_superUnlocked_SUPER_PRIZE",
+      "ok": true,
+      "detail": "SUPER_PRIZE=70000000000 prizeOk=true forcedSuperHits=1"
+    },
+    {
+      "id": "drawTickets_super_path_no_throw",
+      "ok": true,
+      "detail": "drawTickets ok losers=8868311 super=0 prize=1001887600"
+    },
+    {
+      "id": "buy_infinity_autoTP",
+      "ok": true,
+      "detail": "can=1e+68 buyQty=1e+68 bought=1e+68 ok=true autoTP=Infinity MAX=1e+68"
+    },
+    {
+      "id": "buyQty_exp12",
+      "ok": true,
+      "detail": "buyQty=1000000000000"
+    },
+    {
+      "id": "buyQty_exp13",
+      "ok": true,
+      "detail": "buyQty=10000000000000"
+    },
+    {
+      "id": "buyQty_exp14",
+      "ok": true,
+      "detail": "buyQty=100000000000000"
+    },
+    {
+      "id": "spendTicketTP_1cho",
+      "ok": true,
+      "detail": "spent=1000000000000 tpAfter=0"
+    },
+    {
+      "id": "SUPER_PRIZE_used_in_draw",
+      "ok": true,
+      "detail": "drawTickets adds SUPER_PRIZE*superCount"
+    }
+  ],
+  "failures": [],
+  "summary": "All 23 checks passed: SUPER_PRIZE=7e10, qty steps 10^0..10^68 (no QTY_EXPS/1e15), qtyUp uses qtyExp++, and buyQty/spendTicketTP/buyLottery succeed for 1 / 1兆 / 10兆 / 100兆 / MAX(~500兆 TP) / superUnlocked / Infinity autoTP."
+}

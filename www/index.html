@@ -1,0 +1,4787 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b0c0e">
+<title>宝くじ生活</title>
+<style>
+  :root{
+    --bg:#0b0c0e;
+    --panel:#131519;
+    --panel-2:#181b21;
+    --panel-3:#1e222a;
+    --line:#242832;
+    --line-soft:#1b1e25;
+    --text:#e7e4dd;
+    --sub:#8b8f99;
+    --dim:#585d68;
+    --gold:#c8a951;
+    --gold-lo:#9c8235;
+    --gold-hi:#e5d3a0;
+    --sage:#8fae95;
+    --steel:#8098b8;
+    --rose:#b4707a;
+    --serif:"Yu Mincho","YuMincho","Hiragino Mincho ProN","Times New Roman",serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;
+    font-size:14px;display:flex;flex-direction:column;
+    max-width:480px;margin:0 auto;height:100dvh;overflow:hidden;
+    user-select:none;-webkit-user-select:none;
+    touch-action:manipulation;overscroll-behavior:none;
+  }
+  button{font-family:inherit;color:inherit;background:none;border:none;}
+  .num{font-variant-numeric:tabular-nums;}
+
+  /* ================= ヘッダー ================= */
+  header{
+    flex-shrink:0;padding:calc(8px + env(safe-area-inset-top)) 14px 8px;
+    background:var(--bg);border-bottom:1px solid var(--line);
+  }
+  .brand-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .brand-block{flex:1;min-width:0;}
+  .brand-line{display:flex;align-items:center;gap:7px;min-width:0;}
+  .brand{
+    font-family:var(--serif);font-size:13px;letter-spacing:.24em;
+    color:var(--gold-hi);text-indent:.24em;flex-shrink:0;
+  }
+  .mascot-cat{
+    width:32px;height:32px;flex-shrink:0;padding:0;border:none;background:none;
+    cursor:pointer;border-radius:50%;transition:transform .15s ease;
+  }
+  .mascot-cat:active{transform:scale(.92);}
+  .mascot-cat svg{display:block;width:100%;height:100%;}
+  .mascot-bubble{
+    flex:1;min-width:0;position:relative;
+    padding:5px 12px;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:2px 12px 12px 12px;
+    overflow:hidden;
+  }
+  .mascot-bubble::before{
+    content:"";position:absolute;left:-5px;top:50%;transform:translateY(-50%);
+    border:5px solid transparent;border-right-color:var(--line);z-index:1;
+  }
+  .mascot-bubble::after{
+    content:"";position:absolute;left:-3px;top:50%;transform:translateY(-50%);
+    border:4px solid transparent;border-right-color:var(--panel-2);z-index:1;
+  }
+  .mascot-track{overflow:hidden;min-width:0;transition:opacity .25s ease;}
+  .mascot-track.out{opacity:0;}
+  .mascot-text{
+    margin:0;font-size:10px;line-height:1.35;color:var(--text);letter-spacing:.02em;
+    white-space:nowrap;display:inline-flex;align-items:center;gap:28px;will-change:transform;
+  }
+  .mascot-text.rare{color:#e45a6a;}
+  .mascot-seg{flex-shrink:0;}
+
+  #tutCoach{
+    position:fixed;left:50%;transform:translateX(-50%);
+    /* ヘッダー直下に固定。労働・購入ボタンと重ならないようにする */
+    top:calc(102px + env(safe-area-inset-top));
+    z-index:280;width:min(92vw,440px);max-width:440px;
+    pointer-events:none;
+    opacity:0;visibility:hidden;
+    transition:opacity .85s ease, visibility .85s ease;
+  }
+  #tutCoach.is-on{
+    opacity:1;visibility:visible;
+  }
+  #tutCoach.tut-pos-bottom{
+    top:auto;
+    bottom:calc(72px + env(safe-area-inset-bottom));
+  }
+  .tut-card{
+    background:rgba(14,16,19,.96);border:1px solid var(--gold-lo);border-radius:4px;
+    padding:10px 12px;box-shadow:0 8px 28px rgba(0,0,0,.45);
+    opacity:0;transform:translateY(-6px);
+    transition:opacity .85s ease, transform .85s ease;
+  }
+  #tutCoach.is-on .tut-card{
+    opacity:1;transform:none;
+  }
+  .tut-step{font-size:9px;letter-spacing:.2em;color:var(--gold-lo);margin-bottom:4px;}
+  .tut-ttl{font-size:12px;letter-spacing:.1em;color:var(--gold);margin-bottom:4px;}
+  .tut-body{font-size:11px;color:var(--sub);line-height:1.55;}
+  .tut-hl{
+    position:relative;z-index:270;
+    box-shadow:0 0 0 2px var(--gold), 0 0 22px rgba(200,169,81,.35) !important;
+    border-radius:4px;
+    transition:box-shadow .85s ease;
+  }
+  .nv.tut-hl{z-index:290;border-radius:6px;}
+  .meter.tut-hl{border-radius:4px;z-index:290;}
+  #workCard.tut-locked{
+    opacity:.45;pointer-events:none;filter:grayscale(.15);
+  }
+  #workCard.tut-locked .pad{cursor:default;}
+  .tut-next{
+    display:none;pointer-events:auto;margin-top:10px;width:100%;
+    padding:8px 0;border:1px solid var(--gold-lo);border-radius:3px;
+    background:rgba(200,169,81,.1);color:var(--gold);font-size:11px;letter-spacing:.14em;
+  }
+  #tutCoach.has-next .tut-next{display:block;}
+  .tut-next:active{background:rgba(200,169,81,.22);}
+  @media (max-height:720px){
+    #tutCoach{top:calc(88px + env(safe-area-inset-top));}
+  }
+  .hdr-right{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-shrink:0;}
+  .coin-chip{
+    display:flex;align-items:center;gap:5px;padding:3px 9px 3px 7px;
+    border:1px solid var(--line);border-radius:14px;font-size:11px;color:var(--gold);
+  }
+  .coin-chip .c{font-family:var(--serif);font-size:13px;}
+  .coin-chip:active{background:var(--panel-2);}
+  .icon-btn{
+    width:24px;height:24px;flex-shrink:0;border:1px solid var(--line);border-radius:50%;
+    color:var(--dim);font-size:11px;line-height:1;
+  }
+  .icon-btn:active{background:var(--panel-2);}
+
+  .asset{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:7px;border-bottom:1px solid var(--line-soft);}
+  .asset .k{font-size:9.5px;letter-spacing:.18em;color:var(--dim);}
+  .asset .v{font-family:var(--serif);font-size:23px;color:var(--gold);line-height:1.05;}
+  .asset .v small{font-size:13px;margin-left:1px;color:var(--gold-lo);}
+
+  .meters{display:grid;grid-template-columns:1fr 1fr 1fr;margin-top:7px;}
+  .meter{padding:0 8px;border-left:1px solid var(--line-soft);}
+  .meter:first-child{padding-left:0;border-left:none;}
+  .meter .k{font-size:9px;letter-spacing:.14em;color:var(--dim);display:block;}
+  .meter .v{font-size:13.5px;font-weight:600;line-height:1.3;}
+  .meter .s{font-size:9px;color:var(--dim);}
+  .m-manual .v{color:var(--sage);}
+  .m-auto .v{color:var(--steel);}
+  .m-lose .v{color:var(--sub);}
+
+  /* ================= 画面 ================= */
+  #screens{flex:1;min-height:0;position:relative;}
+  .screen{
+    position:absolute;inset:0;display:none;flex-direction:column;
+  }
+  .screen.on{display:flex;animation:fadeIn .2s ease-out;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+  .scroll{flex:1;min-height:0;overflow-y:auto;padding:11px 14px 14px;scrollbar-width:none;}
+  .scroll::-webkit-scrollbar{display:none;}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:4px;}
+  .card-hd{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--line-soft);}
+  .card-hd .t{font-size:10px;letter-spacing:.22em;color:var(--sub);}
+  .card-bd{padding:11px 12px;}
+
+  /* --- 抽選画面：スクロールなしで 1 画面に収める --- */
+  #scr-home{padding:11px 14px 12px;gap:11px;overflow:hidden;}
+  #resultCard{flex:1;min-height:0;display:flex;flex-direction:column;}
+  #resultCard .card-bd{flex:1;min-height:0;display:flex;flex-direction:column;}
+  #lotteryCard,#workCard{flex-shrink:0;}
+
+  #resultCard .card-hd .sum{font-family:var(--serif);font-size:16px;color:var(--gold);}
+  #resultList{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;}
+  #resultList::-webkit-scrollbar{display:none;}
+  .rgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+  .rcell{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;font-size:11px;border-bottom:1px solid var(--line-soft);}
+  .rcell .tier{color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rcell .tier em{font-style:normal;color:var(--dim);font-size:9.5px;margin-left:4px;}
+  .rcell .cnt{color:var(--sub);font-size:10.5px;flex-shrink:0;margin-left:8px;}
+  .rcell.hit .tier,.rcell.hit .cnt{color:var(--text);}
+  .rcell.top{grid-column:1 / -1;}
+  .rcell.top .tier,.rcell.top .cnt{color:var(--gold);}
+  .rcell.sup{grid-column:1 / -1;}
+  .rcell.sup .tier,.rcell.sup .cnt{
+    background:linear-gradient(90deg,#ff5e7a,#ffb347,#ffe566,#6dffb0,#5ec8ff,#b388ff,#ff5e7a);
+    background-size:220% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:rainbowShift 2.8s linear infinite;
+  }
+  .rcell.rhc{grid-column:1 / -1;}
+  .rcell.rhc .tier,.rcell.rhc .cnt{
+    background:linear-gradient(115deg,#064e3b 0%,#10b981 28%,#d1fae5 48%,#34d399 58%,#047857 78%,#a7f3d0 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:glossShine 2.6s ease-in-out infinite;
+  }
+  .rcell.zero{grid-column:1 / -1;}
+  .rcell.zero .tier,.rcell.zero .cnt{
+    background:linear-gradient(115deg,#2e1065 0%,#7c3aed 28%,#f3e8ff 48%,#a78bfa 58%,#5b21b6 78%,#ddd6fe 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:glossShine 2.6s ease-in-out infinite;
+  }
+  .rcell.lose .tier,.rcell.lose .cnt{color:var(--dim);}
+  @keyframes rainbowShift{to{background-position:220% center;}}
+  @keyframes glossShine{
+    0%,100%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+  }
+  .r-empty{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-size:11px;color:var(--dim);text-align:center;line-height:2;
+  }
+
+  /* --- 宝くじ --- */
+  .qty{display:flex;align-items:center;gap:8px;}
+  .step{width:38px;height:38px;flex-shrink:0;border:1px solid var(--line);border-radius:3px;font-size:17px;color:var(--sub);}
+  .step:active{background:var(--panel-3);}
+  .step:disabled{color:#33363d;border-color:var(--line-soft);}
+  .qty-val{flex:1;text-align:center;line-height:1.15;}
+  .qty-val .n{font-family:var(--serif);font-size:21px;color:var(--text);}
+  .qty-val .u{font-size:10px;color:var(--dim);margin-left:3px;}
+  .qty-val .c{display:block;font-size:10px;color:var(--sub);margin-top:2px;letter-spacing:.06em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .max-btn{width:44px;height:38px;flex-shrink:0;border:1px solid var(--gold-lo);border-radius:3px;font-size:10px;letter-spacing:.1em;color:var(--gold);}
+  .max-btn:active{background:rgba(200,169,81,.12);}
+  .max-btn.on{background:rgba(200,169,81,.16);border-color:var(--gold);}
+  .buys{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px;}
+  .buy{border:1px solid var(--line);border-radius:3px;padding:9px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;transition:opacity .15s,background .12s;}
+  .prod-row{
+    display:flex;align-items:center;justify-content:space-between;gap:6px;
+    margin:0 0 8px;padding:0 1px 7px;border:0;border-bottom:1px solid var(--line-soft);border-radius:0;background:transparent;
+  }
+  .prod-row .prod-pt{display:flex;align-items:baseline;gap:3px;flex-wrap:wrap;font-size:9.5px;color:var(--sub);letter-spacing:.04em;}
+  .prod-row .prod-pt .k{color:var(--dim);}
+  .prod-row .prod-pt b{font-family:var(--serif);font-size:13px;font-weight:400;color:var(--gold);margin:0 1px;}
+  .prod-row .prod-pt #vProdMult{font-family:var(--serif);color:var(--gold-hi);}
+  .help-btn{
+    width:18px;height:18px;flex-shrink:0;border:1px solid var(--line);border-radius:50%;
+    color:var(--dim);font-size:10px;line-height:1;font-family:var(--serif);
+  }
+  .help-btn:active{background:var(--panel-3);color:var(--gold);}
+  .help-body{font-size:12px;line-height:1.85;color:var(--sub);text-align:left;letter-spacing:.02em;}
+  .help-body b{color:var(--gold);font-weight:600;}
+  .buy .lb{font-size:12px;font-weight:600;letter-spacing:.06em;}
+  .buy .bal{font-size:9.5px;color:var(--dim);}
+  .buy.manual{border-color:rgba(143,174,149,.42);}
+  .buy.manual .lb{color:var(--sage);}
+  .buy.auto{border-color:rgba(128,152,184,.42);}
+  .buy.auto .lb{color:var(--steel);}
+  .buy:not(:disabled):active{background:var(--panel-3);}
+  .buy:disabled{opacity:.3;}
+
+  /* --- 労働（固定パネル） --- */
+  #workCard{border-radius:4px;background:var(--panel);border:1px solid var(--line);}
+  #workCard .combo{font-size:10px;color:var(--dim);letter-spacing:.1em;}
+  #workCard .combo b{font-family:var(--serif);font-size:15px;font-weight:400;color:var(--sub);margin:0 3px;}
+  #workCard.c1 .combo b{color:var(--sage);}
+  #workCard.c2 .combo b{color:var(--gold);}
+  #workCard.c3 .combo b{color:var(--gold-hi);}
+  #timerTrack{height:2px;background:var(--line-soft);overflow:hidden;}
+  #timerBar{height:100%;width:100%;background:var(--gold-lo);transform-origin:left center;transform:scaleX(0);}
+  @keyframes drain{from{transform:scaleX(1);}to{transform:scaleX(0);}}
+
+  .pads{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;padding:11px 12px 9px;}
+  .pads.simple{grid-template-columns:1fr;max-width:140px;margin:0 auto;padding-left:12px;padding-right:12px;}
+  .pad{
+    position:relative;height:60px;border:1px solid var(--line);border-radius:3px;background:var(--panel-2);
+    display:flex;align-items:center;justify-content:center;
+    transition:background .12s,border-color .12s,transform .08s,box-shadow .12s;
+  }
+  .pad .dot{width:7px;height:7px;border-radius:50%;background:#2c313a;transition:background .12s,box-shadow .12s,width .12s,height .12s;}
+  .pad.lit{border-color:var(--gold);background:rgba(200,169,81,.13);box-shadow:0 0 14px rgba(200,169,81,.2), inset 0 0 18px rgba(200,169,81,.07);}
+  .pad.lit .dot{width:13px;height:13px;background:var(--gold-hi);box-shadow:0 0 10px var(--gold);}
+  .pad.wait{animation:breathe 1.7s ease-in-out infinite;}
+  @keyframes breathe{
+    0%,100%{box-shadow:0 0 8px rgba(200,169,81,.1), inset 0 0 14px rgba(200,169,81,.04);}
+    50%{box-shadow:0 0 22px rgba(200,169,81,.34), inset 0 0 22px rgba(200,169,81,.12);}
+  }
+  .pad:active{transform:translateY(1px);}
+  .pad.miss{border-color:var(--rose);background:rgba(180,112,122,.14);}
+  .pad.miss .dot{background:var(--rose);}
+  .pop{position:absolute;top:-4px;left:50%;font-size:12px;font-weight:600;color:var(--gold-hi);pointer-events:none;white-space:nowrap;animation:pop .7s ease-out forwards;}
+  .pop.bad{color:var(--rose);}
+  @keyframes pop{0%{opacity:1;transform:translate(-50%,0);}100%{opacity:0;transform:translate(-50%,-32px);}}
+  .work-ft{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 12px 10px;font-size:10px;color:var(--dim);letter-spacing:.06em;}
+  .work-ft .gain{color:var(--sage);font-weight:600;}
+  .work-ft .hint.ready{color:var(--gold);}
+
+  /* ================= 強化画面 ================= */
+  .note{font-size:10px;color:var(--dim);line-height:1.85;margin-bottom:10px;}
+  .amt-row{display:flex;gap:6px;margin-bottom:10px;}
+  .amt{flex:1;padding:7px 0;border:1px solid var(--line);border-radius:3px;font-size:10.5px;letter-spacing:.1em;color:var(--sub);}
+  .amt.active{border-color:var(--gold-lo);color:var(--gold);background:rgba(200,169,81,.08);}
+
+  .row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line-soft);}
+  .row:last-child{border-bottom:none;}
+  .row .ic{width:32px;height:32px;flex-shrink:0;border:1px solid var(--line);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .row.owned .ic{border-color:var(--gold-lo);color:var(--gold);}
+  .row .info{flex:1;min-width:0;}
+  .row .nm{font-size:12.5px;display:flex;align-items:baseline;gap:6px;}
+  .row .nm .lv{font-size:9.5px;color:var(--dim);letter-spacing:.08em;}
+  .row .ds{font-size:10px;color:var(--dim);margin-top:3px;line-height:1.6;}
+  .row .ds b{color:var(--sub);font-weight:400;}
+  .act{flex-shrink:0;min-width:84px;padding:8px;border-radius:3px;border:1px solid var(--line);text-align:center;line-height:1.35;transition:opacity .15s,background .12s;}
+  .act .a1{display:block;font-size:9.5px;color:var(--dim);letter-spacing:.08em;}
+  .act .a2{display:block;font-size:11px;font-weight:600;}
+  .act.can{border-color:var(--gold-lo);background:rgba(200,169,81,.09);}
+  .act.can .a1{color:var(--gold-lo);}
+  .act.can .a2{color:var(--gold);}
+  .act:not(:disabled):active{background:rgba(200,169,81,.2);}
+  .act:disabled{opacity:.38;}
+  .act.tk.can{border-color:rgba(143,174,149,.5);background:rgba(143,174,149,.09);}
+  .act.tk.can .a1{color:rgba(143,174,149,.7);}
+  .act.tk.can .a2{color:var(--sage);}
+  .maxed{font-size:10px;color:var(--dim);text-align:center;padding:16px 0;letter-spacing:.1em;}
+
+  /* --- 嗜好品 --- */
+  .lux-prog{display:flex;justify-content:space-between;align-items:baseline;padding:6px 2px 9px;border-bottom:1px solid var(--line);font-size:10.5px;color:var(--sub);letter-spacing:.06em;}
+  .lux-prog b{font-family:var(--serif);font-size:15px;font-weight:400;color:var(--gold);margin:0 3px;}
+  .lux-done{text-align:center;padding:14px 8px 6px;letter-spacing:.12em;}
+  .lux-done .t{font-family:var(--serif);font-size:15px;color:var(--gold-hi);}
+  .lux-done .s{font-size:10px;color:var(--sub);margin-top:6px;line-height:1.6;}
+  .lux-done .badge-clear{display:inline-block;margin-top:10px;font-size:9px;letter-spacing:.28em;color:var(--gold);border:1px solid var(--gold-lo);padding:4px 10px;}
+  .lux-gallery{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;}
+  .lux-gallery .g-hd{font-size:9px;letter-spacing:.22em;color:var(--dim);margin-bottom:8px;text-indent:.22em;}
+  .lux-gallery .g-row{display:flex;gap:10px;padding:7px 2px;border-bottom:1px solid rgba(255,255,255,.04);}
+  .lux-gallery .g-row:last-child{border-bottom:0;}
+  .lux-gallery .g-nm{font-size:11px;color:var(--text);letter-spacing:.04em;min-width:0;flex:1;}
+  .lux-gallery .g-note{font-size:10px;color:var(--dim);margin-top:2px;line-height:1.45;}
+  .ms-list{display:grid;gap:6px;margin-top:4px;}
+  .ms-row{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+  .ms-row .mk{color:var(--sub);letter-spacing:.04em;}
+  .ms-row .mv{font-family:var(--serif);color:var(--dim);}
+  .ms-row.on .mv{color:var(--gold-hi);}
+  .ms-row.on .mk{color:var(--text);}
+  .rec-clear{margin-top:8px;font-size:10px;letter-spacing:.18em;color:var(--gold);text-align:center;}
+  .row.lux .ic{font-size:11px;color:var(--dim);}
+  .row.lux.owned .ic{color:var(--gold);border-color:var(--gold-lo);}
+  .row.lux.owned .nm{color:var(--gold-hi);}
+  .row .have{flex-shrink:0;min-width:84px;text-align:center;font-size:9.5px;letter-spacing:.24em;text-indent:.24em;color:var(--gold-lo);}
+  .scr-title{font-size:10px;letter-spacing:.28em;color:var(--gold-lo);text-indent:.28em;padding-bottom:9px;margin-bottom:11px;border-bottom:1px solid var(--line);}
+
+  /* ================= 記録帳 ================= */
+  .rec-hero{text-align:center;padding:6px 0 18px;}
+  .rec-seal{
+    width:72px;height:72px;margin:0 auto 12px;border:1px solid var(--gold-lo);border-radius:50%;
+    overflow:hidden;padding:0;cursor:pointer;background:#0b0c0e;
+  }
+  .rec-seal img{width:100%;height:100%;object-fit:cover;display:block;}
+  .rec-rank{font-family:var(--serif);font-size:22px;color:var(--gold-hi);letter-spacing:.16em;text-indent:.16em;}
+  .rec-name{font-size:10px;color:var(--dim);letter-spacing:.2em;margin-top:8px;}
+  .avatar-pick{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:4px;}
+  .avatar-pick button{
+    aspect-ratio:1;border:1px solid var(--line);border-radius:50%;overflow:hidden;padding:0;background:#0b0c0e;
+  }
+  .avatar-pick button.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold-lo);}
+  .avatar-pick img{width:100%;height:100%;object-fit:cover;display:block;}
+  .rec-seal-hint{font-size:9.5px;color:var(--dim);letter-spacing:.14em;margin-top:8px;}
+  .ad-card{
+    border:1px solid var(--line);border-radius:4px;padding:12px;margin-bottom:12px;
+    display:flex;align-items:center;gap:12px;background:var(--panel);
+  }
+  .ad-card .info{flex:1;min-width:0;}
+  .ad-card .nm{font-size:12.5px;color:var(--text);}
+  .ad-card .ds{font-size:10px;color:var(--dim);margin-top:3px;line-height:1.6;}
+  .shop-row{
+    display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line-soft);
+  }
+  .shop-row:last-child{border-bottom:none;}
+  .shop-row .info{flex:1;min-width:0;}
+  .shop-row .nm{font-size:12.5px;}
+  .shop-row .ds{font-size:10px;color:var(--dim);margin-top:3px;line-height:1.55;}
+  .shop-row .have{flex-shrink:0;font-size:9.5px;letter-spacing:.2em;color:var(--gold-lo);}
+  .price-c{color:var(--gold);}
+  .sec{margin-top:20px;}
+  .sec:first-child{margin-top:0;}
+  .sec-t{font-size:9.5px;letter-spacing:.26em;color:var(--gold-lo);text-indent:.26em;padding-bottom:7px;border-bottom:1px solid var(--line);}
+  .st{display:flex;justify-content:space-between;align-items:baseline;padding:8px 2px;border-bottom:1px solid var(--line-soft);font-size:11.5px;}
+  .st .k{color:var(--sub);letter-spacing:.04em;}
+  .st .v{font-family:var(--serif);font-size:14px;color:var(--text);}
+  .st .v small{font-size:10px;color:var(--dim);margin-left:2px;font-family:inherit;}
+  .st.hl .v{color:var(--gold);}
+  .st.sup .v{color:var(--gold-hi);}
+  .st.emerald .v{
+    background:linear-gradient(115deg,#064e3b 0%,#10b981 28%,#d1fae5 48%,#34d399 58%,#047857 78%,#a7f3d0 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:glossShine 2.6s ease-in-out infinite;
+  }
+  .st.amethyst .v{
+    background:linear-gradient(115deg,#2e1065 0%,#7c3aed 28%,#f3e8ff 48%,#a78bfa 58%,#5b21b6 78%,#ddd6fe 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:glossShine 2.6s ease-in-out infinite;
+  }
+  .st.zero .v{color:var(--dim);}
+  #shareBtn{
+    display:block;width:100%;margin:14px 0 4px;padding:11px 0;
+    border:1px solid var(--gold-lo);border-radius:3px;
+    font-size:10.5px;letter-spacing:.24em;text-indent:.24em;color:var(--gold);
+    background:rgba(200,169,81,.07);
+  }
+  #shareBtn:active{background:rgba(200,169,81,.2);}
+
+  /* ================= 共有カード ================= */
+  #shareWrap{
+    position:fixed;inset:0;z-index:300;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  #shareWrap[hidden]{display:none;}
+  #shareCard{
+    width:100%;max-width:340px;
+    border:1px solid var(--gold-lo);
+    background:linear-gradient(170deg,#15161a,#0e0f12);
+    padding:24px 22px 20px;text-align:center;
+  }
+  .sh-brand{font-family:var(--serif);font-size:12px;letter-spacing:.38em;text-indent:.38em;color:var(--gold-lo);}
+  .sh-seal{
+    width:64px;height:64px;margin:16px auto 12px;border:1px solid var(--gold-lo);border-radius:50%;
+    overflow:hidden;background:#0b0c0e;
+  }
+  .sh-seal img{width:100%;height:100%;object-fit:cover;display:block;}
+  .sh-rank{font-family:var(--serif);font-size:25px;letter-spacing:.16em;text-indent:.16em;color:var(--gold-hi);}
+  .sh-home{font-size:9.5px;letter-spacing:.16em;color:var(--dim);margin-top:9px;}
+  .sh-asset{margin:18px 0 16px;padding:13px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .sh-asset .k{display:block;font-size:9px;letter-spacing:.3em;text-indent:.3em;color:var(--dim);}
+  .sh-asset .v{display:block;font-family:var(--serif);font-size:27px;color:var(--gold);margin-top:5px;line-height:1.1;}
+  .sh-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;text-align:left;}
+  .sh-grid > div{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line-soft);padding-bottom:5px;}
+  .sh-grid .sh-row{
+    grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;
+    border-bottom:none;padding-bottom:0;
+  }
+  .sh-grid .sh-row > div{
+    display:flex;justify-content:space-between;align-items:baseline;
+    border-bottom:1px solid var(--line-soft);padding-bottom:5px;
+  }
+  .sh-grid .k{font-size:9.5px;color:var(--dim);}
+  .sh-grid .v{font-family:var(--serif);font-size:13px;color:var(--text);}
+  .sh-grid .v.g{color:var(--gold);}
+  .sh-grid .v.s{color:var(--gold-hi);}
+  .sh-grid .v.emerald{
+    background:linear-gradient(115deg,#064e3b 0%,#10b981 28%,#d1fae5 48%,#34d399 58%,#047857 78%,#a7f3d0 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:glossShine 2.6s ease-in-out infinite;
+  }
+  .sh-grid .v.amethyst{
+    background:linear-gradient(115deg,#2e1065 0%,#7c3aed 28%,#f3e8ff 48%,#a78bfa 58%,#5b21b6 78%,#ddd6fe 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:glossShine 2.6s ease-in-out infinite;
+  }
+  .sh-foot{margin-top:16px;font-size:9px;letter-spacing:.18em;color:var(--dim);}
+  .share-stage{width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px;}
+  .share-actions{text-align:center;}
+  .share-x{
+    display:block;width:100%;padding:12px 0;border:1px solid var(--gold-lo);border-radius:3px;
+    font-size:11px;letter-spacing:.14em;text-indent:.14em;color:var(--gold);
+    background:rgba(200,169,81,.1);
+  }
+  .share-x:active{background:rgba(200,169,81,.22);}
+  .share-x:disabled{opacity:.45;color:var(--dim);border-color:var(--line);background:transparent;}
+  .share-note{margin-top:8px;font-size:10px;color:var(--dim);letter-spacing:.06em;line-height:1.55;}
+  #shareClose{
+    position:fixed;top:calc(12px + env(safe-area-inset-top));right:14px;
+    width:30px;height:30px;border:1px solid var(--line);border-radius:50%;color:var(--dim);font-size:12px;
+  }
+  #shareClose:active{background:var(--panel-2);}
+
+  /* ================= 下部ナビ ================= */
+  #nav{
+    flex-shrink:0;display:grid;grid-template-columns:repeat(5,1fr);
+    border-top:1px solid var(--line);background:var(--panel);
+    padding-bottom:env(safe-area-inset-bottom);
+    position:relative;z-index:300;
+  }
+  #nav.has-apex{grid-template-columns:repeat(6,1fr);}
+  #nvApex[hidden]{display:none;}
+  .nv{position:relative;padding:9px 0 10px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--dim);}
+  .nv .g{font-size:14px;line-height:1;}
+  .nv .l{font-size:9px;letter-spacing:.16em;text-indent:.16em;}
+  .nv.on{color:var(--gold);}
+  .nv.on::before{content:"";position:absolute;top:0;left:22%;right:22%;height:1px;background:var(--gold);}
+  .nv .badge{position:absolute;top:7px;right:calc(50% - 17px);width:5px;height:5px;border-radius:50%;background:var(--gold);opacity:0;transition:opacity .2s;}
+  .nv .badge.on{opacity:1;}
+
+  /* ================= 演出 ================= */
+  #flash{position:fixed;inset:0;z-index:200;pointer-events:none;opacity:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(60,48,20,.92),rgba(8,8,10,.95));}
+  #flash.show{animation:flashIn 2.6s ease-out forwards;}
+  #flash.super{background:radial-gradient(ellipse at center,rgba(48,28,60,.92),rgba(8,8,10,.96));}
+  #flash.rhc{background:radial-gradient(ellipse at center,rgba(12,48,36,.92),rgba(8,8,10,.96));}
+  #flash.zero{background:radial-gradient(ellipse at center,rgba(36,16,56,.92),rgba(8,8,10,.96));}
+  @keyframes flashIn{0%{opacity:0;}6%{opacity:1;}78%{opacity:1;}100%{opacity:0;}}
+  #flashInner{border-top:1px solid var(--gold);border-bottom:1px solid var(--gold);padding:26px 40px;text-align:center;}
+  #flash.super #flashInner{border-color:#b388ff;}
+  #flash.rhc #flashInner{border-color:#34d399;}
+  #flash.zero #flashInner{border-color:#a78bfa;}
+  #flashTitle{font-family:var(--serif);font-size:38px;letter-spacing:.2em;text-indent:.2em;color:var(--gold-hi);text-shadow:0 0 26px rgba(200,169,81,.55);}
+  #flashSub{font-family:var(--serif);font-size:19px;color:var(--gold);margin-top:12px;letter-spacing:.06em;}
+  #flashTag{font-size:9px;letter-spacing:.34em;color:var(--gold-lo);margin-bottom:10px;text-indent:.34em;}
+  #flash.super #flashTitle,
+  #flash.super #flashTag,
+  #flash.super #flashSub{
+    background:linear-gradient(90deg,#ff5e7a,#ffb347,#ffe566,#6dffb0,#5ec8ff,#b388ff,#ff5e7a);
+    background-size:220% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:rainbowShift 2.8s linear infinite;
+    text-shadow:none;
+  }
+  #flash.rhc #flashTitle,
+  #flash.rhc #flashTag,
+  #flash.rhc #flashSub{
+    background:linear-gradient(115deg,#064e3b 0%,#10b981 28%,#d1fae5 48%,#34d399 58%,#047857 78%,#a7f3d0 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:glossShine 2.6s ease-in-out infinite;
+    text-shadow:none;
+  }
+  #flash.zero #flashTitle,
+  #flash.zero #flashTag,
+  #flash.zero #flashSub{
+    background:linear-gradient(115deg,#2e1065 0%,#7c3aed 28%,#f3e8ff 48%,#a78bfa 58%,#5b21b6 78%,#ddd6fe 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:glossShine 2.6s ease-in-out infinite;
+    text-shadow:none;
+  }
+  body.shake{animation:shk .42s ease-in-out 3;}
+  @keyframes shk{0%,100%{transform:translate(0,0);}25%{transform:translate(-4px,2px);}50%{transform:translate(4px,-2px);}75%{transform:translate(-3px,-2px);}}
+  .sliver{position:fixed;top:-20px;z-index:199;pointer-events:none;width:2px;height:16px;animation:fall linear forwards;}
+  @keyframes fall{0%{transform:translateY(0) rotate(0);opacity:.9;}100%{transform:translateY(108dvh) rotate(340deg);opacity:0;}}
+  #toast{
+    position:fixed;left:50%;transform:translateX(-50%);
+    bottom:calc(78px + env(safe-area-inset-bottom));z-index:210;pointer-events:none;opacity:0;transition:opacity .3s;
+    background:#0e1013;border:1px solid var(--line);border-radius:3px;
+    padding:8px 16px;font-size:11px;color:var(--sub);letter-spacing:.06em;white-space:nowrap;
+  }
+  #toast.show{opacity:1;}
+
+  .settings-list{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+  .settings-list button{
+    display:block;width:100%;text-align:left;padding:11px 12px;
+    border:1px solid var(--line);border-radius:3px;background:var(--panel-2);
+    font-size:12px;letter-spacing:.08em;color:var(--text);
+  }
+  .settings-list button:active{background:var(--panel-3);}
+  .settings-list button.danger{color:var(--rose);border-color:#4a3034;}
+  .settings-list .meta{font-size:10px;color:var(--dim);letter-spacing:.04em;margin-top:10px;line-height:1.6;}
+  .legal-body{font-size:12px;color:var(--sub);line-height:1.85;text-align:left;}
+  .legal-body b{color:var(--gold);}
+
+  /* モーダル共通（ショップ / 超一等解禁） */
+  .modal{
+    position:fixed;inset:0;z-index:320;background:rgba(5,6,8,.92);
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal[hidden]{display:none;}
+  .modal.unlock-appear{
+    animation:unlockVeil 1.1s ease-out both;
+  }
+  .modal.unlock-appear .unlock-card{
+    animation:unlockCardIn 1.15s cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes unlockVeil{
+    from{opacity:0;}
+    to{opacity:1;}
+  }
+  @keyframes unlockCardIn{
+    from{opacity:0;transform:translateY(18px) scale(.985);}
+    to{opacity:1;transform:none;}
+  }
+  .modal-card{
+    width:100%;max-width:360px;background:var(--panel);border:1px solid var(--line);
+    border-radius:4px;padding:18px 16px 16px;max-height:min(86dvh,640px);overflow-y:auto;
+  }
+  .apex-boost-row{
+    display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;
+  }
+  .apex-boost-row .boost-val{
+    flex:1;min-width:120px;text-align:center;font-family:var(--serif);
+    font-size:15px;color:var(--gold-hi);letter-spacing:.04em;
+  }
+  .apex-boost-row .boost-val small{display:block;font-size:10px;color:var(--dim);letter-spacing:.06em;margin-top:2px;}
+  .apex-boost-row .step{
+    width:38px;height:38px;flex-shrink:0;border:1px solid var(--line);border-radius:3px;
+    font-size:17px;color:var(--sub);background:transparent;
+  }
+  .apex-boost-row .step:active{background:var(--panel-3);}
+  .apex-boost-row .step:disabled{color:#33363d;border-color:var(--line-soft);}
+  .apex-boost-row .amt{flex:0 0 auto;min-width:52px;padding:7px 10px;}
+  .modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .modal-hd .t{font-size:11px;letter-spacing:.28em;color:var(--gold);text-indent:.28em;}
+  .modal-x{width:28px;height:28px;border:1px solid var(--line);border-radius:50%;color:var(--dim);font-size:11px;}
+  .modal-x:active{background:var(--panel-3);}
+  .unlock-card{text-align:center;padding:8px 6px 4px;}
+  .unlock-card .tag{font-size:9px;letter-spacing:.34em;color:var(--gold-lo);text-indent:.34em;}
+  .unlock-card .ttl{
+    font-family:var(--serif);font-size:32px;letter-spacing:.18em;text-indent:.18em;
+    color:var(--gold-hi);margin:14px 0 10px;text-shadow:0 0 22px rgba(200,169,81,.45);
+  }
+  .unlock-card .body{font-size:12px;color:var(--sub);line-height:1.9;}
+  .unlock-card .ok{
+    display:block;width:100%;margin-top:18px;padding:11px 0;border:1px solid var(--gold-lo);
+    border-radius:3px;color:var(--gold);letter-spacing:.2em;text-indent:.2em;
+    background:rgba(200,169,81,.08);
+  }
+  .unlock-card .ok:active{background:rgba(200,169,81,.2);}
+  .review-card .ttl{font-size:26px;margin:12px 0 8px;}
+  .review-card .stars{
+    display:flex;justify-content:center;gap:6px;margin:12px 0 4px;
+    color:var(--gold);font-size:22px;letter-spacing:.08em;
+  }
+  .unlock-card .ok.secondary,
+  .review-card .ok.secondary{
+    margin-top:8px;border-color:var(--line);color:var(--sub);background:transparent;letter-spacing:.12em;
+  }
+  .unlock-card .ok.secondary:active,
+  .review-card .ok.secondary:active{background:var(--panel-3);}
+  .apex-box{
+    border:1px solid var(--line);border-radius:4px;padding:12px;margin-bottom:14px;background:var(--panel);
+  }
+  .apex-box .apex-hd{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;}
+  .apex-box .apex-hd .nm{font-size:13px;letter-spacing:.12em;color:var(--gold-hi);font-family:var(--serif);}
+  .apex-box .apex-hd .tag{font-size:9px;color:var(--dim);letter-spacing:.1em;}
+  .apex-box .apex-ds{font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:10px;}
+  .apex-box .apex-stat{font-size:11px;color:var(--text);margin-bottom:10px;line-height:1.6;}
+  .apex-box .apex-stat b{color:var(--gold);}
+  .apex-prod{
+    border:1px solid var(--gold-lo);border-radius:4px;padding:14px 12px 12px;margin-bottom:14px;
+    background:rgba(200,169,81,.06);text-align:center;
+  }
+  .apex-prod .apex-hd{justify-content:center;margin-bottom:6px;}
+  .apex-prod .apex-hd .nm{color:var(--gold);font-size:11px;letter-spacing:.18em;font-family:var(--serif);}
+  .apex-prod .apex-mult{
+    font-family:var(--serif);font-size:34px;line-height:1.1;letter-spacing:.04em;
+    color:var(--gold-hi);margin:4px 0 2px;
+  }
+  .apex-prod .apex-mult small{
+    font-size:14px;letter-spacing:.12em;color:var(--gold);margin-right:2px;
+    vertical-align:middle;
+  }
+  .apex-prod .apex-mult-note{font-size:10px;color:var(--dim);margin-bottom:10px;}
+  .apex-prod .apex-stat{
+    margin-bottom:0;text-align:left;font-size:10.5px;color:var(--sub);line-height:1.65;
+  }
+  .apex-prod .apex-stat b{color:var(--gold);}
+  .apex-prod .apex-formula{
+    font-size:8.5px;color:var(--dim);line-height:1.55;margin-top:8px;
+    letter-spacing:.01em;opacity:.85;text-align:left;
+  }
+  .apex-act{
+    display:block;width:100%;padding:10px 0;border:1px solid var(--gold-lo);border-radius:3px;
+    color:var(--gold);letter-spacing:.14em;background:rgba(200,169,81,.08);font-size:12px;
+  }
+  .apex-act:disabled{opacity:.35;border-color:var(--line);color:var(--dim);}
+  .apex-act:not(:disabled):active{background:rgba(200,169,81,.2);}
+  .apex-act .sub{display:block;font-size:9.5px;letter-spacing:.04em;color:var(--dim);margin-top:3px;}
+  .zero-card{text-align:center;max-width:min(96vw,960px);width:100%;padding:14px 10px 12px;}
+  .zero-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:10px;}
+  .zero-grid{
+    display:flex;flex-direction:row;align-items:stretch;gap:4px;
+    overflow:visible;margin-bottom:10px;
+  }
+  .zero-cell{
+    flex:1 1 0;min-width:0;
+    border:1px solid var(--line);border-radius:3px;padding:6px 2px 5px;background:var(--panel-2);
+    text-align:center;transition:border-color .2s, background .2s;
+  }
+  .zero-cell .zn{font-size:8px;letter-spacing:.08em;color:var(--dim);margin-bottom:3px;}
+  .zero-cell .zf{
+    font-family:var(--serif);font-size:9.5px;letter-spacing:0;color:var(--gold-hi);
+    min-height:1.15em;line-height:1.15;white-space:nowrap;
+    transition:transform .15s ease, color .15s ease;
+  }
+  .zero-cell .zf.pop{transform:scale(1.06);color:var(--gold);}
+  .zero-cell .zl{font-size:8px;color:var(--sub);min-height:1.2em;margin:3px 0 4px;line-height:1.2;}
+  .zero-cell .zb{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:0;}
+  .zero-cell .zb i{
+    width:5px;height:5px;border-radius:50%;border:1px solid var(--line);display:inline-block;flex-shrink:0;
+  }
+  .zero-cell .zb i.on{background:var(--gold);border-color:var(--gold-lo);}
+  .zero-cell .zb i.off{background:var(--rose);border-color:#7a3d45;}
+  .zero-cell.win{border-color:#7c3aed;background:rgba(124,58,237,.1);}
+  .zero-cell.win .zf,.zero-cell.win .zl{
+    background:linear-gradient(115deg,#2e1065 0%,#7c3aed 28%,#f3e8ff 48%,#a78bfa 58%,#5b21b6 78%,#ddd6fe 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:glossShine 2.6s ease-in-out infinite;
+  }
+  .zero-cell.win .zb i.on{background:#a78bfa;border-color:#7c3aed;}
+  .zero-cell.fail .zf{color:var(--rose);}
+  .apex-box.rhc-box .apex-hd .nm{
+    background:linear-gradient(115deg,#064e3b 0%,#10b981 28%,#d1fae5 48%,#34d399 58%,#047857 78%,#a7f3d0 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:glossShine 2.6s ease-in-out infinite;
+  }
+  .apex-box.zero-box .apex-hd .nm{
+    background:linear-gradient(115deg,#2e1065 0%,#7c3aed 28%,#f3e8ff 48%,#a78bfa 58%,#5b21b6 78%,#ddd6fe 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:glossShine 2.6s ease-in-out infinite;
+  }
+  .zero-log{font-size:10.5px;color:var(--dim);line-height:1.7;max-height:88px;overflow-y:auto;text-align:left;}
+  .zero-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+  .zero-hd .t{font-size:13px;letter-spacing:.18em;color:var(--gold);}
+  .zero-skip{
+    flex-shrink:0;padding:6px 12px;border:1px solid var(--line);border-radius:3px;
+    background:transparent;color:var(--sub);font-size:11px;letter-spacing:.08em;cursor:pointer;
+  }
+  .zero-skip:hover{border-color:var(--gold-lo);color:var(--gold);}
+  .zero-skip:disabled{opacity:.4;cursor:default;}
+  .apex-amt{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+  .apex-amt .amt{
+    flex:1;min-width:56px;padding:7px 0;border:1px solid var(--line);border-radius:3px;
+    font-size:11px;color:var(--sub);letter-spacing:.06em;
+  }
+  .apex-amt .amt.active{border-color:var(--gold-lo);color:var(--gold);background:rgba(200,169,81,.08);}
+  .pack-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+  .pack{
+    border:1px solid var(--line);border-radius:3px;padding:12px 8px;text-align:center;
+  }
+  .pack .amt{font-family:var(--serif);font-size:18px;color:var(--gold);}
+  .pack .yen{font-size:10px;color:var(--dim);margin-top:4px;}
+  .pack .deal{font-size:9.5px;color:var(--sage);margin-top:3px;min-height:1.2em;}
+  .pack .buy-c{
+    display:block;width:100%;margin-top:9px;padding:7px 0;border:1px solid var(--gold-lo);
+    border-radius:3px;font-size:11px;color:var(--gold);background:rgba(200,169,81,.08);
+  }
+  .pack .buy-c:active{background:rgba(200,169,81,.2);}
+  .starter-pack{
+    border:1px solid var(--gold-lo);border-radius:4px;padding:14px 12px;margin-bottom:12px;
+    background:rgba(200,169,81,.06);display:flex;align-items:center;gap:12px;
+  }
+  .starter-pack .info{flex:1;min-width:0;}
+  .starter-pack .nm{font-family:var(--serif);font-size:16px;color:var(--gold-hi);letter-spacing:.08em;}
+  .starter-pack .ds{font-size:10.5px;color:var(--sub);line-height:1.55;margin-top:4px;}
+  .starter-pack .deal{font-size:10px;color:var(--sage);margin-top:3px;}
+  .starter-pack .buy-c{
+    flex-shrink:0;min-width:88px;padding:10px 12px;border:1px solid var(--gold-lo);
+    border-radius:3px;font-size:12px;color:var(--gold);background:rgba(200,169,81,.1);
+    letter-spacing:.06em;
+  }
+  .starter-pack .buy-c:active{background:rgba(200,169,81,.22);}
+  .starter-pack .have{flex-shrink:0;font-size:9.5px;letter-spacing:.2em;color:var(--gold-lo);}
+
+  /* 紙使用量レポート */
+  .paper-box{margin-top:18px;padding-top:4px;}
+  .paper-hero{
+    border:1px solid var(--line);border-radius:4px;padding:14px 12px;background:var(--panel);
+    text-align:center;margin-bottom:12px;
+  }
+  .paper-hero .k{font-size:9.5px;letter-spacing:.2em;color:var(--dim);text-indent:.2em;}
+  .paper-hero .v{font-family:var(--serif);font-size:22px;color:var(--gold);margin-top:6px;line-height:1.2;}
+  .paper-hero .s{font-size:10px;color:var(--sub);margin-top:6px;line-height:1.7;}
+  .paper-cmp{border-top:1px solid var(--line-soft);}
+  .paper-cmp .st .v{font-size:12.5px;}
+  .paper-foot{font-size:9.5px;color:var(--dim);line-height:1.75;margin-top:10px;padding:0 2px;}
+
+  /* 画面が低いときも抽選画面はスクロールさせない。
+     結果は 3 列に畳み、周囲の余白と固定パネルを詰めて高さを捻出する */
+  @media (max-height:720px){
+    .asset .v{font-size:20px;}
+    .meter .v{font-size:12.5px;}
+    #scr-home{padding:8px 12px 9px;gap:8px;}
+    .card-hd{padding:7px 11px;}
+    .card-bd{padding:9px 11px;}
+    .rgrid{grid-template-columns:1fr 1fr 1fr;gap:0 10px;}
+    .rcell{font-size:10px;padding:3px 0;}
+    .rcell .tier em{display:none;}
+    .step,.max-btn{height:34px;}
+    .qty-val .n{font-size:19px;}
+    .buys{margin-top:9px;}
+    .buy{padding:7px 6px 6px;}
+    .pads{padding:9px 11px 7px;}
+    .pad{height:52px;}
+    .work-ft{padding-bottom:8px;}
+  }
+  @media (max-height:600px){
+    header{padding-top:calc(6px + env(safe-area-inset-top));}
+    .mascot-cat{width:28px;height:28px;}
+    .mascot-text{font-size:9.5px;}
+    .mascot-bubble{padding:4px 10px;}
+    .asset .v{font-size:18px;}
+    .meter .v{font-size:12px;}
+    .pad{height:44px;}
+    .nv{padding:6px 0 7px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand-row">
+    <div class="brand-block">
+      <div class="brand-line">
+        <div class="brand">宝くじ生活</div>
+        <button type="button" class="mascot-cat" id="mascotCat" aria-label="三毛猫のセリフ">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <ellipse cx="32" cy="38" rx="22" ry="19" fill="#e8e4dc"/>
+            <path d="M14 24 L20 12 L26 24 Z" fill="#e8e4dc"/>
+            <path d="M38 24 L44 12 L50 24 Z" fill="#e8e4dc"/>
+            <path d="M14 24 L20 12 L23 22 Z" fill="#d4956a"/>
+            <path d="M41 24 L44 12 L50 24 Z" fill="#d4956a"/>
+            <ellipse cx="32" cy="40" rx="20" ry="16" fill="#e8e4dc"/>
+            <ellipse cx="22" cy="36" rx="9" ry="7" fill="#d4956a" opacity=".95"/>
+            <ellipse cx="42" cy="37" rx="8" ry="6" fill="#2a2d34"/>
+            <ellipse cx="32" cy="46" rx="5" ry="3.5" fill="#f0ebe3"/>
+            <circle cx="24" cy="36" r="2.2" fill="#1a1c20"/>
+            <circle cx="40" cy="36" r="2.2" fill="#1a1c20"/>
+            <circle cx="24.8" cy="35.2" r=".7" fill="#fff"/>
+            <circle cx="40.8" cy="35.2" r=".7" fill="#fff"/>
+            <path d="M30 43 Q32 45 34 43" stroke="#b8a89a" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+            <line x1="18" y1="42" x2="10" y2="40" stroke="#c8c2b8" stroke-width=".8" stroke-linecap="round"/>
+            <line x1="18" y1="44" x2="10" y2="46" stroke="#c8c2b8" stroke-width=".8" stroke-linecap="round"/>
+            <line x1="46" y1="42" x2="54" y2="40" stroke="#c8c2b8" stroke-width=".8" stroke-linecap="round"/>
+            <line x1="46" y1="44" x2="54" y2="46" stroke="#c8c2b8" stroke-width=".8" stroke-linecap="round"/>
+            <path d="M52 48 Q58 44 60 36 Q56 50 48 52 Z" fill="#d4956a"/>
+          </svg>
+        </button>
+        <div class="mascot-bubble">
+          <div class="mascot-track" id="mascotTrack">
+            <p class="mascot-text" id="mascotText"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <button class="coin-chip" id="coinBtn" aria-label="ショップ">
+        <span>C</span><span class="c num" id="vCoins">0</span>
+      </button>
+      <button class="icon-btn" id="menuBtn" aria-label="メニュー">☰</button>
+    </div>
+  </div>
+  <div class="asset">
+    <span class="k">総資産</span>
+    <span class="v num" id="vMoney">0<small>G</small></span>
+  </div>
+  <div class="meters">
+    <div class="meter m-manual" id="meterManual"><span class="k">手動 TP</span><span class="v num" id="vMTP">0</span><span class="s" id="vTap">+1 / 打</span></div>
+    <div class="meter m-auto" id="meterAuto"><span class="k">自動 TP</span><span class="v num" id="vATP">0</span><span class="s num" id="vRate">0 / 秒</span></div>
+    <div class="meter m-lose"><span class="k">ハズレ券</span><span class="v num" id="vLose">0</span><span class="s">リサイクル用</span></div>
+  </div>
+</header>
+
+<div id="screens">
+
+  <!-- ===== 抽選（ホーム） ===== -->
+  <section class="screen on" id="scr-home">
+    <section class="card" id="resultCard">
+      <div class="card-hd">
+        <span class="t" id="resultTitle">抽 選 結 果</span>
+        <span class="sum num" id="resultSum"></span>
+      </div>
+      <div class="card-bd">
+        <div id="resultList">
+          <div class="r-empty">まだ抽選していません<br>労働で TP を集めて、夢を買う</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="lotteryCard">
+      <div class="card-hd">
+        <span class="t">超ドリーム宝くじ</span>
+        <span class="t" style="letter-spacing:.06em" id="lotteryMultHint">1 枚 30 TP</span>
+      </div>
+      <div class="card-bd">
+        <div class="prod-row">
+          <span class="prod-pt">
+            <span class="k">生産 Pt</span>
+            <b class="num" id="vProdPt">0</b>/100
+            <span>· 自動 ×</span><span class="num" id="vProdMult">1.0</span>
+          </span>
+          <button type="button" class="help-btn" id="prodHelpBtn" aria-label="生産ポイントの説明">?</button>
+        </div>
+        <div class="qty">
+          <button type="button" class="step" id="qtyDown">−</button>
+          <div class="qty-val">
+            <span class="n num" id="qtyN">1</span><span class="u">枚</span>
+            <span class="c num" id="qtyCost">30 TP</span>
+          </div>
+          <button type="button" class="step" id="qtyUp">＋</button>
+          <button type="button" class="max-btn" id="qtyMax">MAX</button>
+        </div>
+        <div class="buys">
+          <button type="button" class="buy manual" id="buyManual">
+            <span class="lb">手動 TP で買う</span><span class="bal num" id="balManual">所持 0</span>
+          </button>
+          <button type="button" class="buy auto" id="buyAuto">
+            <span class="lb">自動 TP で買う</span><span class="bal num" id="balAuto">所持 0</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="workCard">
+      <div class="card-hd">
+        <span class="t">労 働</span>
+        <span class="combo">連鎖 <b class="num" id="vCombo">0</b> 倍率 ×<span class="num" id="vMult">1.0</span></span>
+      </div>
+      <div id="timerTrack"><div id="timerBar"></div></div>
+      <div class="pads" id="pads"></div>
+      <div class="work-ft">
+        <span class="hint ready" id="workHint">光ったパネルをタップしてTP獲得</span>
+        <span>1 打 <span class="gain num" id="vGain">+1</span> TP</span>
+      </div>
+    </section>
+  </section>
+
+  <!-- ===== 設備 ===== -->
+  <section class="screen" id="scr-facility">
+    <div class="scroll">
+      <div class="scr-title">設 備 ─ 自 動 生 産</div>
+      <div class="note">各レベルで <b>一定量</b> の自動 TP が増える。その設備の累計レベルが <b>10</b> で生産 <b>2 倍</b>、<b>100</b> で <b>10 倍</b>、以降は <b>10 レベルごと</b>にさらに <b>1.1 倍</b>（まとめ買い自体のボーナスはなし）。労働の生産ポイントでも自動 TP が上がる（10 Pt ごと +10%、上限 100 Pt、1 時間で 20 Pt 減少）。</div>
+      <div id="adSlot"></div>
+      <div id="facAmt"></div>
+      <div id="facList"></div>
+    </div>
+  </section>
+
+  <!-- ===== 生活 ===== -->
+  <section class="screen" id="scr-life">
+    <div class="scroll">
+      <div class="scr-title">生 活 ─ 拠 点</div>
+      <div class="note">拠点をアップグレードする。1 打あたりの手動 TP が増え、設備の自動生産に強力な倍率がかかる。</div>
+      <div id="lifeList"></div>
+
+      <div class="scr-title" style="margin-top:24px">嗜 好 品</div>
+      <div class="note">当選金でただ買うだけの品。効果は何もない。買ったという事実だけが残る。</div>
+      <div id="luxProgress"></div>
+      <div id="luxList"></div>
+    </div>
+  </section>
+
+  <!-- ===== 再生 ===== -->
+  <section class="screen" id="scr-recycle">
+    <div class="scroll">
+      <div class="scr-title">再 生 ─ ハ ズ レ 券</div>
+      <div class="note">ハズレ券を再生処理し、自動 TP 生産に永続倍率を付与する。1 レベルごとに ×1.49（複利）。初回（Lv.0→1）のみ 10 枚、以降は従来どおり 200 枚起点・コスト ×12。</div>
+      <div id="recAmt"></div>
+      <div id="recList"></div>
+      <div id="paperReport"></div>
+    </div>
+  </section>
+
+  <!-- ===== 極み（超一等後） ===== -->
+  <section class="screen" id="scr-apex">
+    <div class="scroll" id="apexBody"></div>
+  </section>
+
+  <!-- ===== 記録帳 ===== -->
+  <section class="screen" id="scr-record">
+    <div class="scroll" id="recordBody"></div>
+  </section>
+
+</div>
+
+<nav id="nav">
+  <button class="nv on" data-scr="home"><span class="g">✦</span><span class="l">抽選</span></button>
+  <button class="nv" data-scr="facility"><span class="g">▩</span><span class="l">設備</span><i class="badge" id="bdgF"></i></button>
+  <button class="nv" data-scr="life"><span class="g">⌂</span><span class="l">生活</span><i class="badge" id="bdgL"></i></button>
+  <button class="nv" data-scr="recycle"><span class="g">♺</span><span class="l">再生</span><i class="badge" id="bdgR"></i></button>
+  <button class="nv" data-scr="apex" id="nvApex" hidden><span class="g">✧</span><span class="l">極み</span><i class="badge" id="bdgA"></i></button>
+  <button class="nv" data-scr="record"><span class="g">▤</span><span class="l">記録</span></button>
+</nav>
+
+<div id="shareWrap" hidden>
+  <button id="shareClose" aria-label="閉じる">✕</button>
+  <div class="share-stage">
+    <div id="shareCard"></div>
+    <div class="share-actions">
+      <button type="button" id="shareToX" class="share-x">X に投稿する</button>
+      <div class="share-note" id="shareRewardNote"></div>
+    </div>
+  </div>
+</div>
+
+<div id="shopModal" class="modal" hidden>
+  <div class="modal-card" id="shopBody"></div>
+</div>
+
+<div id="avatarModal" class="modal" hidden>
+  <div class="modal-card">
+    <div class="modal-hd">
+      <span class="t">ア イ コ ン 選 択</span>
+      <button class="modal-x" id="avatarClose">✕</button>
+    </div>
+    <div class="note">記録帳に表示する動物アイコンを選ぶ</div>
+    <div class="avatar-pick" id="avatarPick"></div>
+  </div>
+</div>
+
+<div id="unlockModal" class="modal" hidden>
+  <div class="modal-card unlock-card">
+    <div class="tag">NEW PRIZE UNLOCKED</div>
+    <div class="ttl">超一等 解禁</div>
+    <div class="body">
+      一等の当選により、さらに上の賞が開かれた。<br>
+      以降、一等が当たるたび <b style="color:var(--gold-hi)">1/10000</b> の確率で<br>
+      <b style="color:var(--gold)">超一等 700億G</b> に昇格する。
+    </div>
+    <button class="ok" id="unlockOk">確 認</button>
+  </div>
+</div>
+
+<div id="apexUnlockModal" class="modal" hidden>
+  <div class="modal-card unlock-card">
+    <div class="tag">APEX CONTENT UNLOCKED</div>
+    <div class="ttl">極 み 解 禁</div>
+    <div class="body">
+      超一等の当選により、さらに上の領域が開かれた。<br>
+      <b style="color:var(--gold)">RHC</b>（リベンジハズレチャレンジ）と<br>
+      <b style="color:var(--gold-hi)">零等</b> への挑戦が可能になる。
+    </div>
+    <button class="ok" id="apexUnlockOk">確 認</button>
+  </div>
+</div>
+
+<div id="reviewModal" class="modal" hidden>
+  <div class="modal-card unlock-card review-card">
+    <div class="tag">REVIEW BONUS</div>
+    <div class="ttl">レ ビ ュ ー 特 典</div>
+    <div class="body">
+      楽しんでいただけていますか？<br>
+      ストアでレビューを書いてくれた方に<br>
+      <b style="color:var(--gold-hi)">TP 3,000</b> をプレゼントします（1 回のみ）。<br>
+      <span style="font-size:10px;color:var(--dim)">評価の星数は自由です</span>
+    </div>
+    <button class="ok" id="reviewOk">レビューして受け取る</button>
+    <button class="ok secondary" id="reviewLater">あとで</button>
+  </div>
+</div>
+
+<div id="legalModal" class="modal" hidden>
+  <div class="modal-card unlock-card">
+    <div class="tag">BEFORE YOU PLAY</div>
+    <div class="ttl" style="font-size:22px">ご 利 用 に あ た っ て</div>
+    <div class="legal-body">
+      本アプリは娯楽目的の<strong>シミュレーション</strong>です。<br>
+      実在の宝くじ・抽選機関とは一切関係ありません。<br><br>
+      ゲーム内の当選金・コインに換金性はなく、<br>
+      現実の賭博・投資ではありません。<br><br>
+      続行で <b>利用規約</b>・<b>プライバシーポリシー</b> に同意したものとみなします。
+    </div>
+    <button class="ok" id="legalOk">同 意 し て は じ め る</button>
+    <button class="ok secondary" id="legalTerms" style="margin-top:8px">利用規約を見る</button>
+    <button class="ok secondary" id="legalPrivacy" style="margin-top:8px">プライバシーを見る</button>
+  </div>
+</div>
+
+<div id="settingsModal" class="modal" hidden>
+  <div class="modal-card" id="settingsBody"></div>
+</div>
+
+<div id="zeroModal" class="modal" hidden>
+  <div class="modal-card zero-card">
+    <div class="zero-hd">
+      <span class="t">零 等 チ ャ レ ン ジ</span>
+      <button type="button" class="zero-skip" id="zeroSkip">スキップ</button>
+    </div>
+    <div class="zero-meta">
+      <span id="zeroRound">挑戦 10 件</span>
+      <span id="zeroHits">零等 0</span>
+    </div>
+    <div class="zero-grid" id="zeroGrid"></div>
+    <div class="zero-log" id="zeroLog"></div>
+  </div>
+</div>
+
+<div id="flash">
+  <div id="flashInner">
+    <div id="flashTag">CONGRATULATIONS</div>
+    <div id="flashTitle">一等当選</div>
+    <div id="flashSub"></div>
+  </div>
+</div>
+<div id="toast"></div>
+<div id="tutCoach">
+  <div class="tut-card">
+    <div class="tut-step" id="tutStep"></div>
+    <div class="tut-ttl" id="tutTtl"></div>
+    <div class="tut-body" id="tutBody"></div>
+    <button type="button" class="tut-next" id="tutNext">つ ぎ へ</button>
+  </div>
+</div>
+
+<div id="tutGoalModal" class="modal" hidden>
+  <div class="modal-card unlock-card">
+    <div class="tag">NEXT GOAL</div>
+    <div class="ttl" style="font-size:22px">目 標</div>
+    <div class="legal-body" style="text-align:center">
+      まずは <b>一等</b> を目指そう。<br>
+      一等が当たると、さらに上の挑戦が開かれる。<br>
+      労働で TP を稼ぎ、設備を育て、夢を買い続けろ。
+    </div>
+    <button class="ok" id="tutGoalOk">わ か っ た</button>
+  </div>
+</div>
+
+<div id="clearModal" class="modal" hidden>
+  <div class="modal-card unlock-card">
+    <div class="tag">THE END</div>
+    <div class="ttl" style="font-size:22px">宝くじ生活 — 完</div>
+    <div class="legal-body" style="text-align:center">
+      生活の最終形に住み、嗜好品をすべて集めた。<br>
+      当選と散財の旅は、ここでひと区切り。<br><br>
+      設備も極みも、まだ回せる。<br>
+      終わりのない領収書は、あなたの手元にある。
+    </div>
+    <button class="ok" id="clearOk">つ づ け る</button>
+  </div>
+</div>
+
+<div id="prodHelpModal" class="modal" hidden>
+  <div class="modal-card unlock-card">
+    <div class="modal-hd">
+      <span class="t">生 産 ポ イ ン ト</span>
+      <button type="button" class="modal-x" id="prodHelpClose">✕</button>
+    </div>
+    <div class="help-body">
+      労働でパネルをタップすると貯まるポイントです。<br><br>
+      ・<b>100 タップ</b>ごとに <b>+30 Pt</b><br>
+      ・上限は <b>100 Pt</b><br>
+      ・時間経過で減り、<b>1 時間あたり 20 Pt</b><br>
+      ・<b>10 Pt ごと</b>に自動 TP 生産が <b>+10%</b><br>
+      （100 Pt で最大 <b>×2.0</b>）
+    </div>
+    <button class="ok" id="prodHelpOk">と じ る</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ==========================================================
+   ストア設定（note 公開後に URL を差し替え）
+========================================================== */
+const APP_VERSION = "1.0.0";
+const STORE_LINKS = {
+  /* note で公開した記事URLに書き換えてください */
+  terms: "https://note.com/",
+  privacy: "https://note.com/",
+  support: "https://note.com/",
+  /* 申請後に埋める（レビュー誘導用） */
+  appStoreId: "",
+  playStoreUrl: "",
+};
+/* 製品IDは App Store Connect / Play Console と一致させる */
+const IAP_PRODUCT_IDS = [
+  "starter_kit_500",
+  "coins_100",
+  "coins_550",
+  "coins_1200",
+  "coins_6500",
+];
+
+const Cap = typeof window !== "undefined" ? window.Capacitor : null;
+function isNativeApp(){
+  try{ return !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform()); }
+  catch(e){ return false; }
+}
+async function openExternalUrl(url){
+  if(!url){ toast("リンク未設定です"); return; }
+  try{
+    if(isNativeApp() && Cap.Plugins && Cap.Plugins.Browser){
+      await Cap.Plugins.Browser.open({ url });
+      return;
+    }
+  }catch(e){}
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+async function openStoreReviewPage(){
+  const ua = navigator.userAgent || "";
+  if(/android/i.test(ua) && STORE_LINKS.playStoreUrl){
+    await openExternalUrl(STORE_LINKS.playStoreUrl);
+    return;
+  }
+  if(STORE_LINKS.appStoreId){
+    await openExternalUrl("https://apps.apple.com/app/id" + STORE_LINKS.appStoreId + "?action=write-review");
+    return;
+  }
+  if(STORE_LINKS.playStoreUrl){
+    await openExternalUrl(STORE_LINKS.playStoreUrl);
+    return;
+  }
+  /* ネイティブ未設定時は何もしない（特典付与は呼び出し側） */
+}
+/**
+ * 課金・広告の差し替え口。
+ * 本番は Capacitor プラグイン接続後にここを差し替える。
+ * ブラウザ開発時のみモック購入・モック広告を許可する。
+ */
+const StoreBridge = {
+  async purchaseCoinPack(packIndex){
+    const p = COIN_PACKS[packIndex];
+    if(!p) return { ok:false, reason:"invalid" };
+    if(isNativeApp()){
+      /* TODO: @capacitor-community/in-app-purchases 等で productId 課金 */
+      toast("アプリ内課金は準備中です");
+      return { ok:false, reason:"iap_pending" };
+    }
+    if(!confirm(`${p.label}（¥${p.yen.toLocaleString()}）を開発用モック購入しますか？`)){
+      return { ok:false, reason:"cancel" };
+    }
+    return { ok:true, mocked:true };
+  },
+  async purchaseStarterKit(){
+    if(S.starterKitOwned) return { ok:false, reason:"owned" };
+    if(isNativeApp()){
+      toast("アプリ内課金は準備中です");
+      return { ok:false, reason:"iap_pending" };
+    }
+    if(!confirm(`${STARTER_KIT.label}（¥${STARTER_KIT.yen.toLocaleString()} → ${STARTER_KIT.coins} C）を開発用モック購入しますか？\n※購入は 1 回のみ`)){
+      return { ok:false, reason:"cancel" };
+    }
+    return { ok:true, mocked:true };
+  },
+  async restorePurchases(){
+    if(isNativeApp()){
+      toast("購入の復元は準備中です");
+      return { ok:false, reason:"iap_pending" };
+    }
+    toast("ブラウザ版では復元対象がありません");
+    return { ok:true, restored:0 };
+  },
+  async showRewardedAd(){
+    if(isNativeApp()){
+      /* TODO: AdMob Rewarded 接続 */
+      toast("広告は準備中です");
+      return { ok:false, reason:"ads_pending" };
+    }
+    await new Promise(r=>setTimeout(r, 600));
+    return { ok:true, mocked:true };
+  },
+};
+
+/* ==========================================================
+   効果音（Web Audio）
+   soft = ASMR寄り・暖色の金の世界観
+   peak = 一等／超一等／極みのアドレナリン
+========================================================== */
+const SFX_MUTE_KEY = "takarakuji_sfx_muted";
+const sfx = (()=>{
+  let ctx = null, master = null, comp = null;
+  let muted = false;
+  try{ muted = localStorage.getItem(SFX_MUTE_KEY) === "1"; }catch(e){}
+  let lastTapAt = 0;
+  const now = ()=> ctx ? ctx.currentTime : 0;
+
+  function ensure(){
+    if(ctx) return ctx;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.55;
+    comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -24;
+    comp.knee.value = 18;
+    comp.ratio.value = 3.2;
+    comp.attack.value = 0.003;
+    comp.release.value = 0.22;
+    master.connect(comp);
+    comp.connect(ctx.destination);
+    return ctx;
+  }
+  function unlock(){
+    const c = ensure();
+    if(!c) return;
+    if(c.state === "suspended") c.resume().catch(()=>{});
+  }
+  function setMuted(v){
+    muted = !!v;
+    try{ localStorage.setItem(SFX_MUTE_KEY, muted ? "1" : "0"); }catch(e){}
+    if(master) master.gain.setTargetAtTime(muted ? 0 : 0.55, now(), 0.02);
+  }
+  function isMuted(){ return muted; }
+  function live(){
+    if(muted) return null;
+    const c = ensure();
+    if(!c || c.state === "suspended"){ unlock(); }
+    return c && !muted ? c : null;
+  }
+  function env(g, t0, a, d, s, r, peak){
+    const p = peak == null ? 1 : peak;
+    g.gain.cancelScheduledValues(t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, p), t0 + Math.max(0.005, a));
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, p * s), t0 + a + d);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d + r);
+  }
+  function tone(type, freq, dur, opts){
+    const c = live(); if(!c) return;
+    opts = opts || {};
+    const t0 = now() + (opts.delay || 0);
+    const o = c.createOscillator();
+    const g = c.createGain();
+    const f = c.createBiquadFilter();
+    o.type = type || "sine";
+    o.frequency.setValueAtTime(freq, t0);
+    if(opts.slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, opts.slide), t0 + dur);
+    f.type = opts.filter || "lowpass";
+    f.frequency.setValueAtTime(opts.cutoff || 1800, t0);
+    if(opts.cutSlide) f.frequency.exponentialRampToValueAtTime(opts.cutSlide, t0 + dur);
+    f.Q.value = opts.q || 0.7;
+    env(g, t0, opts.a || 0.02, opts.d || 0.08, opts.s || 0.35, opts.r || Math.max(0.08, dur * 0.55), opts.vol || 0.2);
+    o.connect(f); f.connect(g); g.connect(master);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function noiseBurst(dur, opts){
+    const c = live(); if(!c) return;
+    opts = opts || {};
+    const t0 = now() + (opts.delay || 0);
+    const n = Math.max(1, Math.floor(c.sampleRate * dur));
+    const buf = c.createBuffer(1, n, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i=0;i<n;i++) data[i] = (Math.random()*2-1) * Math.pow(1 - i/n, opts.pow || 1.6);
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    const f = c.createBiquadFilter();
+    f.type = opts.filter || "bandpass";
+    f.frequency.value = opts.cutoff || 1200;
+    f.Q.value = opts.q || 0.8;
+    const g = c.createGain();
+    env(g, t0, opts.a || 0.005, opts.d || 0.04, 0.2, opts.r || dur * 0.7, opts.vol || 0.12);
+    src.connect(f); f.connect(g); g.connect(master);
+    src.start(t0); src.stop(t0 + dur + 0.02);
+  }
+  /* —— soft family：近接・低中域・触覚。刺さる高域／saw／UIチャイムを避ける —— */
+  function tapHit(comboLv){
+    const c = live(); if(!c) return;
+    const t = performance.now();
+    if(t - lastTapAt < 28) return;
+    lastTapAt = t;
+    const step = Math.min(COMBO_CAP_TAPS, comboLv|0);
+    const base = 68 + step * 2.2;
+    tone("sine", base, 0.16, { a:0.008, d:0.055, s:0.3, r:0.12, vol:0.14, cutoff:780 });
+    tone("triangle", base * 2.01, 0.12, { a:0.01, d:0.045, s:0.2, r:0.09, vol:0.035, cutoff:1200 });
+    noiseBurst(0.04, { cutoff:280, q:0.5, vol:0.028, filter:"lowpass", pow:2.2 });
+  }
+  function tapMiss(){
+    tone("sine", 150, 0.22, { a:0.02, d:0.08, s:0.28, r:0.16, vol:0.09, cutoff:520, slide:88 });
+    noiseBurst(0.1, { cutoff:320, q:0.45, vol:0.045, filter:"lowpass", pow:1.8 });
+  }
+  function comboTier(tier){
+    const f0 = 95 + tier * 12;
+    tone("sine", f0, 0.34, { a:0.04, d:0.12, s:0.4, r:0.24, vol:0.11, cutoff:900 });
+    tone("sine", f0 * 0.67, 0.38, { delay:0.09, a:0.05, d:0.14, s:0.35, r:0.28, vol:0.055, cutoff:700 });
+    noiseBurst(0.08, { delay:0.01, cutoff:450, q:0.7, vol:0.04, filter:"bandpass", pow:1.6 });
+  }
+  function lotteryBuy(){
+    noiseBurst(0.14, { cutoff:780, q:0.65, vol:0.07, filter:"bandpass", pow:1.35, a:0.008 });
+    noiseBurst(0.06, { delay:0.05, cutoff:420, q:0.5, vol:0.04, filter:"lowpass", pow:2.0 });
+    tone("triangle", 220, 0.22, { delay:0.02, a:0.02, d:0.08, s:0.25, r:0.14, vol:0.07, cutoff:1200, slide:360 });
+    tone("sine", 110, 0.26, { delay:0.04, a:0.03, d:0.1, s:0.22, r:0.16, vol:0.06, cutoff:700 });
+  }
+  function winSmall(){
+    noiseBurst(0.1, { cutoff:450, q:0.5, vol:0.05, filter:"lowpass", pow:1.8 });
+    tone("sine", 98, 0.5, { a:0.04, d:0.14, s:0.4, r:0.38, vol:0.08, cutoff:700 });
+    tone("sine", 196, 0.48, { delay:0.03, a:0.05, d:0.14, s:0.4, r:0.36, vol:0.1, cutoff:1200, cutSlide:900 });
+    tone("sine", 246.94, 0.48, { delay:0.03, a:0.05, d:0.14, s:0.4, r:0.36, vol:0.085, cutoff:1200, cutSlide:900 });
+    tone("triangle", 98, 0.55, { delay:0.05, a:0.06, d:0.16, s:0.35, r:0.4, vol:0.045, cutoff:900 });
+  }
+  function loseSoft(){
+    tone("sine", 210, 0.32, { a:0.03, d:0.1, s:0.25, r:0.24, vol:0.07, cutoff:700, slide:120 });
+    noiseBurst(0.12, { delay:0.02, cutoff:280, vol:0.03, filter:"lowpass", pow:2.0 });
+  }
+  function upgradeBuild(){
+    noiseBurst(0.07, { cutoff:300, q:0.5, vol:0.045, filter:"lowpass", pow:2.2 });
+    tone("sine", 130, 0.28, { a:0.03, d:0.1, s:0.35, r:0.2, vol:0.1, cutoff:900, slide:165 });
+    tone("triangle", 196, 0.32, { delay:0.12, a:0.04, d:0.12, s:0.3, r:0.24, vol:0.055, cutoff:1100 });
+  }
+  function facMultBreak(){
+    noiseBurst(0.25, { a:0.05, cutoff:500, q:0.55, vol:0.05, filter:"bandpass", pow:1.2 });
+    tone("sine", 500, 0.25, { a:0.06, d:0.1, s:0.3, r:0.18, vol:0.03, cutoff:900, slide:350 });
+    subImpact(0.12, 65, 0.12);
+    tone("sine", 174.61, 0.85, { delay:0.18, a:0.08, d:0.22, s:0.45, r:0.7, vol:0.09, cutoff:1400, cutSlide:900 });
+    tone("sine", 220, 0.85, { delay:0.18, a:0.08, d:0.22, s:0.45, r:0.7, vol:0.08, cutoff:1400, cutSlide:900 });
+    tone("sine", 349.23, 0.9, { delay:0.4, a:0.1, d:0.25, s:0.3, r:0.7, vol:0.025, cutoff:1800 });
+  }
+  function lifeUpgrade(){
+    noiseBurst(0.2, { a:0.04, cutoff:280, q:0.5, vol:0.045, filter:"lowpass", pow:1.7 });
+    tone("sine", 98, 0.95, { a:0.06, d:0.25, s:0.5, r:0.7, vol:0.1, cutoff:600, cutSlide:1400 });
+    tone("sine", 164.81, 0.7, { delay:0.35, a:0.07, d:0.2, s:0.4, r:0.55, vol:0.065, cutoff:1200 });
+    tone("triangle", 123.47, 0.8, { delay:0.15, a:0.08, d:0.22, s:0.35, r:0.6, vol:0.04, cutoff:900 });
+  }
+  function luxBuy(){
+    tone("sine", 220, 0.65, { a:0.07, d:0.2, s:0.4, r:0.55, vol:0.095, cutoff:1600 });
+    tone("triangle", 330, 0.7, { delay:0.08, a:0.08, d:0.22, s:0.35, r:0.58, vol:0.055, cutoff:1800 });
+    noiseBurst(0.22, { delay:0.04, cutoff:900, q:0.35, vol:0.03, filter:"bandpass", pow:1.4 });
+    tone("sine", 110, 0.8, { delay:0.05, a:0.08, d:0.25, s:0.4, r:0.6, vol:0.05, cutoff:600 });
+  }
+  function unlockSoft(){
+    tone("sine", 98, 1.0, { a:0.07, d:0.28, s:0.5, r:0.75, vol:0.085, cutoff:600 });
+    noiseBurst(0.22, { delay:0.08, cutoff:480, vol:0.04, filter:"lowpass", pow:1.5 });
+    tone("sine", 196, 0.85, { delay:0.12, a:0.08, d:0.22, s:0.45, r:0.65, vol:0.085, cutoff:1600 });
+    tone("sine", 246.94, 0.85, { delay:0.12, a:0.08, d:0.22, s:0.45, r:0.65, vol:0.075, cutoff:1600 });
+    tone("sine", 293.66, 0.85, { delay:0.12, a:0.08, d:0.22, s:0.45, r:0.65, vol:0.065, cutoff:1600 });
+    tone("sine", 392, 0.95, { delay:0.6, a:0.12, d:0.25, s:0.3, r:0.75, vol:0.03, cutoff:2000 });
+  }
+  function unlockApex(){
+    tone("sine", 55, 1.1, { a:0.08, d:0.3, s:0.55, r:0.85, vol:0.1, cutoff:400 });
+    noiseBurst(0.35, { delay:0.1, cutoff:480, vol:0.05, filter:"lowpass", pow:1.3 });
+    tone("triangle", 110, 1.0, { delay:0.1, a:0.08, d:0.28, s:0.4, r:0.75, vol:0.05, cutoff:700 });
+    tone("sine", 146.83, 0.95, { delay:0.12, a:0.08, d:0.25, s:0.45, r:0.7, vol:0.08, cutoff:1500 });
+    tone("sine", 185, 0.95, { delay:0.12, a:0.08, d:0.25, s:0.45, r:0.7, vol:0.07, cutoff:1500 });
+    tone("sine", 220, 0.95, { delay:0.12, a:0.08, d:0.25, s:0.45, r:0.7, vol:0.06, cutoff:1500 });
+    tone("sine", 523.25, 1.05, { delay:0.65, a:0.12, d:0.28, s:0.3, r:0.85, vol:0.03, cutoff:2000 });
+  }
+  function rhcSpin(){
+    noiseBurst(0.28, { a:0.04, cutoff:600, q:0.55, vol:0.055, filter:"bandpass", pow:1.2 });
+    tone("sine", 90, 0.45, { a:0.05, d:0.15, s:0.35, r:0.3, vol:0.07, cutoff:700, slide:180 });
+    tone("triangle", 180, 0.5, { delay:0.06, a:0.06, d:0.18, s:0.3, r:0.35, vol:0.045, cutoff:1100, slide:320 });
+  }
+  function adReward(){
+    noiseBurst(0.05, { cutoff:420, q:0.55, vol:0.05, filter:"lowpass", pow:2.2 });
+    tone("sine", 92, 0.28, { a:0.015, d:0.08, s:0.3, r:0.2, vol:0.05, cutoff:600 });
+    tone("sine", 185, 0.26, { a:0.02, d:0.08, s:0.3, r:0.2, vol:0.1, cutoff:1000, slide:210 });
+  }
+  function tutComplete(){
+    noiseBurst(0.35, { a:0.06, cutoff:600, q:0.5, vol:0.045, filter:"bandpass", pow:1.15 });
+    tone("sine", 600, 0.35, { a:0.08, d:0.12, s:0.3, r:0.22, vol:0.03, cutoff:900, slide:400 });
+    tone("sine", 87.31, 1.1, { delay:0.12, a:0.08, d:0.28, s:0.5, r:0.85, vol:0.08, cutoff:500 });
+    tone("sine", 174.61, 1.0, { delay:0.2, a:0.1, d:0.28, s:0.45, r:0.75, vol:0.08, cutoff:1300 });
+    tone("sine", 220, 1.0, { delay:0.2, a:0.1, d:0.28, s:0.45, r:0.75, vol:0.07, cutoff:1300 });
+    tone("sine", 261.63, 1.0, { delay:0.2, a:0.1, d:0.28, s:0.45, r:0.75, vol:0.06, cutoff:1300 });
+  }
+  function mascotRare(){
+    noiseBurst(0.12, { a:0.03, cutoff:700, q:0.5, vol:0.04, filter:"bandpass", pow:1.5 });
+    tone("sine", 185, 0.42, { a:0.05, d:0.14, s:0.35, r:0.32, vol:0.09, cutoff:1400, slide:247 });
+    tone("triangle", 277, 0.48, { delay:0.1, a:0.06, d:0.16, s:0.28, r:0.36, vol:0.03, cutoff:1600 });
+  }
+  function zeroFlipOk(streak){
+    const s = Math.min(24, streak|0);
+    const f = 78 + s * 5;
+    noiseBurst(0.035, { cutoff:260, q:0.5, vol:0.03, filter:"lowpass", pow:2.3 });
+    noiseBurst(0.025, { delay:0.01, cutoff:500, q:0.7, vol:0.02, filter:"bandpass", pow:2.0 });
+    tone("sine", f, 0.12, { a:0.012, d:0.04, s:0.28, r:0.08, vol:0.11, cutoff:900 });
+    tone("triangle", f * 2.01, 0.1, { a:0.012, d:0.035, s:0.18, r:0.07, vol:0.028, cutoff:1200 });
+  }
+  function zeroFlipNg(){
+    tone("sine", 160, 0.24, { a:0.02, d:0.09, s:0.25, r:0.18, vol:0.085, cutoff:600, slide:95 });
+    noiseBurst(0.1, { cutoff:300, vol:0.035, filter:"lowpass", pow:1.9 });
+  }
+
+  /* —— peak：#flash / body.shake に同期した「どしん」高揚 ——
+     flashIn は 2.6s、6%≈0.156s で画面が全開（本打撃）
+     shake は 0.42s×3 → 0.42 / 0.84 に余震
+     sliver は 0–0.6s 遅延で降り始め、フラッシュ保持〜2.0s で余韻 */
+  function slam(delay, freq, vol){
+    tone("sine", freq, 0.95, { delay, a:0.0012, d:0.055, s:0.78, r:0.8, vol, cutoff:170 });
+    tone("sine", freq * 2, 0.58, { delay, a:0.0018, d:0.05, s:0.55, r:0.48, vol:vol * 0.7, cutoff:320 });
+    tone("triangle", freq * 3, 0.38, { delay, a:0.002, d:0.05, s:0.32, r:0.3, vol:vol * 0.3, cutoff:500 });
+    noiseBurst(0.22, { delay, a:0.001, cutoff:120, q:0.35, vol:vol * 0.7, filter:"lowpass", pow:3.1 });
+  }
+  function subImpact(delay, freq, vol){
+    /* 余震・弱い打撃（facMultBreak 等からも利用） */
+    tone("sine", freq, 0.7, { delay, a:0.002, d:0.07, s:0.65, r:0.55, vol, cutoff:200 });
+    tone("sine", freq * 2, 0.45, { delay, a:0.003, d:0.06, s:0.4, r:0.35, vol:vol * 0.55, cutoff:380 });
+    noiseBurst(0.14, { delay, a:0.002, cutoff:150, q:0.4, vol:vol * 0.5, filter:"lowpass", pow:2.8 });
+  }
+  function bodyBed(freq, delay, vol, dur){
+    tone("sine", freq, dur, {
+      delay, a:0.02, d:0.25, s:0.72, r:dur * 0.75, vol, cutoff:240, cutSlide:480
+    });
+    tone("sine", freq * 2, dur * 0.92, {
+      delay, a:0.025, d:0.26, s:0.55, r:dur * 0.7, vol:vol * 0.48, cutoff:440
+    });
+  }
+  function chordBlast(notes, delay, vol){
+    notes.forEach((f,i)=>{
+      const d = delay + i * 0.004;
+      tone("sine", f, 1.1, {
+        delay:d, a:0.006, d:0.14, s:0.55, r:0.9, vol:Math.max(0.04, vol - i*0.006), cutoff:2600
+      });
+      tone("triangle", f * 0.5, 1.25, {
+        delay:d, a:0.01, d:0.18, s:0.5, r:1.0, vol:Math.max(0.02, (vol - i*0.006)*0.48), cutoff:1200
+      });
+    });
+  }
+  function energyRush(f0, f1, dur, vol, delay){
+    tone("sine", f0, dur, {
+      delay:delay||0, a:0.015, d:dur*0.28, s:0.55, r:dur*0.42, vol,
+      cutoff:1200, cutSlide:5600, slide:f1
+    });
+    tone("triangle", f0 * 0.5, dur*1.05, {
+      delay:delay||0, a:0.02, d:dur*0.3, s:0.45, r:dur*0.45, vol:vol*0.5,
+      cutoff:800, cutSlide:2800, slide:f1*0.5
+    });
+  }
+  function shimmerTail(freq, delay, dur, vol){
+    tone("sine", freq, dur, { delay, a:0.08, d:dur*0.22, s:0.4, r:dur*0.78, vol, cutoff:4800 });
+    tone("triangle", freq * 1.498, dur*1.05, {
+      delay:delay + 0.06, a:0.1, d:dur*0.24, s:0.32, r:dur*0.8, vol:vol*0.4, cutoff:3800
+    });
+  }
+  function crown(freq, delay, vol, dur){
+    tone("sine", freq, dur||0.95, {
+      delay, a:0.02, d:0.15, s:0.35, r:0.75, vol, cutoff:5200
+    });
+  }
+  function winFirst(){
+    unlock();
+    /* 0→0.15: フラッシュが立ち上がる圧 */
+    tone("sine", 48, 0.16, { a:0.05, d:0.07, s:0.35, r:0.06, vol:0.045, cutoff:220, slide:34 });
+    /* ≈flash 6% 全開どしん */
+    slam(0.15, 30, 0.46);
+    chordBlast([261.63, 329.63, 392, 523.25], 0.17, 0.13);
+    bodyBed(34, 0.15, 0.17, 1.9);
+    /* shake 2拍目 */
+    slam(0.42, 38, 0.16);
+    energyRush(140, 720, 0.5, 0.12, 0.28);
+    crown(988, 0.62, 0.04, 0.95);
+    /* sliver 降り／フラッシュ保持 */
+    shimmerTail(1174, 0.7, 2.2, 0.055);
+    shimmerTail(1568, 0.95, 2.0, 0.03);
+  }
+  function winSuper(){
+    unlock();
+    tone("sine", 40, 0.16, { a:0.05, d:0.07, s:0.4, r:0.06, vol:0.05, cutoff:200, slide:28 });
+    slam(0.15, 24, 0.52);
+    chordBlast([196, 246.94, 311.13, 392, 493.88], 0.17, 0.14);
+    bodyBed(26, 0.15, 0.2, 2.3);
+    tone("sine", 52, 2.0, { delay:0.16, a:0.03, d:0.35, s:0.65, r:1.6, vol:0.09, cutoff:380 });
+    /* shake 2・3拍 + vibrate の連続どしん感 */
+    slam(0.42, 32, 0.2);
+    slam(0.84, 28, 0.14);
+    energyRush(70, 820, 0.58, 0.135, 0.3);
+    crown(1108.7, 0.68, 0.038, 1.0);
+    shimmerTail(1397, 0.78, 2.4, 0.06);
+    shimmerTail(1760, 1.05, 2.2, 0.035);
+    shimmerTail(2217, 1.35, 2.0, 0.018);
+  }
+  function winRhc(){
+    unlock();
+    tone("sine", 44, 0.16, { a:0.05, d:0.07, s:0.38, r:0.06, vol:0.048, cutoff:210, slide:30 });
+    slam(0.15, 28, 0.48);
+    chordBlast([220, 277.18, 330, 415.3, 554.37], 0.17, 0.13);
+    bodyBed(30, 0.15, 0.185, 2.15);
+    tone("triangle", 830, 0.2, { delay:0.22, a:0.005, d:0.05, s:0.25, r:0.14, vol:0.055, cutoff:4800 });
+    slam(0.42, 36, 0.17);
+    energyRush(90, 700, 0.52, 0.12, 0.3);
+    crown(987.77, 0.65, 0.036, 0.95);
+    shimmerTail(1318, 0.78, 2.3, 0.055);
+    shimmerTail(1661, 1.05, 2.1, 0.03);
+  }
+  function winZero(){
+    unlock();
+    tone("sine", 36, 0.17, { a:0.055, d:0.08, s:0.42, r:0.06, vol:0.055, cutoff:190, slide:22 });
+    slam(0.15, 20, 0.56);
+    chordBlast([146.83, 185, 220, 277.18, 349.23, 440], 0.17, 0.135);
+    bodyBed(22, 0.15, 0.23, 2.7);
+    tone("sine", 44, 2.5, { delay:0.16, a:0.03, d:0.4, s:0.7, r:2.0, vol:0.11, cutoff:320 });
+    slam(0.42, 26, 0.22);
+    slam(0.84, 24, 0.16);
+    /* フラッシュ終盤のもう一発（保持ピーク感） */
+    slam(1.26, 22, 0.1);
+    energyRush(50, 900, 0.7, 0.15, 0.3);
+    crown(1318.5, 0.72, 0.045, 1.1);
+    crown(1865, 0.72, 0.025, 1.0);
+    shimmerTail(1568, 0.85, 2.6, 0.065);
+    shimmerTail(1976, 1.15, 2.4, 0.04);
+    shimmerTail(2489, 1.45, 2.2, 0.02);
+  }
+
+  ["pointerdown","keydown","touchstart"].forEach(ev=>{
+    window.addEventListener(ev, unlock, { passive:true });
+  });
+
+  return {
+    unlock, setMuted, isMuted,
+    tapHit, tapMiss, comboTier,
+    lotteryBuy, winSmall, loseSoft,
+    upgradeBuild, facMultBreak, lifeUpgrade, luxBuy,
+    unlockSoft, unlockApex, rhcSpin, adReward, tutComplete, mascotRare,
+    zeroFlipOk, zeroFlipNg,
+    winFirst, winSuper, winRhc, winZero,
+  };
+})();
+
+/* ==========================================================
+   宝くじ定義（年末ジャンボ準拠 / 1ユニット = 2,000万枚）
+========================================================== */
+const UNIT = 20000000;
+const TICKET_COST = 30;
+const TIERS = [
+  { key:"first",  name:"一等",     sub:"7億G",    prize:700000000, count:1 },
+  { key:"around", name:"前後賞",   sub:"1.5億G",  prize:150000000, count:2 },
+  { key:"kumi",   name:"組違い賞", sub:"10万G",   prize:100000,    count:199 },
+  { key:"second", name:"二等",     sub:"1000万G", prize:10000000,  count:3 },
+  { key:"third",  name:"三等",     sub:"100万G",  prize:1000000,   count:100 },
+  { key:"fourth", name:"四等",     sub:"5万G",    prize:50000,     count:2000 },
+  { key:"fifth",  name:"五等",     sub:"1万G",    prize:10000,     count:60000 },
+  { key:"sixth",  name:"六等",     sub:"3000G",   prize:3000,      count:200000 },
+  { key:"seventh",name:"七等",     sub:"300G",    prize:300,       count:2000000 },
+];
+const COMBO_CAP_TAPS = 50; /* この連で倍率上限に到達 */
+const COMBO_CAP_MULT = 10;  /* 倍率上限 */
+const PROD_POINT_CAP = 100;
+const PROD_POINT_PER_BLOCK = 30;   /* 100 タップごと */
+const PROD_POINT_TAP_BLOCK = 100;
+const PROD_POINT_DECAY_PER_HOUR = 20;
+const PROD_POINT_MULT_STEP = 0.1;  /* 10 Pt ごとに +10% */
+const SUPER_RATE  = 0.0001; /* 一等の 1/10000 */
+const SUPER_PRIZE = 70000000000; /* 超一等 700億G */
+const RHC_COST = 1e8;       /* ハズレ券 1億枚で 1 回 */
+const ZERO_STREAK = 13;     /* 2^13 = 8192 で零等成立 */
+const ZERO_STREAK_CAP = 64; /* 演出・連勝記録の上限 */
+const ZERO_COST_BASE = 10;  /* 基礎: 超一等 10 回で 1 挑戦 */
+const ZERO_BATCH = 10;      /* 演出は最初の 10 件のみ */
+const ZERO_MAX_BUY = 10000; /* まとめ買い上限（×1〜×1万、MAX は残数） */
+const ZERO_BOOST_MAX_EXP = 68; /* 無量大数倍 = 10^68（MAX_EXP と同値） */
+const ZERO_SKIP_PER_BOOST = 3; /* 10 倍ごとに 1/2 抽選を 3 回スキップ */
+const ZERO_LABOR_MULT_BASE = 1.1; /* 最大到達 n 連で労働 TP ×1.1^n */
+/* 1枚あたりの理論期待値 */
+const EV_PER_TICKET = TIERS.reduce((s,t)=> s + t.prize*t.count, 0) / UNIT;
+
+/* ==========================================================
+   強化定義
+========================================================== */
+const FACILITIES = [
+  { name:"貯金箱ロボ",      icon:"◈", base:1,      baseCost:200,   costMult:1.22 },
+  { name:"内職マシン",      icon:"◉", base:10,     baseCost:7e4,   costMult:1.24 },
+  { name:"TP 印刷工場",     icon:"▣", base:80,     baseCost:1e7,   costMult:1.26 },
+  { name:"AI 労働センター", icon:"◍", base:2500,   baseCost:3e9,   costMult:1.28 },
+  { name:"量子タップ炉",    icon:"✦", base:120000, baseCost:1.5e13,costMult:1.30 },
+  { name:"異次元プラント",  icon:"❖", base:8e6,    baseCost:4e17, costMult:1.32 },
+  { name:"因果改変炉",      icon:"⊛", base:4e8,    baseCost:2e22, costMult:1.34 },
+  { name:"確率崩壊コア",    icon:"⟐", base:3e10,   baseCost:8e26, costMult:1.36 },
+  { name:"運命演算機",      icon:"۞", base:2e12,   baseCost:4e31, costMult:1.38 },
+];
+/* 設備の生産倍率は累計レベルで決まる。Lv10で×2、Lv100で×10、以降10Lvごとに×1.1 */
+const FAC_OWNED_MULT = [
+  { min:100, mult:10, label:"10倍" },
+  { min:10,  mult:2,  label:"2倍" },
+];
+const FAC_POST100_STEP = 10;   /* 100 以降このレベルごと */
+const FAC_POST100_MULT = 1.1;  /* 上記ごとに乗算 */
+const LIFE_LEVELS = [
+  { name:"公園のベンチ",     icon:"☗", cost:0,     tap:1,      auto:1 },
+  { name:"ネットカフェ暮らし",icon:"☖", cost:5000,  tap:4,      auto:2 },
+  { name:"ボロアパート",     icon:"⌂", cost:1e5,   tap:15,     auto:6 },
+  { name:"分譲マンション",   icon:"▤", cost:3e6,   tap:60,     auto:20 },
+  { name:"タワマン最上階",   icon:"▥", cost:5e8,   tap:250,    auto:80 },
+  { name:"丘の上の大豪邸",   icon:"⛨", cost:6e10,  tap:1200,   auto:350 },
+  { name:"プライベート島",   icon:"❉", cost:1.2e13,tap:6000,   auto:1600 },
+  { name:"月面ヴィラ",       icon:"☾", cost:1.5e15,tap:35000,  auto:9000 },
+  { name:"火星コロニー領主", icon:"✧", cost:8e16,  tap:220000, auto:60000 },
+  { name:"銀河系オーナー",   icon:"✵", cost:1.5e21,tap:1.5e6,  auto:450000 },
+  { name:"パラレルワールド", icon:"∞", cost:1.5e25,tap:1e7,    auto:3500000 },
+  { name:"バグ空間",         icon:"※", cost:1.5e29,tap:7e7,    auto:25000000 },
+];
+const RECYCLE = { firstCost:10, baseCost:200, costMult:12, multPerLv:1.49 };
+/* 枚数は常に 10^e（1,10,…,1兆,10兆,100兆,…,無量大数）。e=0..68 */
+const MAX_EXP = 68;
+const MAX_TICKETS = Math.pow(10, MAX_EXP); /* 無量大数枚 */
+
+/* 嗜好品：効果は一切ない。買ったという事実だけが残る（全 30 品） */
+const LUXURIES = [
+  { name:"レジ横の高級プリン",   cost:500,   note:"いちばん高いやつを指差した" },
+  { name:"取り寄せの和牛",       cost:3e4,   note:"霜降りで前が見えない" },
+  { name:"時価と書かれた寿司",   cost:3e5,   note:"最後まで値段を聞けなかった" },
+  { name:"オーダーメイドの背広", cost:3e6,   note:"肩が驚くほど合う" },
+  { name:"スイス製の機械式時計", cost:3e7,   note:"時刻はスマホで見る" },
+  { name:"ドイツ車",             cost:2e8,   note:"近所のスーパーへ行く" },
+  { name:"ワインの樽ごと",       cost:1e9,   note:"飲む予定はない" },
+  { name:"クルーザー",           cost:9e9,   note:"係留費のほうが高い" },
+  { name:"サラブレッド",         cost:7e10,  note:"走らない" },
+  { name:"自家用ジェット",       cost:8e11,  note:"行き先を考えていない" },
+  { name:"印象派の名画",         cost:2e13,  note:"本物かどうかは聞かない" },
+  { name:"中世の古城",           cost:6e14,  note:"維持費が国家予算" },
+  { name:"無人島",               cost:4e16,  note:"電波が入らない" },
+  { name:"プロサッカークラブ",   cost:9e17,  note:"監督はもう三人替えた" },
+  { name:"人工衛星",             cost:5e19,  note:"軌道上から自宅を見る" },
+  { name:"宇宙ステーション",     cost:2e22,  note:"住むわけではない" },
+  { name:"小惑星の所有権",       cost:7e25,  note:"書類だけが届いた" },
+  { name:"恒星の命名権",         cost:3e29,  note:"自分の名前をつけた" },
+  { name:"銀河ひとつ",           cost:8e34,  note:"所有の意味がわからなくなった" },
+  { name:"ブラックホールの入場券", cost:2e38, note:"中に入る気はない" },
+  { name:"平行宇宙の別荘権",     cost:6e41,  note:"どの宇宙にも行っていない" },
+  { name:"時間そのものの株券",   cost:1e45,  note:"配当は明日届く予定だった" },
+  { name:"神々のオークション席", cost:4e48,  note:"入札はしなかった" },
+  { name:"因果律のコレクション", cost:9e51,  note:"並べても意味がない" },
+  { name:"概念としての邸宅",     cost:3e55,  note:"住所がない" },
+  { name:"虚無のコレクション",   cost:8e58,  note:"箱の中は空だった" },
+  { name:"語彙を超えた美術品",   cost:2e62,  note:"説明文が書けない" },
+  { name:"存在しない宝石",       cost:7e65,  note:"光ってはいる" },
+  { name:"物語の最終章",         cost:1e69,  note:"最後のページに自分の名前があった" },
+  { name:"終わりのない領収書",   cost:5e72,  note:"全部、ここにしまった" },
+];
+
+/* 称号（累計当選金で決まる） */
+const RANKS = [
+  [0,    "無 職"],
+  [1e4,  "小遣い稼ぎ"],
+  [1e6,  "日曜夢想家"],
+  [1e8,  "億 り 人"],
+  [1e10, "資 産 家"],
+  [1e12, "富     豪"],
+  [1e16, "大 富 豪"],
+  [1e20, "経済の支配者"],
+  [1e28, "銀河の資本家"],
+  [1e40, "概念上の富"],
+  [1e48, "神々の入札者"],
+  [1e55, "因果の収集家"],
+  [1e62, "語彙を超えた富"],
+  [1e69, "物語の読者"],
+  [1e72, "終わりなき領収人"],
+];
+const CLEAR_RANK = [Infinity, "完 — 宝くじ生活"];
+function currentRank(){
+  if(S.cleared) return CLEAR_RANK;
+  let r = RANKS[0];
+  for(const x of RANKS) if(S.totalWinnings >= x[0]) r = x;
+  return r;
+}
+
+const AVATARS = [
+  { id:"cat",    name:"猫",   src:"assets/avatar-cat.png" },
+  { id:"fox",    name:"狐",   src:"assets/avatar-fox.png" },
+  { id:"owl",    name:"梟",   src:"assets/avatar-owl.png" },
+  { id:"rabbit", name:"兎",   src:"assets/avatar-rabbit.png" },
+  { id:"deer",   name:"鹿",   src:"assets/avatar-deer.png" },
+];
+function avatarSrc(){
+  return (AVATARS.find(a=>a.id===S.avatar) || AVATARS[0]).src;
+}
+
+/* コインショップ */
+const STARTER_KIT = {
+  coins:500, yen:100, label:"スターターキット",
+  productId: IAP_PRODUCT_IDS[0],
+};
+const COIN_PACKS = [
+  { coins:100,  yen:100,  label:"100 C",   productId: IAP_PRODUCT_IDS[1] },
+  { coins:550,  yen:500,  label:"550 C",   bonus:"+10%", productId: IAP_PRODUCT_IDS[2] },
+  { coins:1200, yen:1000, label:"1,200 C", bonus:"+20%", productId: IAP_PRODUCT_IDS[3] },
+  { coins:6500, yen:5000, label:"6,500 C", bonus:"+30%", productId: IAP_PRODUCT_IDS[4] },
+];
+const COMBO_UPGRADES = [
+  { lv:1, name:"ホワイト企業化", cost:100, mult:1.5, desc:"連鎖の持ち時間が 1.5 倍" },
+  { lv:2, name:"発光企業化",     cost:100, mult:2.0, desc:"連鎖の持ち時間が 2 倍" },
+];
+const SIMPLE_LABOR_COST = 300; /* 労働パネルを 1 枚にする */
+const OFFLINE_UPGRADES = [
+  { hours:4,  cost:100 },
+  { hours:12, cost:200 },
+  { hours:24, cost:400 },
+];
+const BASE_OFFLINE_HOURS = 2;
+const AD_DAILY_LIMIT = 5;
+const AD_MINUTES_BASE = 15;
+const AD_MINUTES_BOOSTED = 60;
+const AD_BOOST_COST = 200;
+const SHARE_TP_MINUTES = 30; /* 記録シートを X 投稿で 1 日 1 回 */
+const RHC_PRIZE_MULT = 1.5; /* RHC一等 1 枚ごとの通常くじ倍率 */
+const RHC_RATE_DIV = 2;     /* RHC一等 1 枚ごとに確率が 1/2 */
+const TP_HOUR_PACK = { cost:100, minutes:60 }; /* コインで買う自動 TP */
+const AUTO_TP_BOOST_BASE_COST = 200; /* 初回 200C で ×2。以降コスト・倍率とも 2 倍ずつ */
+
+/* 三毛猫マスコット：ノーマル 99.7%（白）／レア 0.3%（赤） */
+const MASCOT_NORMAL = [
+  "世の中金が全てじゃないが、金で全て解決する",
+  "通帳のゼロの数だけ、人間の器は大きくなるのさ",
+  "運を使い果たした？なら金で運を買い戻せばいい",
+  "ほら、手が止まってるぞ。もっと画面を叩きな",
+  "スマホの充電より先に、君の理性が尽きそうだ",
+  "現実すら変えられない君が夢を買えるというのかい？",
+  "牡蠣があたる確率は1％程度",
+  "金に物言わせて買う宝くじは楽しいか？",
+];
+const MASCOT_RARE = [
+  "奇跡ってのは、信じて金を出した奴にだけ起こる",
+  "赤文字は確かにレアだが、何かを期待してはいけない",
+];
+const MASCOT_RARE_RATE = 0.003;
+let mascotRare = false, mascotTimer = null, mascotScrollRaf = null, mascotScrollState = null;
+
+function stopMascotScroll(){
+  if(mascotScrollRaf){ cancelAnimationFrame(mascotScrollRaf); mascotScrollRaf = null; }
+  mascotScrollState = null;
+  const el = document.getElementById("mascotText");
+  if(el) el.style.transform = "";
+}
+function pickMascotLine(){
+  mascotRare = Math.random() < MASCOT_RARE_RATE;
+  const pool = mascotRare ? MASCOT_RARE : MASCOT_NORMAL;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+function renderMascotText(el, text){
+  el.classList.toggle("rare", !!mascotRare);
+  el.innerHTML = `<span class="mascot-seg">${text}</span>`;
+  const track = document.getElementById("mascotTrack");
+  const seg = el.querySelector(".mascot-seg");
+  if(track && seg && seg.offsetWidth > track.clientWidth + 2){
+    el.innerHTML =
+      `<span class="mascot-seg">${text}</span>` +
+      `<span class="mascot-seg" aria-hidden="true">${text}</span>`;
+  }
+}
+function startMascotScroll(){
+  stopMascotScroll();
+  const track = document.getElementById("mascotTrack");
+  const el = document.getElementById("mascotText");
+  if(!track || !el) return;
+  const seg = el.querySelector(".mascot-seg");
+  if(!seg) return;
+  const segs = el.querySelectorAll(".mascot-seg");
+  if(segs.length < 2) return;
+  const gap = 28;
+  const loopW = seg.offsetWidth + gap;
+  const speed = 38, pause = 2000;
+  mascotScrollState = { pos:0, waitUntil:0, loopW };
+  let last = 0, started = false;
+  function tick(now){
+    mascotScrollRaf = requestAnimationFrame(tick);
+    const s = mascotScrollState;
+    if(!s) return;
+    if(!started){ started = true; last = now; s.waitUntil = now + pause; return; }
+    const dt = Math.min(now - last, 48) / 1000;
+    last = now;
+    if(now < s.waitUntil) return;
+    s.pos += speed * dt;
+    while(s.pos >= s.loopW) s.pos -= s.loopW;
+    el.style.transform = `translateX(${-s.pos}px)`;
+  }
+  mascotScrollRaf = requestAnimationFrame(tick);
+}
+function setMascotLine(animate){
+  const el = document.getElementById("mascotText");
+  const track = document.getElementById("mascotTrack");
+  if(!el) return;
+  const text = pickMascotLine();
+  if(mascotRare) sfx.mascotRare();
+  const show = ()=>{
+    renderMascotText(el, text);
+    track?.classList.remove("out");
+    requestAnimationFrame(()=> requestAnimationFrame(startMascotScroll));
+  };
+  if(!animate){ show(); return; }
+  stopMascotScroll();
+  track?.classList.add("out");
+  setTimeout(show, 220);
+}
+function cycleMascot(manual){
+  setMascotLine(true);
+  if(manual && mascotTimer){ clearInterval(mascotTimer); mascotTimer = setInterval(()=>cycleMascot(false), 9000); }
+}
+function initMascot(){
+  mascotRare = false;
+  const el = document.getElementById("mascotText");
+  if(el){
+    const text = MASCOT_NORMAL[Math.floor(Math.random() * MASCOT_NORMAL.length)];
+    renderMascotText(el, text);
+    requestAnimationFrame(()=> requestAnimationFrame(startMascotScroll));
+  }
+  document.getElementById("mascotCat")?.addEventListener("click", ()=>cycleMascot(true));
+  mascotTimer = setInterval(()=>cycleMascot(false), 9000);
+  window.addEventListener("resize", ()=>{
+    const t = document.getElementById("mascotText");
+    if(t){
+      const cur = t.querySelector(".mascot-seg");
+      if(cur) renderMascotText(t, cur.textContent || "");
+    }
+    startMascotScroll();
+  });
+}
+
+/* ハズレ券 → 紙の概算（券1枚 ≈ 1.5g）と国内比較の基準 */
+const TICKET_GRAMS = 1.5;
+const PAPER_REFS = [
+  { name:"A4 コピー用紙",       unit:"枚",   grams:5,        note:"約80g/m²" },
+  { name:"トイレットペーパー",   unit:"ロール", grams:100,      note:"1ロールあたり" },
+  { name:"ティシュペーパー",     unit:"箱",   grams:200,      note:"箱入りの概算" },
+  { name:"新聞紙（朝刊）",       unit:"部",   grams:250,      note:"1日分の概算" },
+  { name:"日本人1人の1日分",     unit:"日分", grams:474,      note:"年173kg換算" },
+  { name:"日本人1人の1年分",     unit:"人年", grams:173000,   note:"紙・板紙消費量" },
+  { name:"日本の年間内需",       unit:"%",    grams:2e13,     note:"約2,000万トン", percent:true },
+];
+
+function moneyLabel(n){ return fmt(n) + "G"; }
+function paperGrams(){ return (S.totalLose || 0) * TICKET_GRAMS; }
+function fmtMass(g){
+  if(g < 1000) return parseFloat(g.toFixed(g >= 100 ? 0 : 1)) + " g";
+  if(g < 1e6) return parseFloat((g/1000).toFixed(g >= 1e5 ? 0 : 2)) + " kg";
+  if(g < 1e9) return parseFloat((g/1e6).toFixed(g >= 1e8 ? 0 : 2)) + " t";
+  if(g < 1e12) return parseFloat((g/1e9).toFixed(2)) + " 千t";
+  return parseFloat((g/1e12).toFixed(2)) + " 百万t";
+}
+function paperCompareVal(ref, grams){
+  if(ref.percent){
+    const p = grams / ref.grams * 100;
+    if(p < 0.0001) return "< 0.0001 %";
+    if(p < 0.01) return p.toFixed(4) + " %";
+    if(p < 1) return p.toFixed(2) + " %";
+    return p.toFixed(1) + " %";
+  }
+  const n = grams / ref.grams;
+  if(n < 0.01) return "< 0.01 " + ref.unit;
+  return fmt(n) + " " + ref.unit;
+}
+
+/* ==========================================================
+   状態
+========================================================== */
+const DEFAULT_STATE = () => ({
+  money:0, manualTP:0, autoTP:0, loseTickets:0,
+  coins:0,
+  firstWins:0, superWins:0, superUnlocked:false, apexUnlocked:false,
+  firstWinsManual:0, firstWinsAuto:0,
+  superWinsManual:0, superWinsAuto:0,
+  rhcFirst:0, rhcDraws:0, rhcLoseGain:0, rhcUnlocked:false, rhcAmt:1,
+  zeroWins:0, zeroUsed:0, zeroSpentSuper:0, zeroBestStreak:0, zeroAmt:1, zeroBoostExp:0,
+  facLv:FACILITIES.map(()=>0), lifeLv:0, recycleLv:0,
+  luxOwned:LUXURIES.map(()=>false),
+  qtyExp:0, qtyMax:false, buyAmt:1,
+  avatar:"cat",
+  comboTimeLv:0,
+  simpleLabor:false,
+  offlineHours:BASE_OFFLINE_HOURS,
+  adBoostOwned:false,
+  autoTpBoostLv:0,
+  starterKitOwned:false,
+  adDay:"", adUsed:0,
+  shareRewardDay:"",
+  reviewDone:false,
+  reviewPrompted:{ life1:false, tickets1k:false, tickets100k:false },
+  legalAccepted:false,
+  tutorialDone:false,
+  tutorialStep:"",
+  cleared:false,
+  clearedAt:0,
+  milestones:{
+    firstFirst:false, firstSuper:false, firstZero:false,
+    lifeMax:false, luxAll:false,
+  },
+  /* 記録帳 */
+  workTaps:0, workMiss:0, bestCombo:0,
+  prodPoints:0,
+  ticketsBought:0, totalWinnings:0, totalLose:0,
+  tierWins:{}, playSeconds:0, startedAt:Date.now(),
+  lastTime:Date.now(),
+});
+let S = DEFAULT_STATE();
+const SAVE_KEY = "takarakuji_life_save_v3";
+
+function todayKey(){
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+function ensureAdDay(){
+  const t = todayKey();
+  if(S.adDay !== t){ S.adDay = t; S.adUsed = 0; }
+}
+function offlineCapSec(){ return (S.offlineHours || BASE_OFFLINE_HOURS) * 3600; }
+function adMinutes(){ return S.adBoostOwned ? AD_MINUTES_BOOSTED : AD_MINUTES_BASE; }
+function comboTimeMult(){
+  if(S.comboTimeLv >= 2) return 2;
+  if(S.comboTimeLv >= 1) return 1.5;
+  return 1;
+}
+
+function save(){ S.lastTime = Date.now(); try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+function load(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return;
+    const d = JSON.parse(raw);
+    S = Object.assign(DEFAULT_STATE(), d);
+    S.facLv = FACILITIES.map((_,i)=> (d.facLv && d.facLv[i]) || 0);
+    S.luxOwned = LUXURIES.map((_,i)=> !!(d.luxOwned && d.luxOwned[i]));
+    S.tierWins = Object.assign({}, d.tierWins || {});
+    S.milestones = Object.assign({
+      firstFirst:false, firstSuper:false, firstZero:false,
+      lifeMax:false, luxAll:false,
+    }, d.milestones || {});
+    if(S.cleared == null) S.cleared = false;
+    if(S.clearedAt == null) S.clearedAt = 0;
+    /* 既存進行からマイルストーンを補完 */
+    if((S.firstWins||0) > 0) S.milestones.firstFirst = true;
+    if((S.superWins||0) > 0) S.milestones.firstSuper = true;
+    if((S.zeroWins||0) > 0) S.milestones.firstZero = true;
+    if(S.lifeLv >= LIFE_LEVELS.length - 1) S.milestones.lifeMax = true;
+    if(S.luxOwned.every(Boolean)) S.milestones.luxAll = true;
+    /* 既に条件を満たす既存セーブはモーダルなしで完結扱いにする */
+    if(!S.cleared && S.lifeLv >= LIFE_LEVELS.length - 1 && S.luxOwned.every(Boolean)){
+      S.cleared = true;
+      S.clearedAt = S.clearedAt || Date.now();
+    }
+    if(!S.offlineHours) S.offlineHours = BASE_OFFLINE_HOURS;
+    if(S.superWins > 0) S.apexUnlocked = true;
+    if((S.rhcFirst||0) > 0) S.rhcUnlocked = true;
+    if(S.lifeLv >= LIFE_LEVELS.length) S.lifeLv = LIFE_LEVELS.length - 1;
+    if(S.zeroAmt == null) S.zeroAmt = 1;
+    if(S.zeroBoostExp == null) S.zeroBoostExp = 0;
+    S.zeroBoostExp = Math.max(0, Math.min(ZERO_BOOST_MAX_EXP, Math.floor(Number(S.zeroBoostExp) || 0)));
+    if(S.zeroSpentSuper == null){
+      S.zeroSpentSuper = (S.zeroUsed || 0) * ZERO_COST_BASE;
+    }
+    if(S.rhcAmt == null) S.rhcAmt = 1;
+    if(S.adBoostOwned == null) S.adBoostOwned = false;
+    if(S.simpleLabor == null) S.simpleLabor = false;
+    if(S.autoTpBoostLv == null || !isFinite(Number(S.autoTpBoostLv))) S.autoTpBoostLv = 0;
+    S.autoTpBoostLv = Math.max(0, Math.floor(Number(S.autoTpBoostLv) || 0));
+    if(S.starterKitOwned == null) S.starterKitOwned = false;
+    if(S.shareRewardDay == null) S.shareRewardDay = "";
+    if(S.prodPoints == null || !isFinite(Number(S.prodPoints))) S.prodPoints = 0;
+    S.prodPoints = Math.max(0, Math.min(PROD_POINT_CAP, Number(S.prodPoints) || 0));
+    S.qtyMax = !!S.qtyMax;
+    S.qtyExp = Math.max(0, Math.min(MAX_EXP, Math.floor(Number(S.qtyExp) || 0)));
+    if(S.reviewDone == null) S.reviewDone = false;
+    if(!S.reviewPrompted || typeof S.reviewPrompted !== "object"){
+      S.reviewPrompted = { life1:false, tickets1k:false, tickets100k:false };
+    } else {
+      S.reviewPrompted = Object.assign(
+        { life1:false, tickets1k:false, tickets100k:false },
+        S.reviewPrompted
+      );
+    }
+    /* 既存セーブはチュートリアル済み扱い */
+    if(d.tutorialDone == null){
+      S.tutorialDone = !!(d.workTaps > 0 || d.ticketsBought > 0 || d.money > 0 || d.legalAccepted);
+    }
+    if(!S.tutorialStep) S.tutorialStep = "";
+    ensureAdDay();
+    updateApexNav();
+    const rawDt = (Date.now() - (d.lastTime || Date.now())) / 1000;
+    const dt = Math.min(Math.max(0, rawDt), offlineCapSec());
+    if(dt > 0) applyProdPointDecay(dt);
+    if(dt > 10){
+      const gain = autoRate() * dt;
+      if(gain > 0){ S.autoTP += gain; setTimeout(()=>toast(`放置中の自動生産 +${fmt(gain)} TP`), 600); }
+    }
+  }catch(e){ console.warn(e); }
+}
+
+/* ==========================================================
+   表記
+========================================================== */
+const UNITS = [
+  [1e68,"無量大数"],[1e64,"不可思議"],[1e60,"那由多"],[1e56,"阿僧祇"],[1e52,"恒河沙"],
+  [1e48,"極"],[1e44,"載"],[1e40,"正"],[1e36,"澗"],[1e32,"溝"],
+  [1e28,"穣"],[1e24,"秭"],[1e20,"垓"],[1e16,"京"],[1e12,"兆"],[1e8,"億"],[1e4,"万"],
+];
+function fmt(n){
+  if(!isFinite(n)) return "∞";
+  if(n < 0) return "-" + fmt(-n);
+  for(const [v,u] of UNITS){
+    if(n >= v){
+      const x = n / v;
+      const s = x >= 100 ? Math.floor(x).toLocaleString() : String(parseFloat(x.toFixed(x >= 10 ? 1 : 2)));
+      return s + u;
+    }
+  }
+  if(n >= 1000 || Number.isInteger(n)) return Math.floor(n).toLocaleString();
+  return parseFloat(n.toFixed(1)).toString();
+}
+/* TP表示は切り上げず、購入可能量と見た目を一致させる */
+function fmtTP(n){
+  if(!isFinite(n) || n <= 0) return "0";
+  const x = Math.floor(n * 10 + 1e-9) / 10; /* 切り捨て1桁 */
+  if(x >= 1000) return fmt(Math.floor(x));
+  if(Number.isInteger(x)) return String(x);
+  return x.toFixed(1);
+}
+function fmtDuration(sec){
+  sec = Math.floor(sec);
+  const d = Math.floor(sec/86400), h = Math.floor(sec%86400/3600), m = Math.floor(sec%3600/60);
+  if(d > 0) return `${d}日 ${h}時間`;
+  if(h > 0) return `${h}時間 ${m}分`;
+  return `${m}分 ${sec%60}秒`;
+}
+function fmtDate(ts){
+  const d = new Date(ts);
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getDate()).padStart(2,"0")}`;
+}
+
+/* ==========================================================
+   乱数
+========================================================== */
+function gauss(){
+  let u=0,v=0;
+  while(!u) u=Math.random();
+  while(!v) v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+function poisson(l){
+  if(l<=0) return 0;
+  if(l>30) return Math.max(0, Math.round(l + Math.sqrt(l)*gauss()));
+  const L=Math.exp(-l); let k=0,p=1;
+  do{ k++; p*=Math.random(); }while(p>L);
+  return k-1;
+}
+function binom(n,p){
+  if(!isFinite(n) || n<=0 || p<=0) return 0;
+  n = Math.floor(n);
+  if(n<=0) return 0;
+  if(p>=1) return n;
+  if(n<64){ let c=0; for(let i=0;i<n;i++) if(Math.random()<p) c++; return c; }
+  const mean=n*p;
+  if(!isFinite(mean)) return 0;
+  if(mean<30) return Math.min(n, poisson(mean));
+  const sd = Math.sqrt(Math.max(0, mean*(1-p)));
+  const c = Math.round(mean + sd*gauss());
+  return Math.max(0, Math.min(n, isFinite(c) ? c : Math.round(mean)));
+}
+
+/* ==========================================================
+   抽選
+========================================================== */
+const TUTORIAL_SEVENTH_AT = 2; /* 累計この枚数目は七等確定（その 1 枚の結果を置き換え） */
+
+function drawTickets(n, pool){
+  const hits={}; let totalPrize=0, winners=0, superCount=0;
+  const unlocked = S.superUnlocked;
+  const beforeTickets = S.ticketsBought || 0;
+  n = Math.floor(Number(n));
+  if(!isFinite(n) || n < 1){
+    return { hits, totalPrize:0, losers:0, jackpot:false, superHit:false };
+  }
+
+  /* 2 枚目は抽選枠から外し、あとで七等として確定させる（追加当選にしない） */
+  const forceSeventh =
+    beforeTickets < TUTORIAL_SEVENTH_AT &&
+    beforeTickets + Math.min(n, TUTORIAL_SEVENTH_AT) >= TUTORIAL_SEVENTH_AT
+      ? 1 : 0;
+  const randomN = n - forceSeventh;
+
+  if(randomN > 0){
+    for(const t of TIERS){
+      let c = binom(randomN, t.count/UNIT);
+      if(t.key==="first" && c>0 && unlocked){
+        superCount = binom(c, SUPER_RATE);
+        c -= superCount;
+      }
+      if(c>0){
+        hits[t.key]=c; totalPrize += t.prize*c; winners += c;
+        S.tierWins[t.key] = (S.tierWins[t.key]||0) + c;
+      }
+    }
+    if(superCount>0){
+      hits.super = superCount;
+      totalPrize += SUPER_PRIZE*superCount;
+      winners += superCount;
+      S.tierWins.super = (S.tierWins.super||0) + superCount;
+    }
+  }
+
+  if(forceSeventh > 0){
+    const seventh = TIERS.find(t => t.key === "seventh");
+    hits.seventh = (hits.seventh || 0) + forceSeventh;
+    totalPrize += seventh.prize * forceSeventh;
+    winners += forceSeventh;
+    S.tierWins.seventh = (S.tierWins.seventh || 0) + forceSeventh;
+  }
+
+  const firstCount = hits.first || 0;
+  if(firstCount > 0){
+    S.firstWins += firstCount;
+    if(pool === "manual") S.firstWinsManual += firstCount;
+    else if(pool === "auto") S.firstWinsAuto += firstCount;
+  }
+  if(superCount > 0){
+    S.superWins += superCount;
+    if(pool === "manual") S.superWinsManual += superCount;
+    else if(pool === "auto") S.superWinsAuto += superCount;
+  }
+  if(firstCount + superCount > 0){
+    if(!S.superUnlocked){
+      S.superUnlocked = true;
+      /* flashIn 2.6s のピーク後にゆっくり解禁（〜2.4s） */
+      setTimeout(()=>{ sfx.unlockSoft(); showUnlockModal(); }, 2400);
+    }
+  }
+  if(S.superWins > 0 && !S.apexUnlocked){
+    S.apexUnlocked = true;
+    /* フラッシュ余韻のあとに極み解禁（〜3.4s） */
+    setTimeout(()=>{ sfx.unlockApex(); showApexUnlockModal(); }, 3400);
+  }
+  totalPrize *= lotteryPrizeMult();
+  return { hits, totalPrize, losers:Math.max(0, n-winners), jackpot:(firstCount+superCount)>0, superHit:superCount>0 };
+}
+
+function lotteryPrizeMult(){
+  const n = S.rhcFirst || 0;
+  return n <= 0 ? 1 : Math.pow(RHC_PRIZE_MULT, n);
+}
+/** RHC一等の現在確率（所持 RHC一等 1 枚ごとに 1/RHC_RATE_DIV） */
+function rhcFirstRate(){
+  return (1 / UNIT) / Math.pow(RHC_RATE_DIV, S.rhcFirst || 0);
+}
+function rhcFirstOddsLabel(){
+  const den = UNIT * Math.pow(RHC_RATE_DIV, S.rhcFirst || 0);
+  return "1 / " + fmt(den);
+}
+function rhcBuffLv(){ return S.rhcFirst || 0; }
+function rhcBuffLabel(){ return "Lv." + rhcBuffLv(); }
+/** 2^streak（= 1/n の n）の桁数。streak<=0 は 0 */
+function zeroOddsDenomDigits(streak){
+  const s = Math.floor(Number(streak) || 0);
+  if(s <= 0) return 0;
+  /* digits(2^s) = floor(s * log10(2)) + 1 （大きな連勝でも Number 溢れなし） */
+  return Math.floor(s * Math.LOG10E * Math.LN2) + 1;
+}
+/** 零等バフ用：最大到達 1/n の n の桁数（例: 8192→4、16384→5） */
+function zeroWinsDigits(){
+  return zeroOddsDenomDigits(S.zeroBestStreak || 0);
+}
+/** 零等：最大到達 n 連に対する労働 TP 倍率（×1.1^n） */
+function zeroLaborMult(){
+  const n = Math.max(0, Math.floor(Number(S.zeroBestStreak) || 0));
+  if(n <= 0) return 1;
+  const m = Math.pow(ZERO_LABOR_MULT_BASE, n);
+  return isFinite(m) && m > 0 ? m : 1;
+}
+function laborTapGain(){
+  return tapPower() * comboMult() * zeroLaborMult();
+}
+/** 手動貢献係数: 1 + 手動一等×0.1 + 手動超一等×10 */
+function apexManualFactor(){
+  return 1 + (S.firstWinsManual || 0) * 0.1 + (S.superWinsManual || 0) * 10;
+}
+/**
+ * 極み TP 生産バフ（自動 TP のみ。労働の手動 TP には乗らない）
+ * RHCバフレベル ×（最大到達 1/n の n の桁数）× (1 + 手動一等×0.1 + 手動超一等×10)
+ */
+function apexProdMult(){
+  if(!S.apexUnlocked) return 1;
+  const rhc = rhcBuffLv();
+  const digits = zeroWinsDigits();
+  const manual = apexManualFactor();
+  const m = rhc * digits * manual;
+  if(!(m > 0) || !isFinite(m)) return 1;
+  return m;
+}
+function apexProdBreakdown(){
+  const best = S.zeroBestStreak || 0;
+  return {
+    rhc: rhcBuffLv(),
+    digits: zeroWinsDigits(),
+    manual: apexManualFactor(),
+    firstM: S.firstWinsManual || 0,
+    superM: S.superWinsManual || 0,
+    zeroWins: S.zeroWins || 0,
+    bestStreak: best,
+    mult: apexProdMult(),
+  };
+}
+/** 次の零等に必要な連勝数（初回 13、以降 1 ずつ増加） */
+function zeroRequiredStreak(){
+  return ZERO_STREAK + (S.zeroWins || 0);
+}
+function zeroStreakCap(){
+  return Math.max(ZERO_STREAK_CAP, zeroRequiredStreak() + 24);
+}
+function getZeroBoostExp(){
+  return Math.max(0, Math.min(ZERO_BOOST_MAX_EXP, Math.floor(Number(S.zeroBoostExp) || 0)));
+}
+function zeroCostPerAttempt(){
+  return ZERO_COST_BASE * Math.pow(10, getZeroBoostExp());
+}
+function zeroSkipStreak(){
+  return ZERO_SKIP_PER_BOOST * getZeroBoostExp();
+}
+function zeroBoostMult(){
+  return Math.pow(10, getZeroBoostExp());
+}
+function zeroAttemptsLeft(){
+  const cost = zeroCostPerAttempt();
+  if(!(cost > 0)) return 0;
+  const pool = Math.max(0, (S.superWins || 0) - (S.zeroSpentSuper || 0));
+  return Math.floor(pool / cost);
+}
+function zeroOddsLabel(streak){
+  if(!streak || streak <= 0) return "—";
+  if(streak <= 30) return "1 / " + Math.pow(2, streak).toLocaleString();
+  return "1 / 2^" + streak;
+}
+function zeroOddsCompact(streak){
+  if(!streak || streak <= 0) return "—";
+  if(streak <= 20) return "1/" + Math.pow(2, streak).toLocaleString();
+  return "1/2^" + streak;
+}
+function zeroPlanCount(){
+  const left = zeroAttemptsLeft();
+  if(left <= 0) return 0;
+  if(S.zeroAmt === "max") return Math.min(left, ZERO_MAX_BUY);
+  const want = Math.max(1, +S.zeroAmt || 1);
+  return Math.min(left, want, ZERO_MAX_BUY);
+}
+function updateApexNav(){
+  const nav = document.getElementById("nav");
+  const btn = document.getElementById("nvApex");
+  if(!nav || !btn) return;
+  const on = !!S.apexUnlocked;
+  btn.hidden = !on;
+  nav.classList.toggle("has-apex", on);
+}
+
+/* 幾何分布：成功確率 p で初成功までの試行回数（超低確率でも Number 精度を維持） */
+function geomTrialsUntilSuccess(p){
+  if(!(p > 0) || !isFinite(p)) return Infinity;
+  if(p >= 1) return 1;
+  const u = Math.random();
+  if(!(u > 0 && u < 1)) return 1;
+  /* p が Number.EPSILON 未満だと 1-p が 1 に丸まり log(1-p)=0 になる */
+  let log1mp = (p < 1e-8) ? -p - p*p/2 : Math.log1p(-p);
+  if(!(log1mp < 0) || !isFinite(log1mp)) log1mp = -p;
+  const t = Math.floor(Math.log(1 - u) / log1mp) + 1;
+  if(!isFinite(t) || t < 1) return Infinity;
+  return t;
+}
+
+/* RHC：ハズレ券で引く。一等以外は当選金相当のハズレ券、一等は RHC一等。
+   RHC一等が当たるたび、以降の RHC一等確率は 1/2 になる。 */
+function drawRHC(n){
+  const hits={}; let loseGain=0, winners=0, rhcFirst=0;
+  n = Math.floor(Number(n));
+  if(!isFinite(n) || n < 1){
+    return { hits, loseGain:0, losers:0, rhcFirst:0 };
+  }
+
+  let p = rhcFirstRate();
+  let left = n;
+  /* 1 バッチで理論上取り得る回数に余裕を持たせた上限（UI・ループ保護） */
+  const maxWins = 100000;
+  while(left > 0 && rhcFirst < maxWins && p > 0 && isFinite(p)){
+    const trials = geomTrialsUntilSuccess(p);
+    if(!isFinite(trials) || trials < 1 || trials > left) break;
+    rhcFirst++;
+    left -= trials;
+    p /= RHC_RATE_DIV;
+  }
+  if(rhcFirst > 0){ hits.first = rhcFirst; winners += rhcFirst; }
+
+  for(const t of TIERS){
+    if(t.key === "first") continue;
+    const c = binom(n, t.count/UNIT);
+    if(c<=0) continue;
+    hits[t.key]=c; winners += c;
+    loseGain += t.prize * c;
+  }
+  return { hits, loseGain, losers:Math.max(0, n-winners), rhcFirst };
+}
+
+/* ==========================================================
+   計算
+========================================================== */
+function facOwnedMult(lv){
+  lv = Math.max(0, Math.floor(Number(lv) || 0));
+  let m = 1;
+  for(const b of FAC_OWNED_MULT){
+    if(lv >= b.min){ m = b.mult; break; }
+  }
+  if(lv >= 100){
+    const steps = Math.floor((lv - 100) / FAC_POST100_STEP);
+    if(steps > 0){
+      const extra = Math.pow(FAC_POST100_MULT, steps);
+      if(isFinite(extra) && extra > 0) m *= extra;
+    }
+  }
+  return m;
+}
+function facEffectiveLv(i){
+  const lv = S.facLv[i] || 0;
+  return lv * facOwnedMult(lv);
+}
+function facProdAt(i, effLv){ return effLv <= 0 ? 0 : FACILITIES[i].base * effLv; }
+function facProd(i){ return facProdAt(i, facEffectiveLv(i)); }
+function facProdAfterBuy(i, k){
+  const next = (S.facLv[i] || 0) + k;
+  return facProdAt(i, next * facOwnedMult(next));
+}
+function facGainPerLv(i){ return FACILITIES[i].base * facOwnedMult(S.facLv[i] || 0); }
+function lifeAutoMult(){ return LIFE_LEVELS[S.lifeLv].auto; }
+function tapPower(){ return LIFE_LEVELS[S.lifeLv].tap; }
+function recycleMult(){ return Math.pow(RECYCLE.multPerLv, S.recycleLv); }
+function prodPointsValue(){
+  const v = Number(S.prodPoints);
+  if(!isFinite(v) || v <= 0) return 0;
+  return Math.min(PROD_POINT_CAP, v);
+}
+function prodPointMult(){
+  return 1 + Math.floor(prodPointsValue() / 10) * PROD_POINT_MULT_STEP;
+}
+function applyProdPointDecay(dtSec){
+  if(!(dtSec > 0)) return;
+  const decay = (PROD_POINT_DECAY_PER_HOUR / 3600) * dtSec;
+  S.prodPoints = Math.max(0, Math.min(PROD_POINT_CAP, prodPointsValue() - decay));
+}
+function grantProdPointsFromTap(){
+  const before = S.workTaps - 1;
+  if(before < 0) return;
+  if(Math.floor(S.workTaps / PROD_POINT_TAP_BLOCK) > Math.floor(before / PROD_POINT_TAP_BLOCK)){
+    const next = Math.min(PROD_POINT_CAP, prodPointsValue() + PROD_POINT_PER_BLOCK);
+    const gained = next - prodPointsValue();
+    S.prodPoints = next;
+    if(gained > 0) toast(`生産ポイント +${fmt(gained)}（${fmt(Math.floor(next))} / ${PROD_POINT_CAP}）`);
+  }
+}
+function autoTpBoostLv(){
+  return Math.max(0, Math.floor(Number(S.autoTpBoostLv) || 0));
+}
+function autoTpBoostMult(){
+  const lv = autoTpBoostLv();
+  if(lv <= 0) return 1;
+  const m = Math.pow(2, lv);
+  return isFinite(m) && m > 0 ? m : 1;
+}
+function autoTpBoostNextCost(){
+  const c = AUTO_TP_BOOST_BASE_COST * Math.pow(2, autoTpBoostLv());
+  return isFinite(c) && c > 0 ? c : Infinity;
+}
+function autoRate(){
+  let s=0;
+  for(let i=0;i<FACILITIES.length;i++) s += facProd(i);
+  return s * lifeAutoMult() * recycleMult() * apexProdMult() * prodPointMult() * autoTpBoostMult();
+}
+function totalFacLv(){ return S.facLv.reduce((a,b)=>a+b,0); }
+
+function geoCost(base, mult, lv, k){
+  const unit = base * Math.pow(mult, lv);
+  if(!isFinite(unit)) return Infinity;
+  return unit * (Math.pow(mult,k)-1) / (mult-1);
+}
+function geoMaxLevels(base, mult, lv, budget){
+  const unit = base * Math.pow(mult, lv);
+  if(!isFinite(unit) || budget < unit) return 0;
+  const v = 1 + budget*(mult-1)/unit;
+  return Math.max(0, Math.min(500, Math.floor(Math.log(v)/Math.log(mult))));
+}
+function facPlan(i){
+  const f=FACILITIES[i], lv=S.facLv[i];
+  let k = S.buyAmt==="max" ? Math.max(1, geoMaxLevels(f.baseCost,f.costMult,lv,S.money)) : S.buyAmt;
+  return { k, cost: geoCost(f.baseCost,f.costMult,lv,k) };
+}
+function recycleCost(lv, k){
+  k = Math.max(0, Math.floor(Number(k) || 0));
+  lv = Math.max(0, Math.floor(Number(lv) || 0));
+  if(k <= 0) return 0;
+  /* Lv.0→1 のみ 10 枚。以降は従来曲線（200 → 200×11 → …）を Lv.1 から適用 */
+  if(lv === 0){
+    if(k === 1) return RECYCLE.firstCost;
+    return RECYCLE.firstCost + geoCost(RECYCLE.baseCost, RECYCLE.costMult, 0, k - 1);
+  }
+  return geoCost(RECYCLE.baseCost, RECYCLE.costMult, lv - 1, k);
+}
+function recycleMaxLevels(budget){
+  const lv = S.recycleLv || 0;
+  if(lv > 0) return geoMaxLevels(RECYCLE.baseCost, RECYCLE.costMult, lv - 1, budget);
+  if(!(budget >= RECYCLE.firstCost)) return 0;
+  const more = geoMaxLevels(RECYCLE.baseCost, RECYCLE.costMult, 0, budget - RECYCLE.firstCost);
+  return 1 + more;
+}
+function recyclePlan(){
+  const lv = S.recycleLv;
+  let k = S.buyAmt === "max"
+    ? Math.max(1, recycleMaxLevels(S.loseTickets))
+    : S.buyAmt;
+  return { k, cost: recycleCost(lv, k) };
+}
+
+/* ==========================================================
+   演出
+========================================================== */
+function vibrateJackpot(isSuper){
+  if(navigator.vibrate){
+    navigator.vibrate(isSuper
+      ? [400,70,400,70,400,70,300,70,300,70,1200]
+      : [260,70,260,70,260,70,700]);
+  }
+  document.body.classList.remove("shake");
+  void document.body.offsetWidth;
+  document.body.classList.add("shake");
+  setTimeout(()=>document.body.classList.remove("shake"), 1400);
+}
+function showFlash(mode, subText){
+  /* mode: false/"first" | true/"super" | "rhc" | "zero" */
+  const kind = mode === true ? "super"
+    : mode === false || mode === "first" ? "first"
+    : mode;
+  if(kind === "super") sfx.winSuper();
+  else if(kind === "rhc") sfx.winRhc();
+  else if(kind === "zero") sfx.winZero();
+  else sfx.winFirst();
+  if(kind === "first") markMilestone("firstFirst");
+  else if(kind === "super") markMilestone("firstSuper");
+  else if(kind === "zero") markMilestone("firstZero");
+  const f = document.getElementById("flash");
+  f.classList.remove("super", "rhc", "zero");
+  if(kind === "super" || kind === "rhc" || kind === "zero") f.classList.add(kind);
+
+  const tag = document.getElementById("flashTag");
+  const title = document.getElementById("flashTitle");
+  if(kind === "super"){
+    tag.textContent = "TRANSCENDENT PRIZE";
+    title.textContent = "超一等当選";
+  } else if(kind === "rhc"){
+    tag.textContent = "REVENGE HIT";
+    title.textContent = "RHC一等";
+  } else if(kind === "zero"){
+    tag.textContent = "ABSOLUTE ZERO";
+    title.textContent = "零等当選";
+  } else {
+    tag.textContent = "FIRST PRIZE";
+    title.textContent = "一等当選";
+  }
+  document.getElementById("flashSub").textContent = subText;
+  f.classList.remove("show"); void f.offsetWidth; f.classList.add("show");
+  const colors = kind === "super"
+    ? ["#ff5e7a","#ffb347","#ffe566","#6dffb0","#5ec8ff","#b388ff"]
+    : kind === "rhc"
+    ? ["#064e3b","#10b981","#d1fae5","#34d399","#a7f3d0"]
+    : kind === "zero"
+    ? ["#2e1065","#7c3aed","#f3e8ff","#a78bfa","#ddd6fe"]
+    : ["#c8a951","#e5d3a0","#9c8235","#e7e4dd"];
+  for(let i=0;i<(kind==="first"?34:42);i++){
+    const s=document.createElement("div");
+    s.className="sliver";
+    s.style.left = Math.random()*100 + "vw";
+    s.style.background = colors[(Math.random()*colors.length)|0];
+    s.style.animationDuration = (1.4 + Math.random()*1.6) + "s";
+    s.style.animationDelay = (Math.random()*.6) + "s";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(), 3600);
+  }
+}
+let toastT=null;
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove("show"), 2600);
+}
+
+/* ==========================================================
+   レビュー特典（レビュー誘導 → TP 3,000／1 回のみ・星数は問わない）
+========================================================== */
+const REVIEW_TP_REWARD = 3000;
+let reviewPromptTimer = null;
+
+function canShowReviewPrompt(triggerKey){
+  if(S.reviewDone) return false;
+  if(!S.reviewPrompted) S.reviewPrompted = { life1:false, tickets1k:false, tickets100k:false };
+  return !S.reviewPrompted[triggerKey];
+}
+function queueReviewPrompt(triggerKey, delayMs){
+  if(!canShowReviewPrompt(triggerKey)) return;
+  S.reviewPrompted[triggerKey] = true;
+  save();
+  clearTimeout(reviewPromptTimer);
+  reviewPromptTimer = setTimeout(()=> showReviewModal(triggerKey), delayMs == null ? 700 : delayMs);
+}
+function showReviewModal(){
+  if(S.reviewDone) return;
+  document.getElementById("reviewModal").hidden = false;
+}
+function hideReviewModal(){
+  document.getElementById("reviewModal").hidden = true;
+}
+function grantReviewReward(){
+  S.autoTP += REVIEW_TP_REWARD;
+  toast(`レビュー特典！ +${fmt(REVIEW_TP_REWARD)} TP`);
+  renderHeader(); refreshScreen();
+}
+async function completeReviewReward(){
+  if(S.reviewDone){ hideReviewModal(); return; }
+  await openStoreReviewPage();
+  S.reviewDone = true;
+  hideReviewModal();
+  grantReviewReward();
+  save();
+}
+function checkTicketReviewMilestones(before, after){
+  if(S.reviewDone) return;
+  if(before < 1000 && after >= 1000) queueReviewPrompt("tickets1k", 900);
+  else if(before < 100000 && after >= 100000) queueReviewPrompt("tickets100k", 900);
+}
+
+/* ==========================================================
+   労働：最初の 1 打で始動し、そこからランダムに移動する
+========================================================== */
+const PAD_COUNT_DEFAULT = 5;
+let litIndex = -1, combo = 0, litTimer = null, workActive = false;
+
+function padCount(){ return S.simpleLabor ? 1 : PAD_COUNT_DEFAULT; }
+function comboMult(){
+  return 1 + Math.min(combo, COMBO_CAP_TAPS) * ((COMBO_CAP_MULT - 1) / COMBO_CAP_TAPS);
+}
+function litDuration(){ return Math.max(620, 1600 - combo*22) * comboTimeMult(); }
+
+function buildPads(){
+  const el = document.getElementById("pads");
+  const n = padCount();
+  el.innerHTML = "";
+  el.classList.toggle("simple", n === 1);
+  for(let i=0;i<n;i++){
+    const b=document.createElement("button");
+    b.className="pad"; b.dataset.i=i;
+    b.innerHTML='<span class="dot"></span>';
+    el.appendChild(b);
+  }
+  if(litIndex >= n) litIndex = 0;
+}
+function paintPads(waiting){
+  const simple = padCount() === 1;
+  document.querySelectorAll(".pad").forEach((p,i)=>{
+    p.classList.toggle("lit", i===litIndex);
+    p.classList.toggle("wait", waiting && i===litIndex);
+    p.classList.remove("miss");
+  });
+  document.getElementById("workHint").textContent = simple
+    ? (waiting ? "パネルをタップしてTP獲得" : "パネルをタップ")
+    : (waiting ? "光ったパネルをタップしてTP獲得" : "光ったパネルをタップ");
+  document.getElementById("workHint").classList.toggle("ready", waiting);
+}
+function stopBar(){
+  const bar = document.getElementById("timerBar");
+  bar.style.animation = "none";
+  bar.style.transform = "scaleX(0)";
+}
+function runBar(dur){
+  const bar = document.getElementById("timerBar");
+  bar.style.animation = "none"; void bar.offsetWidth;
+  bar.style.transform = "";
+  bar.style.animation = `drain ${dur}ms linear forwards`;
+}
+/* 待機状態：1 枚だけ静かに灯し、タイマーは動かさない */
+function idleWork(){
+  workActive = false;
+  clearTimeout(litTimer); litTimer = null;
+  const n = padCount();
+  litIndex = n <= 1 ? 0 : ((Math.random()*n)|0);
+  paintPads(true);
+  stopBar();
+}
+/* 始動後：ランダムに移動しながら制限時間を課す */
+function advanceWork(){
+  workActive = true;
+  const n = padCount();
+  let next;
+  if(n <= 1) next = 0;
+  else {
+    do{ next = (Math.random()*n)|0; }while(next === litIndex);
+  }
+  litIndex = next;
+  paintPads(false);
+  const dur = litDuration();
+  runBar(dur);
+  clearTimeout(litTimer);
+  litTimer = setTimeout(()=>{
+    if(combo > 0) sfx.tapMiss();
+    combo = 0; renderCombo(); idleWork();
+  }, dur);
+}
+function popText(padEl, text, bad){
+  const p=document.createElement("span");
+  p.className = "pop" + (bad ? " bad" : "");
+  p.textContent = text;
+  padEl.appendChild(p);
+  setTimeout(()=>p.remove(), 700);
+}
+function renderCombo(){
+  document.getElementById("vCombo").textContent = combo;
+  document.getElementById("vMult").textContent = (comboMult() * zeroLaborMult()).toFixed(1);
+  document.getElementById("vGain").textContent = "+" + fmt(laborTapGain());
+  const c = document.getElementById("workCard");
+  c.classList.remove("c1","c2","c3");
+  let tier = 0;
+  if(combo >= COMBO_CAP_TAPS){ c.classList.add("c3"); tier = 3; }
+  else if(combo >= 30){ c.classList.add("c2"); tier = 2; }
+  else if(combo >= 12){ c.classList.add("c1"); tier = 1; }
+  if(tier > (renderCombo._lastTier || 0)) sfx.comboTier(tier);
+  renderCombo._lastTier = combo === 0 ? 0 : tier;
+}
+document.getElementById("pads").addEventListener("pointerdown", (e)=>{
+  const pad = e.target.closest(".pad");
+  if(!pad) return;
+  e.preventDefault();
+  if(tutorialLocksWork()) return;
+  const i = +pad.dataset.i;
+
+  if(i === litIndex){
+    const gain = laborTapGain();
+    S.manualTP += gain;
+    S.workTaps++;
+    grantProdPointsFromTap();
+    combo++;
+    if(combo > S.bestCombo) S.bestCombo = combo;
+    popText(pad, "+" + fmt(gain), false);
+    sfx.tapHit(combo);
+    renderCombo();
+    renderHeader();
+    advanceWork();
+    if(S.tutorialStep === "labor" && S.manualTP >= TICKET_COST){
+      advanceTutorial("labor");
+    }
+  } else if(workActive){
+    S.workMiss++;
+    pad.classList.add("miss");
+    setTimeout(()=>pad.classList.remove("miss"), 220);
+    if(navigator.vibrate) navigator.vibrate(18);
+    if(combo > 0){ popText(pad, "MISS", true); combo = 0; renderCombo(); }
+    sfx.tapMiss();
+  }
+});
+
+/* ==========================================================
+   宝くじ購入
+========================================================== */
+const poolKey = pool => pool === "manual" ? "manualTP" : "autoTP";
+
+function qtyPow(exp){
+  const e = Math.max(0, Math.min(MAX_EXP, exp|0));
+  const n = Math.pow(10, e);
+  return isFinite(n) && n > 0 ? n : MAX_TICKETS;
+}
+
+/** 所持 TP から買える枚数（1回あたり無量大数枚まで） */
+function ticketsAffordable(tp){
+  let x = Number(tp);
+  if(x === Infinity) x = Number.MAX_VALUE;
+  if(!isFinite(x) || x < TICKET_COST) return 0;
+  const can = Math.floor(x / TICKET_COST);
+  if(!isFinite(can) || can <= 0) return 0;
+  return can > MAX_TICKETS ? MAX_TICKETS : can;
+}
+function affordable(pool){
+  return ticketsAffordable(S[poolKey(pool)]);
+}
+
+function qty(pool){
+  if(!S.qtyMax) return qtyPow(S.qtyExp);
+  return pool ? affordable(pool) : Math.max(affordable("manual"), affordable("auto"));
+}
+function buyQty(pool){
+  const can = affordable(pool);
+  if(!(can > 0)) return 0;
+  if(S.qtyMax) return can;
+  const want = qtyPow(S.qtyExp);
+  return want <= can ? want : can;
+}
+function qtyCost(pool){ return buyQty(pool) * TICKET_COST; }
+
+function spendTicketTP(key, n){
+  const before = Number(S[key]);
+  if(!(n > 0)) return 0;
+  if(before === Infinity){
+    /* 無限 TP: 枚数分だけ「消費した」ことにし、残高は無限のまま */
+    return n > MAX_TICKETS ? MAX_TICKETS : n;
+  }
+  if(!isFinite(before)) return 0;
+  const can = ticketsAffordable(before);
+  const bought = n <= can ? n : can;
+  if(!(bought > 0)) return 0;
+  let after = before - bought * TICKET_COST;
+  if(!isFinite(after) || after < 0 || !(after < before)){
+    /* 減算が潰れた＝事実上使い切り */
+    after = 0;
+  }
+  if(after < 1e-9) after = 0;
+  S[key] = after;
+  return bought;
+}
+
+function buyLottery(pool){
+  const key = poolKey(pool);
+  const label = pool === "manual" ? "手動" : "自動";
+  const want = S.qtyMax ? affordable(pool) : qtyPow(S.qtyExp);
+  const n = buyQty(pool);
+  if(!(n > 0)){
+    toast(`${label} TP が足りません`);
+    renderQty();
+    return;
+  }
+
+  const tpBefore = S[key];
+  const bought = spendTicketTP(key, n);
+  if(!(bought > 0)){
+    toast(`${label} TP が足りません`);
+    renderQty();
+    return;
+  }
+
+  let r;
+  try{
+    r = drawTickets(bought, pool);
+  }catch(err){
+    S[key] = tpBefore;
+    console.error(err);
+    toast("購入に失敗しました（再試行してください）");
+    renderQty();
+    return;
+  }
+
+  S.money += r.totalPrize;
+  S.loseTickets += r.losers;
+  const beforeTickets = S.ticketsBought || 0;
+  S.ticketsBought += bought;
+  S.totalWinnings += r.totalPrize;
+  S.totalLose += r.losers;
+
+  sfx.lotteryBuy();
+  renderResult(bought, r);
+  if(isFinite(want) && want > bought * 1.0000001){
+    toast(`${fmt(bought)} 枚を購入（指定 ${fmt(want)} 枚中）`);
+  }
+  if(r.jackpot){
+    vibrateJackpot(r.superHit);
+    showFlash(r.superHit, "+" + moneyLabel(r.totalPrize));
+  } else if(r.totalPrize > 0){
+    sfx.winSmall();
+  } else {
+    sfx.loseSoft();
+  }
+  checkTicketReviewMilestones(beforeTickets, S.ticketsBought);
+  renderHeader(); refreshScreen();
+  if(S.tutorialStep === "lottery"){
+    if(r.totalPrize > 0){
+      advanceTutorial("lottery");
+    } else {
+      toast("ハズレだ。もう一度働いて、買い直そう");
+      syncTutWorkLock();
+    }
+  }
+  save();
+}
+
+function renderResult(n, r){
+  document.getElementById("resultTitle").textContent = `抽 選 結 果  ${fmt(n)} 枚`;
+  document.getElementById("resultSum").textContent = "+" + moneyLabel(r.totalPrize);
+
+  const rows = [];
+  if(r.hits.super) rows.push({ cls:"sup", name:"超一等", sub:"700億G", c:r.hits.super, v:SUPER_PRIZE*r.hits.super });
+  for(const t of TIERS){
+    if(r.hits[t.key]) rows.push({
+      cls: t.key==="first" ? "top" : "hit",
+      name:t.name, sub:t.sub, c:r.hits[t.key], v:t.prize*r.hits[t.key]
+    });
+  }
+  rows.sort((a,b)=> (a.cls==="sup"?-1:b.cls==="sup"?1: a.cls==="top"?-1:b.cls==="top"?1: b.v-a.v));
+
+  let html = "";
+  for(const w of rows){
+    html += `<div class="rcell ${w.cls}"><span class="tier">${w.name}<em>${w.sub}</em></span><span class="cnt num">${fmt(w.c)}</span></div>`;
+  }
+  if(r.losers > 0){
+    html += `<div class="rcell lose"><span class="tier">ハズレ</span><span class="cnt num">${fmt(r.losers)}</span></div>`;
+  }
+  const list = document.getElementById("resultList");
+  list.innerHTML = `<div class="rgrid">${html}</div>`;
+  list.scrollTop = 0;
+}
+
+document.getElementById("qtyDown").addEventListener("click", ()=>{
+  if(S.qtyMax){ S.qtyMax = false; renderQty(); save(); return; }
+  if(S.qtyExp > 0){ S.qtyExp--; renderQty(); save(); }
+});
+document.getElementById("qtyUp").addEventListener("click", ()=>{
+  if(S.qtyMax) return;
+  if(S.qtyExp < MAX_EXP){ S.qtyExp++; renderQty(); save(); }
+});
+document.getElementById("qtyMax").addEventListener("click", ()=>{
+  S.qtyMax = !S.qtyMax; renderQty(); save();
+});
+document.getElementById("buyManual").addEventListener("click", ()=>buyLottery("manual"));
+document.getElementById("buyAuto").addEventListener("click", ()=>buyLottery("auto"));
+
+function renderQty(){
+  const canMan = affordable("manual");
+  const canAuto = affordable("auto");
+  const canBest = Math.max(canMan, canAuto);
+  const want = S.qtyMax ? null : qtyPow(S.qtyExp);
+  const nShow = S.qtyMax ? canBest : want;
+
+  document.getElementById("qtyN").textContent = fmt(nShow || 0);
+  if(S.qtyMax){
+    document.getElementById("qtyCost").textContent =
+      nShow > 0
+        ? `最大 ${fmt(nShow)} 枚 / ${fmt(nShow * TICKET_COST)} TP`
+        : "購入できる枚数なし";
+  } else if(canBest >= 1 && want > canBest){
+    document.getElementById("qtyCost").textContent =
+      `所持なら ${fmt(canBest)} 枚（${fmt(canBest * TICKET_COST)} TP）`;
+  } else {
+    document.getElementById("qtyCost").textContent = fmt((nShow || 0) * TICKET_COST) + " TP";
+  }
+  document.getElementById("qtyMax").classList.toggle("on", !!S.qtyMax);
+  document.getElementById("qtyDown").disabled = !S.qtyMax && S.qtyExp <= 0;
+  document.getElementById("qtyUp").disabled = !!S.qtyMax || S.qtyExp >= MAX_EXP;
+  document.getElementById("buyManual").disabled = !(canMan > 0);
+  document.getElementById("buyAuto").disabled = !(canAuto > 0);
+  document.getElementById("balManual").textContent = "所持 " + fmtTP(S.manualTP);
+  document.getElementById("balAuto").textContent = "所持 " + fmtTP(S.autoTP);
+}
+
+/* ==========================================================
+   画面切り替え
+========================================================== */
+let screenId = "home";
+document.querySelectorAll(".nv").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const id = btn.dataset.scr;
+    if(id === screenId){
+      onTutorialNav(id);
+      return;
+    }
+    /* ホームを離れたら労働は待機状態へ戻す */
+    if(screenId === "home"){ combo = 0; renderCombo(); idleWork(); }
+    screenId = id;
+    document.querySelectorAll(".nv").forEach(b=>b.classList.toggle("on", b===btn));
+    document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on", s.id === "scr-"+id));
+    renderScreen();
+    onTutorialNav(id);
+  });
+});
+
+/* ==========================================================
+   強化画面
+========================================================== */
+function amtRowHtml(){
+  const opt=[[1,"×1"],[10,"×10"],["max","MAX"]];
+  return `<div class="amt-row">` + opt.map(([v,l])=>
+    `<button class="amt ${String(S.buyAmt)===String(v)?"active":""}" data-amt="${v}">${l}</button>`
+  ).join("") + `</div>`;
+}
+function facAmtRowHtml(){
+  const opt=[[1,"×1"],[10,"×10 (2倍)"],[100,"×100 (10倍)"],["max","MAX"]];
+  return `<div class="amt-row">` + opt.map(([v,l])=>
+    `<button class="amt ${String(S.buyAmt)===String(v)?"active":""}" data-amt="${v}">${l}</button>`
+  ).join("") + `</div>`;
+}
+function renderFacility(){
+  ensureAdDay();
+  const left = AD_DAILY_LIMIT - S.adUsed;
+  const mins = adMinutes();
+  const gain = autoRate() * mins * 60;
+  document.getElementById("adSlot").innerHTML = `
+    <div class="ad-card">
+      <div class="info">
+        <div class="nm">広告ボーナス</div>
+        <div class="ds">${mins} 分分の自動 TP を即時獲得　本日あと ${left} 回<br>現在レートなら +${fmt(gain)} TP${S.adBoostOwned?"":"　（ショップで 1 時間に延長可）"}</div>
+      </div>
+      <button class="act ${left>0?"can":""}" data-act="ad" ${left<=0?"disabled":""}>
+        <span class="a1">${left>0?"視聴する":"本日終了"}</span>
+        <span class="a2">${left>0?`${left} / ${AD_DAILY_LIMIT}`:"—"}</span>
+      </button>
+    </div>`;
+  document.getElementById("facAmt").innerHTML = facAmtRowHtml();
+  document.getElementById("facList").innerHTML = FACILITIES.map((f,i)=>`
+    <div class="row ${S.facLv[i]>0?"owned":""}" data-fac="${i}">
+      <div class="ic">${f.icon}</div>
+      <div class="info">
+        <div class="nm">${f.name}<span class="lv" data-lv></span></div>
+        <div class="ds" data-ds></div>
+      </div>
+      <button class="act" data-act="fac" data-i="${i}">
+        <span class="a1" data-a1></span><span class="a2" data-a2></span>
+      </button>
+    </div>`).join("");
+  if(S.tutorialStep === "facility") requestAnimationFrame(applyTutHighlight);
+}
+function renderLife(){
+  const cur = LIFE_LEVELS[S.lifeLv], next = LIFE_LEVELS[S.lifeLv+1];
+  let html = `
+    <div class="row owned">
+      <div class="ic">${cur.icon}</div>
+      <div class="info">
+        <div class="nm">${cur.name}<span class="lv">現 在</span></div>
+        <div class="ds">1 打 <b>+${fmt(cur.tap)}</b> TP ／ 自動生産 <b>×${fmt(cur.auto)}</b></div>
+      </div>
+    </div>`;
+  if(next){
+    html += `
+    <div class="row">
+      <div class="ic">${next.icon}</div>
+      <div class="info">
+        <div class="nm">${next.name}<span class="lv">次 の 拠 点</span></div>
+        <div class="ds">1 打 <b>+${fmt(next.tap)}</b> TP ／ 自動生産 <b>×${fmt(next.auto)}</b></div>
+      </div>
+      <button class="act" data-act="life">
+        <span class="a1">引っ越す</span><span class="a2">${moneyLabel(next.cost)}</span>
+      </button>
+    </div>`;
+  } else {
+    html += `<div class="maxed">バグ空間に住み着いた — 生活の最終形</div>`;
+  }
+  document.getElementById("lifeList").innerHTML = html;
+  renderLuxury();
+}
+function luxOwnedCount(){ return S.luxOwned.reduce((a,b)=>a+(b?1:0),0); }
+function luxSpent(){ return LUXURIES.reduce((a,l,i)=> a + (S.luxOwned[i] ? l.cost : 0), 0); }
+function nextLuxuryIndex(){
+  for(let i=0;i<LUXURIES.length;i++) if(!S.luxOwned[i]) return i;
+  return -1;
+}
+function luxGalleryHtml(){
+  const rows = [];
+  LUXURIES.forEach((l,i)=>{
+    if(!S.luxOwned[i]) return;
+    rows.push(`<div class="g-row"><div class="g-nm">${l.name}<div class="g-note">${l.note}</div></div></div>`);
+  });
+  if(!rows.length) return "";
+  return `<div class="lux-gallery"><div class="g-hd">所 有 一 覧</div>${rows.join("")}</div>`;
+}
+function renderLuxury(){
+  const owned = luxOwnedCount();
+  const next = nextLuxuryIndex();
+  const progExtra = S.cleared ? ` · 完` : "";
+  document.getElementById("luxProgress").innerHTML =
+    `<div class="lux-prog"><span>所有 <b>${owned}</b> / ${LUXURIES.length}${progExtra}</span><span>散財 ${moneyLabel(luxSpent())}</span></div>`;
+
+  if(next < 0){
+    document.getElementById("luxList").innerHTML = `
+      <div class="lux-done">
+        <div class="t">嗜好品をすべて集めた</div>
+        <div class="s">${S.cleared
+          ? "散財の旅はひと区切りついた。領収書は記録帳に残っている。"
+          : "生活の最終形にも住めば、物語は完結する。"}</div>
+        ${S.cleared ? `<div class="badge-clear">完</div>` : ""}
+      </div>
+      ${luxGalleryHtml()}`;
+    return;
+  }
+  const l = LUXURIES[next];
+  document.getElementById("luxList").innerHTML = `
+    <div class="row lux">
+      <div class="ic">◇</div>
+      <div class="info">
+        <div class="nm">${l.name}</div>
+        <div class="ds">${l.note}</div>
+      </div>
+      <button class="act" data-act="lux" data-i="${next}">
+        <span class="a1">買う</span><span class="a2">${moneyLabel(l.cost)}</span>
+      </button>
+    </div>
+    ${luxGalleryHtml()}`;
+}
+function renderRecycle(){
+  document.getElementById("recAmt").innerHTML = amtRowHtml();
+  document.getElementById("recList").innerHTML = `
+    <div class="row ${S.recycleLv>0?"owned":""}" data-recycle>
+      <div class="ic">♺</div>
+      <div class="info">
+        <div class="nm">再生プラント<span class="lv" data-lv></span></div>
+        <div class="ds" data-ds></div>
+      </div>
+      <button class="act tk" data-act="recycle">
+        <span class="a1" data-a1></span><span class="a2" data-a2></span>
+      </button>
+    </div>`;
+  renderPaperReport();
+}
+function renderPaperReport(){
+  const tickets = S.totalLose || 0;
+  const grams = paperGrams();
+  const el = document.getElementById("paperReport");
+  if(!el) return;
+  el.innerHTML = `
+    <div class="paper-box">
+      <div class="scr-title">紙 の 使 用 量</div>
+      <div class="paper-hero">
+        <div class="k">累計ハズレ券</div>
+        <div class="v num">${fmt(tickets)} 枚</div>
+        <div class="s">紙に換算すると 約 <b style="color:var(--gold)">${fmtMass(grams)}</b><br>
+        （1 枚 ≈ ${TICKET_GRAMS} g として概算）</div>
+      </div>
+      <div class="sec-t">国 内 の 紙 製 品 と 比 較</div>
+      <div class="paper-cmp">
+        ${PAPER_REFS.map(r=>stat(r.name + ` <small>${r.note}</small>`, paperCompareVal(r, grams))).join("")}
+      </div>
+      <div class="paper-foot">
+        比較値は日本の紙・板紙統計などを参考にした概算です。<br>
+        ハズレ券を引くほど、ここに積み上がっていく。
+      </div>
+    </div>`;
+}
+
+function rhcPlanCount(){
+  const max = Math.floor((S.loseTickets || 0) / RHC_COST);
+  if(max < 1) return 0;
+  if(S.rhcAmt === "max") return max;
+  return Math.min(max, Math.max(1, +S.rhcAmt || 1));
+}
+
+function renderApex(){
+  const el = document.getElementById("apexBody");
+  if(!el) return;
+  const rhcN = rhcPlanCount();
+  const canRhc = rhcN > 0;
+  const left = zeroAttemptsLeft();
+  const plan = zeroPlanCount();
+  const canZero = plan > 0 && !zeroRunning;
+  const buffLv = rhcBuffLabel();
+  const boostExp = getZeroBoostExp();
+  const costEach = zeroCostPerAttempt();
+  const skipN = zeroSkipStreak();
+  const boostMult = zeroBoostMult();
+  const poolLeft = Math.max(0, (S.superWins || 0) - (S.zeroSpentSuper || 0));
+  const bd = apexProdBreakdown();
+  const needNext = zeroRequiredStreak();
+  const rawProd = bd.rhc * bd.digits * bd.manual;
+  const prodActive = S.apexUnlocked && rawProd > 0 && isFinite(rawProd);
+
+  const rhcOpts = [[1,"×1"],[10,"×10"],[100,"×100"],["max","MAX"]];
+  const rhcAmtHtml = `<div class="apex-amt">` + rhcOpts.map(([v,l])=>
+    `<button type="button" class="amt ${String(S.rhcAmt)===String(v)?"active":""}" data-rhc-amt="${v}">${l}</button>`
+  ).join("") + `</div>`;
+
+  const zeroOpts = [[1,"×1"],[10,"×10"],[100,"×100"],[1000,"×1000"],[10000,"×1万"],["max","MAX"]];
+  const amtHtml = `<div class="apex-amt">` + zeroOpts.map(([v,l])=>
+    `<button type="button" class="amt ${String(S.zeroAmt)===String(v)?"active":""}" data-zero-amt="${v}">${l}</button>`
+  ).join("") + `</div>`;
+
+  const boostHtml = `<div class="apex-boost-row">
+      <button type="button" class="step" data-zero-boost-step="-1" ${boostExp<=0?"disabled":""}>−</button>
+      <div class="boost-val">×${fmt(boostMult)}<small>${boostExp===0?"等倍":"10^"+boostExp+" ・ スキップ "+skipN+" 回"}</small></div>
+      <button type="button" class="step" data-zero-boost-step="1" ${boostExp>=ZERO_BOOST_MAX_EXP?"disabled":""}>＋</button>
+      <button type="button" class="amt ${boostExp===0?"active":""}" data-zero-boost="0">×1</button>
+      <button type="button" class="amt ${boostExp===ZERO_BOOST_MAX_EXP?"active":""}" data-zero-boost="${ZERO_BOOST_MAX_EXP}">MAX</button>
+    </div>`;
+
+  el.innerHTML = `
+    <div class="scr-title">極 み ─ 終 盤 の 遊 び</div>
+
+    <div class="apex-prod">
+      <div class="apex-hd"><span class="nm">現 在 の TP 生 産 倍 率</span></div>
+      <div class="apex-mult"><small>×</small>${fmt(bd.mult)}</div>
+      <div class="apex-mult-note">${prodActive ? "自動 TP に乗算（労働は別枠の ×1.1^n）" : "未整備のため ×1"}　／　次の零等 ${needNext} 連（${zeroOddsLabel(needNext)}）</div>
+      <div class="apex-stat">
+        RHCバフ <b>${buffLv}</b>　×　1/n の桁数 <b>${fmt(bd.digits)}</b>（最大 ${zeroOddsLabel(bd.bestStreak)}）　×　手動係数 <b>${fmt(bd.manual)}</b><br>
+        手動係数 = 1 + 手動一等 <b>${fmt(bd.firstM)}</b>×0.1 + 手動超一等 <b>${fmt(bd.superM)}</b>×10<br>
+        労働 TP 倍率 <b>×${fmt(zeroLaborMult())}</b>（最大到達 ${fmt(bd.bestStreak)} 連 → ×${ZERO_LABOR_MULT_BASE}^n）
+      </div>
+      <div class="apex-formula">RHC Lv ×（最大到達 1/n の n の桁数）×（1 + 手動一等×0.1 + 手動超一等×10）</div>
+    </div>
+
+    <div class="apex-box rhc-box">
+      <div class="apex-hd">
+        <span class="nm">R H C</span>
+        <span class="tag">リベンジハズレチャレンジ</span>
+      </div>
+      <div class="apex-ds">
+        ハズレ券 <b>1億枚</b> で「ハズレくじ」を 1 回引く。まとめ買い可。<br>
+        一等以外の当選確率は通常くじと同じ。一等以外は当選金の代わりにハズレ券を得る。<br>
+        <b>RHC一等</b> が当たるとバフ Lv が上がり、以降の RHC一等確率は 1/2 になる。<br>
+        通常くじの当選金は RHC一等 1 枚ごとに <b>×${RHC_PRIZE_MULT}</b>（現在 ×${fmt(lotteryPrizeMult())}）。
+      </div>
+      <div class="apex-stat">
+        所持ハズレ券 <b>${fmt(S.loseTickets)}</b> 枚（最大 ${fmt(Math.floor(S.loseTickets/RHC_COST))} 回分）<br>
+        RHC一等 <b>${fmt(S.rhcFirst||0)}</b> 枚　／　抽選回数 <b>${fmt(S.rhcDraws||0)}</b><br>
+        RHC一等確率 <b>${rhcFirstOddsLabel()}</b>　／　バフ <b>${buffLv}</b>
+      </div>
+      ${rhcAmtHtml}
+      <button class="apex-act" data-act="rhc" ${canRhc?"":"disabled"}>
+        ハズレくじを ${fmt(Math.max(rhcN,1))} 回引く
+        <span class="sub">消費 ${fmt(RHC_COST * Math.max(rhcN,1))} 枚</span>
+      </button>
+    </div>
+
+    <div class="apex-box zero-box">
+      <div class="apex-hd">
+        <span class="nm">零 等</span>
+        <span class="tag">次 ${needNext} 連 / ${zeroOddsLabel(needNext)}</span>
+      </div>
+      <div class="apex-ds">
+        基礎は超一等 <b>${ZERO_COST_BASE}</b> 回で 1 挑戦。<br>
+        倍率を上げるほど消費が増え、1/2 抽選を先頭からスキップできる<br>
+        （<b>×10 で 3 回</b>スキップ。最大 <b>×${fmt(Math.pow(10, ZERO_BOOST_MAX_EXP))}</b>＝${ZERO_SKIP_PER_BOOST * ZERO_BOOST_MAX_EXP} 回スキップ）。<br>
+        初回は <b>${ZERO_STREAK} 連勝</b>（1/${Math.pow(2,ZERO_STREAK).toLocaleString()}）。成立後は必要連勝が <b>+1</b> ずつ増える。<br>
+        最大到達 <b>n 連</b> に応じて労働の 1 打 TP に <b>×${ZERO_LABOR_MULT_BASE}^n</b> がかかる（現在 ×${fmt(zeroLaborMult())}）。<br>
+        成立後も外れまで続行。まとめ買いは最大 <b>${fmt(ZERO_MAX_BUY)}</b> 件。<br>
+        演出は最初の <b>${ZERO_BATCH} 件</b>のみ（以降は即時判定）。
+      </div>
+      <div class="apex-stat">
+        未使用の超一等 <b>${fmt(poolLeft)}</b> 回　／　挑戦残数 <b>${fmt(left)}</b> 回<br>
+        現在倍率 <b>×${fmt(boostMult)}</b>　→　1 回あたり超一等 <b>${fmt(costEach)}</b>　／　スキップ <b>${skipN}</b> 回<br>
+        零等 <b>${fmt(S.zeroWins||0)}</b> 回　／　最大到達 <b>${zeroOddsLabel(S.zeroBestStreak||0)}</b>　／　次の必要 <b>${needNext} 連</b>
+      </div>
+      <div class="apex-ds" style="margin-top:8px">消費倍率</div>
+      ${boostHtml}
+      <div class="apex-ds" style="margin-top:8px">挑戦回数</div>
+      ${amtHtml}
+      <button class="apex-act" data-act="zero" ${canZero?"":"disabled"}>
+        ${fmt(Math.max(plan,1))} 連チャレンジ
+        <span class="sub">${
+          canZero
+            ? (plan > ZERO_BATCH
+                ? `消費 超一等 ${fmt(costEach * plan)}　・先頭 ${ZERO_BATCH} 件のみ演出`
+                : `消費 超一等 ${fmt(costEach * plan)}　／　スキップ ${skipN} 回から開始`)
+            : (zeroRunning ? "演出中…" : "挑戦回数が足りません")
+        }</span>
+      </button>
+    </div>
+  `;
+}
+
+let zeroRunning = false;
+let zeroSkip = false;
+function sleep(ms){
+  return new Promise(r=>{
+    if(zeroSkip){ r(); return; }
+    let done = false;
+    const finish = ()=>{ if(done) return; done = true; clearTimeout(t); clearInterval(iv); r(); };
+    const t = setTimeout(finish, ms);
+    const iv = setInterval(()=>{ if(zeroSkip) finish(); }, 40);
+  });
+}
+
+function resolveZeroSilent(startStreak, need){
+  const req = need != null ? need : zeroRequiredStreak();
+  const cap = Math.max(zeroStreakCap(), req);
+  let streak = Math.max(0, Math.min(cap, startStreak|0));
+  while(streak < cap && Math.random() < 0.5) streak++;
+  return { streak, win: streak >= req, need: req };
+}
+function syncZeroBits(bits, streak, failedAt, need){
+  const req = need != null ? need : zeroRequiredStreak();
+  const n = Math.max(req, Math.min(zeroStreakCap(), streak + (failedAt != null ? 1 : 0)));
+  bits.innerHTML = Array.from({length:n},()=>"<i></i>").join("");
+  const dots = bits.querySelectorAll("i");
+  for(let i=0;i<streak && i<dots.length;i++) dots[i].classList.add("on");
+  if(failedAt != null && failedAt < dots.length) dots[failedAt].classList.add("off");
+  return dots;
+}
+function applyZeroVisual(cell, result){
+  const frac = cell.querySelector(".zf");
+  const label = cell.querySelector(".zl");
+  const bits = cell.querySelector(".zb");
+  const need = result.need != null ? result.need : zeroRequiredStreak();
+  if(result.win){
+    syncZeroBits(bits, result.streak, null, need);
+    cell.classList.remove("fail");
+    cell.classList.add("win");
+    frac.textContent = zeroOddsCompact(result.streak);
+    label.textContent = result.streak > need ? `零等 ${result.streak}連` : "零等";
+  } else {
+    syncZeroBits(bits, result.streak, result.streak, need);
+    cell.classList.remove("win");
+    cell.classList.add("fail");
+    frac.textContent = result.streak ? zeroOddsCompact(result.streak) : "1/2";
+    label.textContent = result.streak === 0 ? "外れ" : result.streak+"連止";
+  }
+  return result;
+}
+function finishZeroFrom(streak, need){
+  const req = need != null ? need : zeroRequiredStreak();
+  const cap = Math.max(zeroStreakCap(), req);
+  let s = streak;
+  while(s < cap && Math.random() < 0.5) s++;
+  return { streak:s, win: s >= req, need: req };
+}
+function recordZeroResult(r, no, log){
+  S.zeroBestStreak = Math.max(S.zeroBestStreak || 0, r.streak);
+  if(r.win){
+    S.zeroWins = (S.zeroWins || 0) + 1;
+    const need = r.need != null ? r.need : (ZERO_STREAK + (S.zeroWins - 1));
+    log.push(`#${no}  零等達成　${r.streak} 連（必要 ${need}・${zeroOddsLabel(r.streak)}）`);
+    return 1;
+  }
+  log.push(`#${no}  ${r.streak} 連勝（必要 ${r.need ?? zeroRequiredStreak()}・${zeroOddsLabel(Math.max(r.streak,1))}）で終了`);
+  return 0;
+}
+
+async function animateZeroCell(cell, idx, startStreak, need){
+  const req = need != null ? need : zeroRequiredStreak();
+  const cap = Math.max(zeroStreakCap(), req);
+  const start = Math.max(0, Math.min(cap, startStreak|0));
+  if(zeroSkip) return applyZeroVisual(cell, resolveZeroSilent(start, req));
+
+  const frac = cell.querySelector(".zf");
+  const label = cell.querySelector(".zl");
+  const bits = cell.querySelector(".zb");
+  let streak = start;
+  let won = streak >= req;
+  syncZeroBits(bits, streak, null, req);
+  if(won){
+    cell.classList.add("win");
+    frac.textContent = zeroOddsCompact(streak);
+    label.textContent = streak > req ? `零等 ${streak}連` : "零等（スキップ）";
+  } else if(streak > 0){
+    frac.textContent = zeroOddsCompact(streak);
+    label.textContent = streak + "連（スキップ）";
+  } else {
+    frac.textContent = "1/2";
+    label.textContent = "…";
+  }
+  await sleep(700 + (idx % 5) * 100);
+  if(zeroSkip) return applyZeroVisual(cell, resolveZeroSilent(streak, req));
+
+  while(streak < cap){
+    if(zeroSkip) return applyZeroVisual(cell, finishZeroFrom(streak, req));
+
+    if(Math.random() < 0.5){
+      streak++;
+      sfx.zeroFlipOk(streak);
+      syncZeroBits(bits, streak, null, req);
+      frac.textContent = zeroOddsCompact(streak);
+      frac.classList.remove("pop"); void frac.offsetWidth; frac.classList.add("pop");
+      if(streak >= req){
+        won = true;
+        cell.classList.add("win");
+        label.textContent = streak > req ? `零等 ${streak}連` : "零等";
+      } else {
+        label.textContent = streak+"連";
+      }
+      await sleep(900 + Math.min(streak, 10) * 70);
+    } else {
+      sfx.zeroFlipNg();
+      syncZeroBits(bits, streak, streak, req);
+      if(!won){
+        cell.classList.add("fail");
+        label.textContent = streak === 0 ? "外れ" : streak+"連止";
+      } else {
+        label.textContent = `零等 ${streak}連止`;
+      }
+      await sleep(1000);
+      return { streak, win:won, need: req };
+    }
+  }
+  cell.classList.add("win");
+  label.textContent = `零等 ${streak}連`;
+  frac.textContent = zeroOddsCompact(streak);
+  await sleep(1200);
+  return { streak, win:true, need: req };
+}
+
+async function runZeroBatch(){
+  if(zeroRunning) return;
+  const plan = zeroPlanCount();
+  if(plan <= 0){ toast("挑戦回数が足りません"); return; }
+
+  const costEach = zeroCostPerAttempt();
+  const startStreak = zeroSkipStreak();
+  const totalCost = costEach * plan;
+  const poolLeft = Math.max(0, (S.superWins || 0) - (S.zeroSpentSuper || 0));
+  if(totalCost > poolLeft){ toast("超一等が足りません"); return; }
+
+  zeroRunning = true;
+  zeroSkip = false;
+  S.zeroSpentSuper = (S.zeroSpentSuper || 0) + totalCost;
+  S.zeroUsed = (S.zeroUsed || 0) + plan;
+  let gained = 0;
+  const log = [];
+  const modal = document.getElementById("zeroModal");
+  const grid = document.getElementById("zeroGrid");
+  const roundEl = document.getElementById("zeroRound");
+  const hitsEl = document.getElementById("zeroHits");
+  const logEl = document.getElementById("zeroLog");
+  const skipBtn = document.getElementById("zeroSkip");
+  const animateCount = Math.min(plan, ZERO_BATCH);
+
+  skipBtn.disabled = false;
+  skipBtn.onclick = ()=>{
+    if(zeroSkip) return;
+    zeroSkip = true;
+    skipBtn.disabled = true;
+    toast("演出をスキップ");
+  };
+
+  hitsEl.textContent = `零等 0`;
+  logEl.innerHTML = startStreak > 0
+    ? `<div>開始スキップ ${startStreak} 連（×${fmt(zeroBoostMult())}）</div>`
+    : "";
+  modal.hidden = false;
+
+  if(animateCount > 0){
+    roundEl.textContent = plan > animateCount
+      ? `演出 #1〜#${animateCount}　／　全 ${fmt(plan)} 件`
+      : `演出 #1〜#${animateCount}`;
+    grid.innerHTML = Array.from({length:animateCount},(_,i)=>`
+      <div class="zero-cell" data-zi="${i}">
+        <div class="zn">#${i+1}</div>
+        <div class="zf">1/2</div>
+        <div class="zl">…</div>
+        <div class="zb"></div>
+      </div>`).join("");
+    await sleep(500);
+
+    const cells = [...grid.querySelectorAll(".zero-cell")];
+    /* 必要連勝が当選ごとに増えるため演出も直列で処理する */
+    for(let i=0;i<cells.length;i++){
+      const need = zeroRequiredStreak();
+      const r = await animateZeroCell(cells[i], i, startStreak, need);
+      gained += recordZeroResult(r, i + 1, log);
+      hitsEl.textContent = `零等 ${gained}`;
+      logEl.innerHTML = (startStreak > 0 ? `<div>開始スキップ ${startStreak} 連（×${fmt(zeroBoostMult())}）</div>` : "")
+        + log.map(l=>`<div>${l}</div>`).join("");
+    }
+  }
+
+  if(animateCount < plan){
+    roundEl.textContent = zeroSkip
+      ? `スキップ中　（#${animateCount+1}〜#${plan}）`
+      : `残り即時判定　（#${animateCount+1}〜#${plan}）`;
+    for(let i=animateCount; i<plan; i++){
+      const need = zeroRequiredStreak();
+      const r = resolveZeroSilent(startStreak, need);
+      gained += recordZeroResult(r, i+1, log);
+    }
+    hitsEl.textContent = `零等 ${gained}`;
+    logEl.innerHTML = (startStreak > 0 ? `<div>開始スキップ ${startStreak} 連（×${fmt(zeroBoostMult())}）</div>` : "")
+      + log.map(l=>`<div>${l}</div>`).join("");
+    if(!zeroSkip) await sleep(400);
+  }
+
+  const skipped = zeroSkip;
+  zeroSkip = false;
+  skipBtn.disabled = true;
+
+  if(gained > 0 && navigator.vibrate) navigator.vibrate([80,40,80,40,160]);
+
+  if(gained > 0){
+    showFlash("zero", `零等 ×${gained}`);
+    toast(`零等を ${gained} 回獲得した`);
+  } else {
+    toast("零等には届かなかった");
+  }
+  await new Promise(r=>setTimeout(r, skipped ? 500 : 2000));
+  modal.hidden = true;
+  zeroRunning = false;
+  renderApex(); renderHeader(); renderCombo(); save();
+}
+
+function buyRHC(){
+  const n = rhcPlanCount();
+  const cost = n * RHC_COST;
+  if(n < 1 || S.loseTickets < cost){ toast("ハズレ券が足りません"); return; }
+  S.loseTickets -= cost;
+  S.rhcDraws = (S.rhcDraws || 0) + n;
+  sfx.rhcSpin();
+  const r = drawRHC(n);
+  S.loseTickets += r.loseGain;
+  S.rhcLoseGain = (S.rhcLoseGain || 0) + r.loseGain;
+  if(r.rhcFirst > 0){
+    const firstTime = !S.rhcUnlocked && !(S.rhcFirst > 0);
+    S.rhcFirst = (S.rhcFirst || 0) + r.rhcFirst;
+    S.rhcUnlocked = true;
+    vibrateJackpot(false);
+    showFlash("rhc", `RHC一等 ×${r.rhcFirst}`);
+    toast(firstTime
+      ? `RHC一等！ 記録帳に刻まれた　当選バフ ${rhcBuffLabel()}`
+      : `RHC一等 ×${r.rhcFirst}！ 当選バフ ${rhcBuffLabel()}`);
+  } else if(r.loseGain > 0){
+    toast(`${fmt(n)} 回抽選　+${fmt(r.loseGain)} 枚`);
+  } else {
+    toast(`${fmt(n)} 回すべてハズレだった`);
+  }
+
+  let html = "";
+  if(r.rhcFirst) html += `<div class="rcell rhc"><span class="tier">RHC一等<em>バフ ${rhcBuffLabel()}</em></span><span class="cnt num">${fmt(r.rhcFirst)}</span></div>`;
+  for(const t of TIERS){
+    if(t.key==="first") continue;
+    if(r.hits[t.key]) html += `<div class="rcell hit"><span class="tier">${t.name}<em>+${fmt(t.prize)}枚</em></span><span class="cnt num">${fmt(r.hits[t.key])}</span></div>`;
+  }
+  html += `<div class="rcell lose"><span class="tier">ハズレ</span><span class="cnt num">${fmt(r.losers)}</span></div>`;
+  const list = document.getElementById("resultList");
+  if(list){
+    document.getElementById("resultTitle").textContent = `R H C 結 果  ${fmt(n)} 回`;
+    document.getElementById("resultSum").textContent = r.rhcFirst ? `RHC一等 ×${r.rhcFirst}` : `+${fmt(r.loseGain)} 枚`;
+    list.innerHTML = `<div class="rgrid">${html}</div>`;
+  }
+  renderApex(); renderHeader(); save();
+}
+
+function renderScreen(){
+  if(screenId === "facility") renderFacility();
+  else if(screenId === "life") renderLife();
+  else if(screenId === "recycle") renderRecycle();
+  else if(screenId === "apex") renderApex();
+  else if(screenId === "record") renderRecord();
+  refreshScreen();
+}
+
+/* 金額・活性だけを差し替える（スクロール位置を壊さない） */
+function refreshScreen(){
+  if(screenId === "facility"){
+    FACILITIES.forEach((f,i)=>{
+      const row = document.querySelector(`[data-fac="${i}"]`);
+      if(!row) return;
+      const { k, cost } = facPlan(i);
+      const lv = S.facLv[i];
+      const ownedMult = facOwnedMult(lv);
+      const nextMult = facOwnedMult(lv + k);
+      const gain = facProdAfterBuy(i, k) - facProd(i);
+      let multNote = "";
+      if(nextMult > ownedMult){
+        multNote = ` <em style="color:var(--gold-lo);font-style:normal;">(累計で生産×${fmt(nextMult)})</em>`;
+      } else if(ownedMult > 1){
+        multNote = ` <em style="color:var(--dim);font-style:normal;">(累計×${fmt(ownedMult)})</em>`;
+      }
+      row.querySelector("[data-lv]").textContent = `Lv.${lv}`;
+      row.querySelector("[data-ds]").innerHTML = lv > 0
+        ? `<b>${fmt(facProd(i))}</b> → <b>${fmt(facProdAfterBuy(i,k))}</b> TP/秒`
+          + (gain > 0 ? ` <em style="color:var(--gold-lo);font-style:normal;">(+${fmt(gain)})</em>` : "")
+          + multNote
+        : `建設で <b>${fmt(facProdAfterBuy(i,k))}</b> TP/秒` + multNote
+          + `<br><span style="color:var(--dim);font-size:9.5px;">1 レベル +${fmt(FACILITIES[i].base)} TP/秒（累計ボーナス別）</span>`;
+      const btn = row.querySelector(".act");
+      const can = S.money >= cost;
+      btn.disabled = !can;
+      btn.classList.toggle("can", can);
+      btn.querySelector("[data-a1]").textContent = (lv===0?"建設":"強化") + (k>1?` ×${k}`:"");
+      btn.querySelector("[data-a2]").textContent = moneyLabel(cost);
+    });
+    ensureAdDay();
+    const adBtn = document.querySelector('[data-act="ad"]');
+    if(adBtn){
+      const left = AD_DAILY_LIMIT - S.adUsed;
+      const can = left > 0;
+      adBtn.disabled = !can;
+      adBtn.classList.toggle("can", can);
+    }
+  }
+  else if(screenId === "life"){
+    const next = LIFE_LEVELS[S.lifeLv+1];
+    const btn = document.querySelector('[data-act="life"]');
+    if(next && btn){
+      const can = S.money >= next.cost;
+      btn.disabled = !can;
+      btn.classList.toggle("can", can);
+    }
+    document.querySelectorAll('[data-act="lux"]').forEach(b=>{
+      const can = S.money >= LUXURIES[+b.dataset.i].cost;
+      b.disabled = !can;
+      b.classList.toggle("can", can);
+    });
+  }
+  else if(screenId === "recycle"){
+    const row = document.querySelector("[data-recycle]");
+    if(row){
+      const { k, cost } = recyclePlan();
+      row.querySelector("[data-lv]").textContent = `Lv.${S.recycleLv}`;
+      row.querySelector("[data-ds]").innerHTML =
+        `自動生産 <b>×${fmt(recycleMult())}</b> → <b>×${fmt(Math.pow(RECYCLE.multPerLv, S.recycleLv+k))}</b>`;
+      const btn = row.querySelector(".act");
+      const can = S.loseTickets >= cost;
+      btn.disabled = !can;
+      btn.classList.toggle("can", can);
+      btn.querySelector("[data-a1]").textContent = (S.recycleLv===0?"建築":"強化") + (k>1?` ×${k}`:"");
+      btn.querySelector("[data-a2]").textContent = fmt(cost) + "枚";
+    }
+  }
+  else if(screenId === "apex" && !zeroRunning){
+    const rhc = document.querySelector('[data-act="rhc"]');
+    const zero = document.querySelector('[data-act="zero"]');
+    if(rhc) rhc.disabled = rhcPlanCount() <= 0;
+    if(zero) zero.disabled = zeroPlanCount() <= 0;
+  }
+  /* 記録帳は画面を開いた時点のスナップショット。
+     定期再描画するとスクロール位置が飛ぶため、ここでは更新しない */
+  refreshBadges();
+}
+
+function refreshBadges(){
+  ensureAdDay();
+  let f = S.adUsed < AD_DAILY_LIMIT;
+  for(let i=0;i<FACILITIES.length;i++){ if(S.money >= facPlan(i).cost){ f=true; break; } }
+  const next = LIFE_LEVELS[S.lifeLv+1];
+  const ni = nextLuxuryIndex();
+  const lifeReady = (!!next && S.money >= next.cost) ||
+    (ni >= 0 && S.money >= LUXURIES[ni].cost);
+  document.getElementById("bdgF").classList.toggle("on", f);
+  document.getElementById("bdgL").classList.toggle("on", lifeReady);
+  document.getElementById("bdgR").classList.toggle("on", S.loseTickets >= recyclePlan().cost);
+  const bdgA = document.getElementById("bdgA");
+  if(bdgA){
+    bdgA.classList.toggle("on",
+      S.apexUnlocked && (rhcPlanCount() > 0 || zeroPlanCount() > 0));
+  }
+  updateApexNav();
+}
+
+document.getElementById("screens").addEventListener("click", (e)=>{
+  if(e.target.closest("#shareBtn")){ openShare(); return; }
+  if(e.target.closest("#avatarSeal")){ openAvatarPicker(); return; }
+
+  const apexBtn = e.target.closest(".apex-act");
+  if(apexBtn && !apexBtn.disabled){
+    if(apexBtn.dataset.act === "rhc"){ buyRHC(); return; }
+    if(apexBtn.dataset.act === "zero"){ runZeroBatch(); return; }
+  }
+  const zAmt = e.target.closest("[data-zero-amt]");
+  if(zAmt){
+    S.zeroAmt = zAmt.dataset.zeroAmt === "max" ? "max" : +zAmt.dataset.zeroAmt;
+    renderApex(); save(); return;
+  }
+  const zBoostStep = e.target.closest("[data-zero-boost-step]");
+  if(zBoostStep){
+    const d = +zBoostStep.dataset.zeroBoostStep || 0;
+    S.zeroBoostExp = Math.max(0, Math.min(ZERO_BOOST_MAX_EXP, getZeroBoostExp() + d));
+    renderApex(); save(); return;
+  }
+  const zBoost = e.target.closest("[data-zero-boost]");
+  if(zBoost){
+    S.zeroBoostExp = Math.max(0, Math.min(ZERO_BOOST_MAX_EXP, +zBoost.dataset.zeroBoost || 0));
+    renderApex(); save(); return;
+  }
+  const rAmt = e.target.closest("[data-rhc-amt]");
+  if(rAmt){
+    S.rhcAmt = rAmt.dataset.rhcAmt === "max" ? "max" : +rAmt.dataset.rhcAmt;
+    renderApex(); save(); return;
+  }
+
+  const amt = e.target.closest(".amt");
+  if(amt && !amt.dataset.zeroAmt && !amt.dataset.rhcAmt && !amt.dataset.zeroBoost){
+    S.buyAmt = amt.dataset.amt === "max" ? "max" : +amt.dataset.amt;
+    renderScreen(); save(); return;
+  }
+  const btn = e.target.closest(".act");
+  if(!btn || btn.disabled) return;
+
+  if(btn.dataset.act === "ad"){
+    ensureAdDay();
+    if(S.adUsed >= AD_DAILY_LIMIT) return;
+    btn.disabled = true;
+    StoreBridge.showRewardedAd().then(res=>{
+      if(!res || !res.ok){
+        btn.disabled = false;
+        renderFacility();
+        return;
+      }
+      ensureAdDay();
+      if(S.adUsed >= AD_DAILY_LIMIT){ renderFacility(); return; }
+      S.adUsed++;
+      const gain = autoRate() * adMinutes() * 60;
+      S.autoTP += gain;
+      sfx.adReward();
+      toast((res.mocked ? "（開発）" : "") + `広告視聴完了 +${fmt(gain)} TP`);
+      renderFacility(); renderHeader(); save();
+    });
+    return;
+  }
+  if(btn.dataset.act === "fac"){
+    const i = +btn.dataset.i;
+    const { k, cost } = facPlan(i);
+    if(S.money < cost) return;
+    const before = facOwnedMult(S.facLv[i] || 0);
+    S.money -= cost;
+    S.facLv[i] += k;
+    const after = facOwnedMult(S.facLv[i]);
+    sfx.upgradeBuild();
+    if(after > before){
+      sfx.facMultBreak();
+      toast(`${FACILITIES[i].name} 累計 Lv.${S.facLv[i]}（生産×${fmt(after)}）`);
+    }
+    advanceTutorial("facility");
+  }
+  else if(btn.dataset.act === "life"){
+    const next = LIFE_LEVELS[S.lifeLv+1];
+    if(!next || S.money < next.cost) return;
+    S.money -= next.cost; S.lifeLv++;
+    sfx.lifeUpgrade();
+    toast(`${next.name} に移り住んだ`);
+    if(S.lifeLv === 1) queueReviewPrompt("life1", 800);
+    if(S.lifeLv >= LIFE_LEVELS.length - 1){
+      markMilestone("lifeMax");
+      toast("生活の最終形に到達した");
+    }
+    renderLife();
+    tryTriggerClear();
+  }
+  else if(btn.dataset.act === "lux"){
+    const i = +btn.dataset.i, l = LUXURIES[i];
+    if(S.luxOwned[i] || S.money < l.cost) return;
+    S.money -= l.cost; S.luxOwned[i] = true;
+    sfx.luxBuy();
+    toast(`${l.name} を買った`);
+    if(luxOwnedCount() >= LUXURIES.length) markMilestone("luxAll");
+    renderLuxury();
+    tryTriggerClear();
+  }
+  else if(btn.dataset.act === "recycle"){
+    const { k, cost } = recyclePlan();
+    if(S.loseTickets < cost) return;
+    S.loseTickets -= cost; S.recycleLv += k;
+  }
+  renderHeader(); renderCombo(); refreshScreen(); save();
+});
+
+/* ==========================================================
+   記録帳
+========================================================== */
+function stat(k, v, cls){
+  return `<div class="st ${cls||""}"><span class="k">${k}</span><span class="v num">${v}</span></div>`;
+}
+function renderRecord(){
+  const rank = currentRank();
+  const attempts = S.workTaps + S.workMiss;
+  const acc = attempts > 0 ? (S.workTaps/attempts*100).toFixed(1) : "—";
+  const avgPrize = S.ticketsBought > 0 ? S.totalWinnings/S.ticketsBought : 0;
+  const comboName = S.comboTimeLv>=2 ? "発光企業化 ×2" : S.comboTimeLv>=1 ? "ホワイト企業化 ×1.5" : "標準 ×1";
+  const laborMode = S.simpleLabor ? "単純労働（1 パネル）" : "通常（5 パネル）";
+  const ms = S.milestones || {};
+
+  let winRows = "";
+  winRows += stat("一等 合計 <small>7億G</small>", fmt(S.firstWins)+" <small>回</small>", S.firstWins>0?"hl":"zero");
+  winRows += stat("　手動 TP で当選", fmt(S.firstWinsManual||0)+" <small>回</small>");
+  winRows += stat("　自動 TP で当選", fmt(S.firstWinsAuto||0)+" <small>回</small>");
+  if(S.superUnlocked){
+    winRows += stat("超一等 合計 <small>700億G</small>", fmt(S.superWins)+" <small>回</small>", S.superWins>0?"sup":"zero");
+    winRows += stat("　手動 TP で当選", fmt(S.superWinsManual||0)+" <small>回</small>");
+    winRows += stat("　自動 TP で当選", fmt(S.superWinsAuto||0)+" <small>回</small>");
+  }
+  if(S.rhcUnlocked || (S.rhcFirst||0) > 0){
+    winRows += stat("RHC一等", fmt(S.rhcFirst||0)+" <small>枚</small>", "emerald");
+    winRows += stat("当選バフ", rhcBuffLabel(), "emerald");
+    winRows += stat("RHC一等確率", rhcFirstOddsLabel());
+  }
+  if(S.apexUnlocked || (S.zeroWins||0) > 0 || (S.zeroBestStreak||0) > 0){
+    winRows += stat("零等", fmt(S.zeroWins||0)+" <small>回</small>", (S.zeroWins||0)>0?"amethyst":"zero");
+    winRows += stat("最大到達", zeroOddsLabel(S.zeroBestStreak||0), (S.zeroBestStreak||0)>0?"amethyst":"zero");
+    winRows += stat("次の零等", zeroRequiredStreak()+" 連 <small>"+zeroOddsLabel(zeroRequiredStreak())+"</small>", "amethyst");
+  }
+  for(const t of TIERS){
+    if(t.key === "first") continue;
+    const c = S.tierWins[t.key] || 0;
+    winRows += stat(`${t.name} <small>${t.sub}</small>`, fmt(c)+" <small>回</small>", c>0?"":"zero");
+  }
+
+  const msRow = (on, label, val)=>
+    `<div class="ms-row ${on?"on":""}"><span class="mk">${label}</span><span class="mv">${val}</span></div>`;
+  const milestoneHtml = `
+    <div class="ms-list">
+      ${msRow(!!ms.firstFirst, "初めての一等", ms.firstFirst ? "達成" : "未達成")}
+      ${S.superUnlocked ? msRow(!!ms.firstSuper, "初めての超一等", ms.firstSuper ? "達成" : "未達成") : ""}
+      ${S.apexUnlocked ? msRow(!!ms.firstZero, "初めての零等", ms.firstZero ? "達成" : "未達成") : ""}
+      ${msRow(!!ms.lifeMax, "生活の最終形", ms.lifeMax ? LIFE_LEVELS[LIFE_LEVELS.length-1].name : "未達成")}
+      ${msRow(!!ms.luxAll, "嗜好品 全収集", ms.luxAll ? LUXURIES.length+" / "+LUXURIES.length : luxOwnedCount()+" / "+LUXURIES.length)}
+      ${msRow(!!S.cleared, "物語の完結", S.cleared ? (S.clearedAt ? fmtDate(S.clearedAt) : "完") : "未達成")}
+    </div>`;
+
+  document.getElementById("recordBody").innerHTML = `
+    <div class="rec-hero">
+      <button class="rec-seal" id="avatarSeal" aria-label="アイコン変更"><img src="${avatarSrc()}" alt=""></button>
+      <div class="rec-seal-hint">タップでアイコン変更</div>
+      <div class="rec-rank">${rank[1]}</div>
+      <div class="rec-name">${LIFE_LEVELS[S.lifeLv].name} に 暮 ら す</div>
+      ${S.cleared ? `<div class="rec-clear">完 — ${S.clearedAt ? fmtDate(S.clearedAt) : ""}</div>` : ""}
+    </div>
+
+    <button id="shareBtn">記 録 シ ー ト を 表 示</button>
+    <div class="note" style="margin-top:6px;text-align:center">X に投稿すると自動 TP ${SHARE_TP_MINUTES} 分分（1 日 1 回）</div>
+
+    <div class="sec">
+      <div class="sec-t">マイルストーン</div>
+      ${milestoneHtml}
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">当 選 記 録</div>
+      ${winRows}
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">労 働 記 録</div>
+      ${stat("労働した回数", fmt(S.workTaps)+" <small>打</small>", "hl")}
+      ${stat("打ち損じ", fmt(S.workMiss)+" <small>打</small>")}
+      ${stat("命中率", acc+" <small>%</small>")}
+      ${stat("最高連鎖", fmt(S.bestCombo)+" <small>連</small>")}
+      ${stat("1 打の獲得量", "+"+fmt(tapPower() * zeroLaborMult())+" <small>TP</small>")}
+      ${zeroLaborMult()>1 ? stat("零等労働倍率", "×"+fmt(zeroLaborMult())+" <small>("+fmt(S.zeroBestStreak||0)+" 連)</small>", "amethyst") : ""}
+      ${stat("持ち時間", comboName)}
+      ${stat("労働モード", laborMode, S.simpleLabor?"hl":"")}
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">宝 く じ 収 支</div>
+      ${stat("購入枚数", fmt(S.ticketsBought)+" <small>枚</small>")}
+      ${stat("当選総額", moneyLabel(S.totalWinnings), "hl")}
+      ${stat("ハズレ枚数", fmt(S.totalLose)+" <small>枚</small>")}
+      ${stat("1 枚あたり平均", moneyLabel(avgPrize))}
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">生 産 設 備</div>
+      ${stat("自動生産", fmt(autoRate())+" <small>TP / 秒</small>", "hl")}
+      ${stat("生産ポイント", fmt(Math.floor(prodPointsValue()))+" / "+PROD_POINT_CAP+" <small>×"+prodPointMult().toFixed(1)+"</small>", prodPointsValue()>0?"hl":"")}
+      ${stat("設備 合計レベル", "Lv."+fmt(totalFacLv()))}
+      ${stat("生活倍率", "×"+fmt(lifeAutoMult()))}
+      ${stat("再生倍率", "×"+fmt(recycleMult()))}
+      ${autoTpBoostLv()>0 ? stat("ショップ生産倍率", "×"+fmt(autoTpBoostMult()), "hl") : ""}
+      ${S.apexUnlocked ? stat("極み生産倍率", "×"+fmt(apexProdMult()), apexProdMult()>1?"hl":"") : ""}
+      ${stat("オフライン上限", S.offlineHours+" <small>時間</small>")}
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">蒐 集</div>
+      ${stat("嗜好品", luxOwnedCount()+" / "+LUXURIES.length+" <small>品</small>", luxOwnedCount()>0?"hl":"zero")}
+      ${stat("散財総額", moneyLabel(luxSpent()))}
+      ${stat("最も高価な買い物", mostExpensiveLux())}
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">来 歴</div>
+      ${stat("開始日", fmtDate(S.startedAt))}
+      ${S.cleared ? stat("完結日", S.clearedAt ? fmtDate(S.clearedAt) : "—", "hl") : ""}
+      ${stat("総プレイ時間", fmtDuration(S.playSeconds))}
+      ${stat("現在の資産", moneyLabel(S.money), "hl")}
+      ${stat("所持コイン", fmt(S.coins)+" <small>C</small>")}
+    </div>
+  `;
+}
+function mostExpensiveLux(){
+  let best = null;
+  LUXURIES.forEach((l,i)=>{ if(S.luxOwned[i] && (!best || l.cost > best.cost)) best = l; });
+  return best ? best.name : "—";
+}
+
+/* ==========================================================
+   共有カード（画像つき投稿）
+========================================================== */
+function shPair(k, v, cls){
+  return `<div><span class="k">${k}</span><span class="v num ${cls||""}">${v}</span></div>`;
+}
+function canClaimShareReward(){
+  return S.shareRewardDay !== todayKey();
+}
+function shareStoreUrl(){
+  const ua = navigator.userAgent || "";
+  if(/android/i.test(ua) && STORE_LINKS.playStoreUrl) return STORE_LINKS.playStoreUrl;
+  if(STORE_LINKS.appStoreId) return "https://apps.apple.com/app/id" + STORE_LINKS.appStoreId;
+  if(STORE_LINKS.playStoreUrl) return STORE_LINKS.playStoreUrl;
+  return "";
+}
+function buildShareTweetText(){
+  const rank = currentRank()[1];
+  const home = LIFE_LEVELS[S.lifeLv].name;
+  let text =
+    `「宝くじ生活」記録シート\n` +
+    `${rank} ／ ${home}\n` +
+    `総資産 ${moneyLabel(S.money)}\n` +
+    `一等 ${fmt(S.firstWins)} 回` +
+    (S.superUnlocked ? ` ／ 超一等 ${fmt(S.superWins)} 回` : "") +
+    `\n#宝くじ生活`;
+  const link = shareStoreUrl();
+  if(link) text += `\n${link}`;
+  return text;
+}
+function refreshShareRewardUi(){
+  const btn = document.getElementById("shareToX");
+  const note = document.getElementById("shareRewardNote");
+  if(!btn || !note) return;
+  const gain = autoRate() * SHARE_TP_MINUTES * 60;
+  if(canClaimShareReward()){
+    btn.disabled = false;
+    btn.textContent = "X に投稿して TP を受け取る";
+    note.textContent = `記録シート画像つきで投稿すると、自動 TP ${SHARE_TP_MINUTES} 分分（+${fmt(gain)} TP）を受け取れます（本日 1 回）`;
+  } else {
+    btn.disabled = false;
+    btn.textContent = "画像つきで X に投稿";
+    note.textContent = `本日の投稿ボーナスは受け取り済みです（再度の投稿は自由）`;
+  }
+}
+function grantShareReward(){
+  const gain = autoRate() * SHARE_TP_MINUTES * 60;
+  S.autoTP += gain;
+  S.shareRewardDay = todayKey();
+  sfx.adReward();
+  toast(`X 投稿ボーナス！ 自動 TP ${SHARE_TP_MINUTES} 分分（+${fmt(gain)} TP）`);
+  renderHeader();
+  if(screenId === "home" || screenId === "facility") refreshScreen();
+}
+function loadShareImage(src){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    img.onload = ()=> resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+function canvasToPngBlob(canvas){
+  return new Promise((resolve, reject)=>{
+    canvas.toBlob(b=>{
+      if(b) resolve(b);
+      else reject(new Error("toBlob failed"));
+    }, "image/png");
+  });
+}
+function downloadBlobFile(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=> URL.revokeObjectURL(url), 4000);
+}
+function shareCardRows(){
+  const rows = [["一等", fmt(S.firstWins) + " 回"]];
+  if(S.superUnlocked) rows.push(["超一等", fmt(S.superWins) + " 回"]);
+  if(S.rhcUnlocked || (S.rhcFirst||0) > 0) rows.push(["RHC一等", fmt(S.rhcFirst||0) + " 枚"]);
+  if((S.zeroWins||0) > 0 || (S.zeroBestStreak||0) > 0){
+    rows.push(["零等", fmt(S.zeroWins||0) + " 回"]);
+    rows.push(["最大到達", zeroOddsLabel(S.zeroBestStreak||0)]);
+  }
+  rows.push(["労働", fmt(S.workTaps) + " 打"]);
+  rows.push(["最高連鎖", fmt(S.bestCombo) + " 連"]);
+  rows.push(["購入", fmt(S.ticketsBought) + " 枚"]);
+  rows.push(["嗜好品", luxOwnedCount() + " / " + LUXURIES.length]);
+  return rows;
+}
+async function buildShareCardCanvas(){
+  const scale = 2;
+  const W = 340 * scale;
+  const pad = 22 * scale;
+  const rows = shareCardRows();
+  const rowH = 22 * scale;
+  const gridH = Math.ceil(rows.length / 2) * rowH;
+  const height = pad
+    + 18 * scale
+    + 16 * scale
+    + 64 * scale
+    + 12 * scale
+    + 30 * scale
+    + 14 * scale
+    + (S.cleared ? 18 * scale : 0)
+    + 18 * scale
+    + 56 * scale
+    + 16 * scale
+    + gridH
+    + 16 * scale
+    + 14 * scale
+    + pad;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  const gold = "#c8a951";
+  const goldLo = "#9c8235";
+  const goldHi = "#e5d3a0";
+  const text = "#e7e4dd";
+  const dim = "#585d68";
+
+  const grad = ctx.createLinearGradient(0, 0, 0, height);
+  grad.addColorStop(0, "#15161a");
+  grad.addColorStop(1, "#0e0f12");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, height);
+  ctx.strokeStyle = goldLo;
+  ctx.lineWidth = scale;
+  ctx.strokeRect(scale, scale, W - 2 * scale, height - 2 * scale);
+
+  let y = pad;
+  ctx.textAlign = "center";
+  ctx.fillStyle = goldLo;
+  ctx.font = `${12 * scale}px "Yu Mincho","YuMincho","Hiragino Mincho ProN","Times New Roman",serif`;
+  ctx.fillText("宝くじ生活", W / 2, y + 12 * scale);
+  y += 18 * scale + 16 * scale;
+
+  const sealR = 32 * scale;
+  const sealCx = W / 2;
+  const sealCy = y + sealR;
+  ctx.beginPath();
+  ctx.arc(sealCx, sealCy, sealR, 0, Math.PI * 2);
+  ctx.fillStyle = "#0b0c0e";
+  ctx.fill();
+  ctx.strokeStyle = goldLo;
+  ctx.lineWidth = scale;
+  ctx.stroke();
+  try{
+    const avatar = await loadShareImage(avatarSrc());
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(sealCx, sealCy, sealR - scale, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(avatar, sealCx - sealR, sealCy - sealR, sealR * 2, sealR * 2);
+    ctx.restore();
+  }catch(e){}
+  y += 64 * scale + 12 * scale;
+
+  const rank = currentRank()[1];
+  ctx.fillStyle = goldHi;
+  ctx.font = `${25 * scale}px "Yu Mincho","YuMincho","Hiragino Mincho ProN","Times New Roman",serif`;
+  ctx.fillText(rank, W / 2, y + 22 * scale);
+  y += 30 * scale;
+
+  ctx.fillStyle = dim;
+  ctx.font = `${10 * scale}px "Yu Mincho","YuMincho","Hiragino Mincho ProN","Times New Roman",serif`;
+  ctx.fillText(LIFE_LEVELS[S.lifeLv].name + " に 暮 ら す", W / 2, y + 10 * scale);
+  y += 14 * scale;
+  if(S.cleared){
+    y += 6 * scale;
+    ctx.fillStyle = gold;
+    ctx.font = `${11 * scale}px "Yu Mincho","YuMincho","Hiragino Mincho ProN","Times New Roman",serif`;
+    ctx.fillText("完", W / 2, y + 10 * scale);
+    y += 18 * scale;
+  }
+  y += 18 * scale;
+
+  ctx.strokeStyle = "#242832";
+  ctx.beginPath();
+  ctx.moveTo(pad, y);
+  ctx.lineTo(W - pad, y);
+  ctx.stroke();
+  y += 14 * scale;
+  ctx.fillStyle = dim;
+  ctx.font = `${9 * scale}px sans-serif`;
+  ctx.fillText("総 資 産", W / 2, y);
+  y += 16 * scale;
+  ctx.fillStyle = gold;
+  ctx.font = `${22 * scale}px "Yu Mincho","YuMincho","Hiragino Mincho ProN","Times New Roman",serif`;
+  ctx.fillText(moneyLabel(S.money), W / 2, y + 6 * scale);
+  y += 28 * scale;
+  ctx.beginPath();
+  ctx.moveTo(pad, y);
+  ctx.lineTo(W - pad, y);
+  ctx.stroke();
+  y += 16 * scale;
+
+  const colW = (W - pad * 2) / 2;
+  ctx.font = `${10 * scale}px sans-serif`;
+  for(let i = 0; i < rows.length; i++){
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const x0 = pad + col * colW;
+    const yy = y + row * rowH;
+    ctx.textAlign = "left";
+    ctx.fillStyle = dim;
+    ctx.fillText(rows[i][0], x0, yy + 12 * scale);
+    ctx.textAlign = "right";
+    ctx.fillStyle = text;
+    ctx.fillText(rows[i][1], x0 + colW - 4 * scale, yy + 12 * scale);
+  }
+  y += gridH + 16 * scale;
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = dim;
+  ctx.font = `${9 * scale}px sans-serif`;
+  ctx.fillText(`${fmtDate(S.startedAt)} 開始 ・ ${fmtDuration(S.playSeconds)} 経過`, W / 2, y + 8 * scale);
+
+  return canvas;
+}
+async function shareRecordToX(){
+  const btn = document.getElementById("shareToX");
+  if(btn) btn.disabled = true;
+  const claim = canClaimShareReward();
+  const text = buildShareTweetText();
+  const intent = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text);
+  let completed = false;
+  try{
+    const canvas = await buildShareCardCanvas();
+    const blob = await canvasToPngBlob(canvas);
+    const file = new File([blob], "takarakuzi-life-record.png", { type:"image/png" });
+    const payload = { files:[file], text, title:"宝くじ生活" };
+    if(navigator.share && navigator.canShare && navigator.canShare(payload)){
+      try{
+        await navigator.share(payload);
+        completed = true;
+      }catch(err){
+        if(err && err.name === "AbortError") return;
+      }
+    }
+    if(!completed){
+      downloadBlobFile(blob, "takarakuzi-life-record.png");
+      await openExternalUrl(intent);
+      toast("記録画像を保存しました。X の投稿に画像を添付してください");
+      completed = true;
+    }
+    if(completed && claim){
+      grantShareReward();
+      save();
+    }
+  }catch(e){
+    console.warn(e);
+    await openExternalUrl(intent);
+    if(claim){
+      grantShareReward();
+      save();
+    }
+    toast("画像の生成に失敗したため、テキストのみ開きました");
+  }finally{
+    if(btn) btn.disabled = false;
+    refreshShareRewardUi();
+  }
+}
+
+function openShare(){
+  const rank = currentRank();
+  const superRow = S.superUnlocked
+    ? shPair("超一等", fmt(S.superWins)+" 回", S.superWins>0?"s":"")
+    : "";
+  const apexRows = (S.rhcUnlocked || (S.rhcFirst||0)>0)
+    ? shPair("RHC一等", fmt(S.rhcFirst||0)+" 枚", "emerald")
+    : "";
+  const zeroRow = ((S.zeroWins||0)>0 || (S.zeroBestStreak||0)>0)
+    ? `<div class="sh-row">${
+        shPair("零等", fmt(S.zeroWins||0)+" 回", (S.zeroWins||0)>0?"amethyst":"") +
+        shPair("最大到達", zeroOddsLabel(S.zeroBestStreak||0), "amethyst")
+      }</div>`
+    : "";
+  document.getElementById("shareCard").innerHTML = `
+    <div class="sh-brand">宝くじ生活</div>
+    <div class="sh-seal"><img src="${avatarSrc()}" alt=""></div>
+    <div class="sh-rank">${rank[1]}</div>
+    <div class="sh-home">${LIFE_LEVELS[S.lifeLv].name} に 暮 ら す</div>
+    ${S.cleared ? `<div class="sh-foot" style="margin-top:6px;letter-spacing:.28em;color:var(--gold)">完</div>` : ""}
+    <div class="sh-asset">
+      <span class="k">総 資 産</span>
+      <span class="v num">${moneyLabel(S.money)}</span>
+    </div>
+    <div class="sh-grid">
+      ${shPair("一等", fmt(S.firstWins)+" 回", "g")}
+      ${superRow}
+      ${apexRows}
+      ${zeroRow}
+      ${shPair("労働", fmt(S.workTaps)+" 打")}
+      ${shPair("最高連鎖", fmt(S.bestCombo)+" 連")}
+      ${shPair("購入", fmt(S.ticketsBought)+" 枚")}
+      ${shPair("嗜好品", luxOwnedCount()+" / "+LUXURIES.length)}
+    </div>
+    <div class="sh-foot">${fmtDate(S.startedAt)} 開始 ・ ${fmtDuration(S.playSeconds)} 経過</div>
+  `;
+  refreshShareRewardUi();
+  document.getElementById("shareWrap").hidden = false;
+}
+document.getElementById("shareClose").addEventListener("click", ()=>{
+  document.getElementById("shareWrap").hidden = true;
+});
+document.getElementById("shareToX").addEventListener("click", ()=>{ shareRecordToX(); });
+
+function openAvatarPicker(){
+  document.getElementById("avatarPick").innerHTML = AVATARS.map(a=>
+    `<button data-avatar="${a.id}" class="${S.avatar===a.id?"on":""}" aria-label="${a.name}"><img src="${a.src}" alt="${a.name}"></button>`
+  ).join("");
+  document.getElementById("avatarModal").hidden = false;
+}
+document.getElementById("avatarModal").addEventListener("click", (e)=>{
+  if(e.target.id === "avatarClose" || e.target === document.getElementById("avatarModal")){
+    document.getElementById("avatarModal").hidden = true; return;
+  }
+  const btn = e.target.closest("[data-avatar]");
+  if(!btn) return;
+  S.avatar = btn.dataset.avatar;
+  document.getElementById("avatarModal").hidden = true;
+  if(screenId === "record") renderRecord();
+  save();
+});
+
+/* ==========================================================
+   ショップ / 超一等解禁
+========================================================== */
+function showUnlockModal(){
+  const m = document.getElementById("unlockModal");
+  m.classList.remove("unlock-appear");
+  void m.offsetWidth;
+  m.classList.add("unlock-appear");
+  m.hidden = false;
+}
+document.getElementById("unlockOk").addEventListener("click", ()=>{
+  const m = document.getElementById("unlockModal");
+  m.hidden = true;
+  m.classList.remove("unlock-appear");
+});
+function showApexUnlockModal(){
+  updateApexNav();
+  const m = document.getElementById("apexUnlockModal");
+  m.classList.remove("unlock-appear");
+  void m.offsetWidth;
+  m.classList.add("unlock-appear");
+  m.hidden = false;
+}
+document.getElementById("apexUnlockOk").addEventListener("click", ()=>{
+  const m = document.getElementById("apexUnlockModal");
+  m.hidden = true;
+  m.classList.remove("unlock-appear");
+});
+
+function markMilestone(key){
+  if(!S.milestones) S.milestones = {};
+  if(S.milestones[key]) return false;
+  S.milestones[key] = true;
+  return true;
+}
+function isContentComplete(){
+  return S.lifeLv >= LIFE_LEVELS.length - 1 && luxOwnedCount() >= LUXURIES.length;
+}
+function tryTriggerClear(){
+  if(S.cleared || !isContentComplete()) return false;
+  S.cleared = true;
+  S.clearedAt = Date.now();
+  markMilestone("lifeMax");
+  markMilestone("luxAll");
+  sfx.unlockApex();
+  document.getElementById("clearModal").hidden = false;
+  save();
+  if(screenId === "record") renderRecord();
+  if(screenId === "life"){ renderLife(); }
+  return true;
+}
+document.getElementById("clearOk")?.addEventListener("click", ()=>{
+  document.getElementById("clearModal").hidden = true;
+});
+function openProdHelp(){ document.getElementById("prodHelpModal").hidden = false; }
+function hideProdHelp(){ document.getElementById("prodHelpModal").hidden = true; }
+document.getElementById("prodHelpBtn")?.addEventListener("click", openProdHelp);
+document.getElementById("prodHelpOk")?.addEventListener("click", hideProdHelp);
+document.getElementById("prodHelpClose")?.addEventListener("click", hideProdHelp);
+document.getElementById("prodHelpModal")?.addEventListener("click", (e)=>{
+  if(e.target.id === "prodHelpModal") hideProdHelp();
+});
+document.getElementById("reviewOk").addEventListener("click", ()=> completeReviewReward());
+document.getElementById("reviewLater").addEventListener("click", ()=> hideReviewModal());
+document.getElementById("reviewModal").addEventListener("click", (e)=>{
+  if(e.target.id === "reviewModal") hideReviewModal();
+});
+
+function openShop(){
+  const body = document.getElementById("shopBody");
+  const envNote = isNativeApp()
+    ? "アプリ内課金でコインを購入できます。購入の復元はメニューから。"
+    : "ブラウザ開発中はモック購入になります。ストア版では正規の課金に切り替わります。";
+  body.innerHTML = `
+    <div class="modal-hd">
+      <span class="t">シ ョ ッ プ</span>
+      <button class="modal-x" id="shopClose">✕</button>
+    </div>
+    <div class="note">所持コイン <b style="color:var(--gold)">${fmt(S.coins)} C</b><br>${envNote}</div>
+
+    <div class="scr-title">コ イ ン 購 入</div>
+    <div class="starter-pack">
+      <div class="info">
+        <div class="nm">${STARTER_KIT.label}</div>
+        <div class="ds"><b style="color:var(--gold)">${STARTER_KIT.coins} C</b> を特別価格で入手（購入は 1 回のみ）</div>
+        <div class="deal">通常 100 C / ¥100 相当 → 5 倍お得</div>
+      </div>
+      ${S.starterKitOwned
+        ? `<span class="have">購入済</span>`
+        : `<button class="buy-c" data-starter="1">¥${STARTER_KIT.yen.toLocaleString()}</button>`}
+    </div>
+    <div class="pack-grid">
+      ${COIN_PACKS.map((p,i)=>`
+        <div class="pack">
+          <div class="amt">${p.label}</div>
+          <div class="yen">¥${p.yen.toLocaleString()}</div>
+          <div class="deal">${p.bonus||""}</div>
+          <button class="buy-c" data-pack="${i}">購入する</button>
+        </div>`).join("")}
+    </div>
+
+    <div class="scr-title" style="margin-top:18px">労 働</div>
+    <div class="shop-row">
+      <div class="info">
+        <div class="nm">単純労働</div>
+        <div class="ds">労働パネルを 5 枚から 1 枚にする。ミス判定がなくなり、光った場所を探す必要がなくなる（買い切り）</div>
+      </div>
+      ${S.simpleLabor
+        ? `<span class="have">適用済</span>`
+        : `<button class="act ${S.coins>=SIMPLE_LABOR_COST?"can":""}" data-shop="simplelabor" ${S.coins<SIMPLE_LABOR_COST?"disabled":""}>
+             <span class="a1">交換</span><span class="a2 price-c">${SIMPLE_LABOR_COST} C</span>
+           </button>`}
+    </div>
+    ${COMBO_UPGRADES.filter(u => u.lv === 1 || S.comboTimeLv >= 1).map(u=>{
+      const owned = S.comboTimeLv >= u.lv;
+      return `<div class="shop-row">
+        <div class="info">
+          <div class="nm">${u.name}</div>
+          <div class="ds">${u.desc}</div>
+        </div>
+        ${owned ? `<span class="have">所持</span>`
+          : `<button class="act ${S.coins>=u.cost?"can":""}" data-shop="combo" data-lv="${u.lv}" ${S.coins<u.cost?"disabled":""}>
+               <span class="a1">交換</span><span class="a2 price-c">${u.cost} C</span>
+             </button>`}
+      </div>`;
+    }).join("")}
+
+    <div class="scr-title" style="margin-top:18px">自 動 T P</div>
+    ${(()=>{
+      const lv = autoTpBoostLv();
+      const cur = autoTpBoostMult();
+      const next = cur * 2;
+      const cost = autoTpBoostNextCost();
+      const can = isFinite(cost) && S.coins >= cost;
+      return `<div class="shop-row">
+        <div class="info">
+          <div class="nm">自動 TP ブースター</div>
+          <div class="ds">自動 TP 生産に永続倍率。初回 200 C で ×2、以降はコスト・倍率とも 2 倍ずつ。<br>現在 <b style="color:var(--gold)">×${fmt(cur)}</b>${lv>0?`（Lv.${lv}）`:""}　→　次回 ×${fmt(next)}</div>
+        </div>
+        <button class="act ${can?"can":""}" data-shop="tpboost" ${can?"":"disabled"}>
+          <span class="a1">交換</span><span class="a2 price-c">${isFinite(cost)?fmt(cost)+" C":"—"}</span>
+        </button>
+      </div>`;
+    })()}
+    <div class="shop-row">
+      <div class="info">
+        <div class="nm">1 時間分の自動 TP</div>
+        <div class="ds">現在レートなら +${fmt(autoRate() * TP_HOUR_PACK.minutes * 60)} TP（何度でも購入可）</div>
+      </div>
+      <button class="act ${S.coins>=TP_HOUR_PACK.cost?"can":""}" data-shop="tphour" ${S.coins<TP_HOUR_PACK.cost?"disabled":""}>
+        <span class="a1">交換</span><span class="a2 price-c">${TP_HOUR_PACK.cost} C</span>
+      </button>
+    </div>
+
+    <div class="scr-title" style="margin-top:18px">広 告 ボ ー ナ ス</div>
+    <div class="note">既定は ${AD_MINUTES_BASE} 分分・1 日 ${AD_DAILY_LIMIT} 回。買い切りで 1 回あたり ${AD_MINUTES_BOOSTED} 分に延長。</div>
+    <div class="shop-row">
+      <div class="info">
+        <div class="nm">広告ボーナス延長</div>
+        <div class="ds">広告 1 回の即時獲得を ${AD_MINUTES_BASE} 分 → ${AD_MINUTES_BOOSTED} 分にする（買い切り）</div>
+      </div>
+      ${S.adBoostOwned
+        ? `<span class="have">適用済</span>`
+        : `<button class="act ${S.coins>=AD_BOOST_COST?"can":""}" data-shop="adboost" ${S.coins<AD_BOOST_COST?"disabled":""}>
+             <span class="a1">交換</span><span class="a2 price-c">${AD_BOOST_COST} C</span>
+           </button>`}
+    </div>
+
+    <div class="scr-title" style="margin-top:18px">オ フ ラ イ ン 上 限</div>
+    <div class="note">現在 ${S.offlineHours} 時間（既定 ${BASE_OFFLINE_HOURS} 時間）<br>下位の延長を購入すると、次の段階が表示される。</div>
+    ${(()=>{
+      let html = "", nextShown = false;
+      for(const u of OFFLINE_UPGRADES){
+        const owned = S.offlineHours >= u.hours;
+        if(owned){
+          html += `<div class="shop-row">
+            <div class="info">
+              <div class="nm">${u.hours} 時間に延長</div>
+              <div class="ds">放置中の自動 TP 回収上限</div>
+            </div>
+            <span class="have">適用済</span>
+          </div>`;
+        } else if(!nextShown){
+          nextShown = true;
+          html += `<div class="shop-row">
+            <div class="info">
+              <div class="nm">${u.hours} 時間に延長</div>
+              <div class="ds">放置中の自動 TP 回収上限</div>
+            </div>
+            <button class="act ${S.coins>=u.cost?"can":""}" data-shop="offline" data-h="${u.hours}" ${S.coins<u.cost?"disabled":""}>
+              <span class="a1">交換</span><span class="a2 price-c">${u.cost} C</span>
+            </button>
+          </div>`;
+        }
+      }
+      if(S.offlineHours >= 24) html += `<div class="maxed">オフライン上限は最大に達している</div>`;
+      return html;
+    })()}
+  `;
+  document.getElementById("shopModal").hidden = false;
+}
+document.getElementById("coinBtn").addEventListener("click", openShop);
+document.getElementById("shopModal").addEventListener("click", (e)=>{
+  if(e.target.id === "shopClose" || e.target === document.getElementById("shopModal")){
+    document.getElementById("shopModal").hidden = true; return;
+  }
+  const starter = e.target.closest("[data-starter]");
+  if(starter){
+    if(S.starterKitOwned){ toast("スターターキットは購入済みです"); return; }
+    starter.disabled = true;
+    StoreBridge.purchaseStarterKit().then(res=>{
+      starter.disabled = false;
+      if(!res || !res.ok) return;
+      if(S.starterKitOwned) return;
+      S.starterKitOwned = true;
+      S.coins += STARTER_KIT.coins;
+      sfx.adReward();
+      toast(`${STARTER_KIT.label} を購入 +${STARTER_KIT.coins} C` + (res.mocked ? "（開発モック）" : ""));
+      renderHeader(); openShop(); save();
+    });
+    return;
+  }
+  const pack = e.target.closest("[data-pack]");
+  if(pack){
+    const idx = +pack.dataset.pack;
+    const p = COIN_PACKS[idx];
+    if(!p) return;
+    pack.disabled = true;
+    StoreBridge.purchaseCoinPack(idx).then(res=>{
+      pack.disabled = false;
+      if(!res || !res.ok) return;
+      S.coins += p.coins;
+      sfx.adReward();
+      toast(`${p.label} を購入した` + (res.mocked ? "（開発モック）" : ""));
+      renderHeader(); openShop(); save();
+    });
+    return;
+  }
+  const btn = e.target.closest("[data-shop]");
+  if(!btn || btn.disabled) return;
+  if(btn.dataset.shop === "combo"){
+    const u = COMBO_UPGRADES.find(x=>x.lv === +btn.dataset.lv);
+    if(!u || S.coins < u.cost) return;
+    if(u.lv === 2 && S.comboTimeLv < 1) return;
+    if(S.comboTimeLv >= u.lv) return;
+    S.coins -= u.cost; S.comboTimeLv = u.lv;
+    toast(`${u.name} を導入した`);
+  } else if(btn.dataset.shop === "simplelabor"){
+    if(S.simpleLabor || S.coins < SIMPLE_LABOR_COST) return;
+    S.coins -= SIMPLE_LABOR_COST;
+    S.simpleLabor = true;
+    combo = 0;
+    buildPads();
+    idleWork();
+    renderCombo();
+    toast("単純労働を導入した　パネルが 1 枚になった");
+  } else if(btn.dataset.shop === "tpboost"){
+    const cost = autoTpBoostNextCost();
+    if(!isFinite(cost) || S.coins < cost) return;
+    S.coins -= cost;
+    S.autoTpBoostLv = autoTpBoostLv() + 1;
+    toast(`自動 TP ブースター ×${fmt(autoTpBoostMult())} になった`);
+  } else if(btn.dataset.shop === "tphour"){
+    if(S.coins < TP_HOUR_PACK.cost) return;
+    S.coins -= TP_HOUR_PACK.cost;
+    const gain = autoRate() * TP_HOUR_PACK.minutes * 60;
+    S.autoTP += gain;
+    toast(`自動 TP ${TP_HOUR_PACK.minutes} 分分を購入 +${fmt(gain)} TP`);
+  } else if(btn.dataset.shop === "adboost"){
+    if(S.adBoostOwned || S.coins < AD_BOOST_COST) return;
+    S.coins -= AD_BOOST_COST;
+    S.adBoostOwned = true;
+    toast(`広告ボーナスを ${AD_MINUTES_BOOSTED} 分に延長した`);
+  } else if(btn.dataset.shop === "offline"){
+    const h = +btn.dataset.h;
+    const idx = OFFLINE_UPGRADES.findIndex(x=>x.hours === h);
+    const u = OFFLINE_UPGRADES[idx];
+    if(!u || S.coins < u.cost || S.offlineHours >= h) return;
+    const need = idx === 0 ? BASE_OFFLINE_HOURS : OFFLINE_UPGRADES[idx-1].hours;
+    if(S.offlineHours < need){ toast("先に下位の延長を購入してください"); return; }
+    S.coins -= u.cost; S.offlineHours = h;
+    toast(`オフライン上限を ${h} 時間に延長`);
+  }
+  renderHeader(); openShop(); save();
+});
+
+/* ==========================================================
+   描画・ループ
+========================================================== */
+function renderHeader(){
+  document.getElementById("vMoney").innerHTML = fmt(S.money) + "<small>G</small>";
+  document.getElementById("vCoins").textContent = fmt(S.coins);
+  document.getElementById("vMTP").textContent = fmtTP(S.manualTP);
+  document.getElementById("vATP").textContent = fmtTP(S.autoTP);
+  document.getElementById("vLose").textContent = fmt(S.loseTickets);
+  document.getElementById("vRate").textContent = fmt(autoRate()) + " / 秒";
+  document.getElementById("vTap").textContent = "+" + fmt(tapPower() * zeroLaborMult()) + " / 打";
+  const ppt = document.getElementById("vProdPt");
+  const ppm = document.getElementById("vProdMult");
+  if(ppt) ppt.textContent = fmt(Math.floor(prodPointsValue()));
+  if(ppm) ppm.textContent = prodPointMult().toFixed(1);
+  const hint = document.getElementById("lotteryMultHint");
+  if(hint){
+    const lv = rhcBuffLv();
+    hint.textContent = lv > 0 ? `当選バフ ${rhcBuffLabel()}` : "1 枚 30 TP";
+  }
+  renderQty();
+}
+
+let lastTick = performance.now();
+setInterval(()=>{
+  const now = performance.now();
+  const dt = (now - lastTick)/1000;
+  lastTick = now;
+  applyProdPointDecay(dt);
+  S.autoTP += autoRate() * dt;
+  if(!document.hidden) S.playSeconds += dt;
+  renderHeader();
+}, 120);
+setInterval(refreshScreen, 400);
+setInterval(save, 5000);
+document.addEventListener("visibilitychange", ()=>{ if(document.hidden) save(); });
+
+document.getElementById("menuBtn").addEventListener("click", ()=> openSettings());
+
+function openSettings(){
+  const body = document.getElementById("settingsBody");
+  const muteLabel = sfx.isMuted() ? "効果音：オフ（タップでオン）" : "効果音：オン（タップでオフ）";
+  body.innerHTML = `
+    <div class="modal-hd">
+      <span class="t">メ ニ ュ ー</span>
+      <button class="modal-x" id="settingsClose">✕</button>
+    </div>
+    <div class="settings-list">
+      <button type="button" data-set="sfx">${muteLabel}</button>
+      <button type="button" data-set="terms">利用規約</button>
+      <button type="button" data-set="privacy">プライバシーポリシー</button>
+      <button type="button" data-set="support">サポート</button>
+      <button type="button" data-set="restore">購入を復元</button>
+      <button type="button" data-set="legal">免責事項をもう一度見る</button>
+      <button type="button" class="danger" data-set="reset">データを削除して最初から</button>
+    </div>
+    <div class="meta">バージョン ${APP_VERSION}${isNativeApp()?"（アプリ）":"（Web）"}<br>
+      セーブは端末内のみ。実在の宝くじとは無関係の娯楽シミュレーションです。</div>
+  `;
+  document.getElementById("settingsModal").hidden = false;
+}
+function closeSettings(){
+  document.getElementById("settingsModal").hidden = true;
+}
+function resetAllData(){
+  if(!confirm("最初からやり直しますか？\n（資産・設備・記録はすべて消えます）")) return;
+  if(!confirm("本当にリセットしますか？\nこの操作は取り消せません。")) return;
+  localStorage.removeItem(SAVE_KEY);
+  try{ localStorage.removeItem("takarakuji_life_save_v2"); }catch(e){}
+  S = DEFAULT_STATE();
+  combo = 0;
+  document.getElementById("resultTitle").textContent = "抽 選 結 果";
+  document.getElementById("resultSum").textContent = "";
+  document.getElementById("resultList").innerHTML =
+    `<div class="r-empty">まだ抽選していません<br>労働で TP を集めて、夢を買う</div>`;
+  closeSettings();
+  hideTutCoach();
+  document.getElementById("tutGoalModal").hidden = true;
+  boot();
+  save();
+}
+document.getElementById("settingsModal").addEventListener("click", (e)=>{
+  if(e.target.id === "settingsClose" || e.target === document.getElementById("settingsModal")){
+    closeSettings(); return;
+  }
+  const btn = e.target.closest("[data-set]");
+  if(!btn) return;
+  const act = btn.dataset.set;
+  if(act === "sfx"){
+    sfx.unlock();
+    sfx.setMuted(!sfx.isMuted());
+    openSettings();
+    return;
+  }
+  if(act === "terms") openExternalUrl(STORE_LINKS.terms);
+  else if(act === "privacy") openExternalUrl(STORE_LINKS.privacy);
+  else if(act === "support") openExternalUrl(STORE_LINKS.support);
+  else if(act === "restore") StoreBridge.restorePurchases();
+  else if(act === "legal"){ closeSettings(); showLegalModal(true); }
+  else if(act === "reset") resetAllData();
+});
+
+function goToScreen(id){
+  if(screenId === "home" && id !== "home"){ combo = 0; renderCombo(); idleWork(); }
+  screenId = id;
+  document.querySelectorAll(".nv").forEach(b=>b.classList.toggle("on", b.dataset.scr === id));
+  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on", s.id === "scr-"+id));
+  renderScreen();
+}
+
+/* ==========================================================
+   チュートリアル（免責同意の直後）
+   画面遷移はプレイヤー自身。光枠で誘導する。
+========================================================== */
+const TUT_FADE_MS = 850;
+let tutCoachTimer = null;
+let tutHlTimer = null;
+
+const TUT_SCRIPT = {
+  labor: {
+    label:"1 / 6", title:"まずは働け",
+    body:"パネルをタップするたび、TP が増える。宝くじ 1 枚分（30 TP）まで稼ごう。",
+    pos:"top", next:false
+  },
+  seeManualTP: {
+    label:"2 / 6", title:"TP が増え始めた",
+    body:"いい感触だ。手動 TP が貯まり始めた。この力が、宝くじを買う切符になる。",
+    pos:"bottom", next:true
+  },
+  lottery: {
+    label:"3 / 6", title:"夢を一枚、買え",
+    body:"貯めた TP で宝くじを買ってみよう。今日の運が、少しだけ顔を出す。",
+    pos:"top", next:false
+  },
+  navFacility: {
+    label:"4 / 6", title:"勝ちを仕組みにしろ",
+    body:"当たった金は、遊ばせるな。『設備』を開いて、自動で稼ぐ準備をしよう。",
+    pos:"top", next:false
+  },
+  facility: {
+    label:"5 / 6", title:"最初の設備を建てろ",
+    body:"貯金箱ロボを買えば、指を休めても TP が増え続ける。ここからが加速だ。",
+    pos:"bottom", next:false
+  },
+  seeAutoTP: {
+    label:"6 / 6", title:"自動生産、始動",
+    body:"自動 TP が増え始めた。もう手が止まっても、夢は近づいてくる。",
+    pos:"bottom", next:true
+  },
+};
+
+function tutorialLocksWork(){
+  /* 「つぎへ」待ちの説明中だけ労働を止める。宝くじ手順中は外れても働ける */
+  if(S.tutorialDone || !S.tutorialStep) return false;
+  return S.tutorialStep === "seeManualTP" || S.tutorialStep === "seeAutoTP";
+}
+function syncTutWorkLock(){
+  const card = document.getElementById("workCard");
+  if(!card) return;
+  card.classList.toggle("tut-locked", tutorialLocksWork());
+}
+
+function clearTutHighlight(){
+  document.querySelectorAll(".tut-hl").forEach(el=>el.classList.remove("tut-hl"));
+}
+function hideTutCoach(immediate){
+  const el = document.getElementById("tutCoach");
+  if(!el) return;
+  if(tutCoachTimer){ clearTimeout(tutCoachTimer); tutCoachTimer = null; }
+  if(tutHlTimer){ clearTimeout(tutHlTimer); tutHlTimer = null; }
+  el.classList.remove("is-on", "has-next");
+  clearTutHighlight();
+  if(immediate){
+    el.style.transition = "none";
+    void el.offsetWidth;
+    el.style.transition = "";
+  }
+  syncTutWorkLock();
+}
+function showTutCoach(stepKey){
+  const coach = document.getElementById("tutCoach");
+  const conf = TUT_SCRIPT[stepKey];
+  if(!coach || !conf) return;
+  if(tutCoachTimer){ clearTimeout(tutCoachTimer); tutCoachTimer = null; }
+
+  const applyContent = ()=>{
+    document.getElementById("tutStep").textContent = conf.label;
+    document.getElementById("tutTtl").textContent = conf.title;
+    document.getElementById("tutBody").textContent = conf.body;
+    coach.classList.toggle("tut-pos-bottom", conf.pos === "bottom");
+    coach.classList.toggle("has-next", !!conf.next);
+    syncTutWorkLock();
+    requestAnimationFrame(()=> coach.classList.add("is-on"));
+  };
+
+  if(coach.classList.contains("is-on")){
+    coach.classList.remove("is-on");
+    clearTutHighlight();
+    tutCoachTimer = setTimeout(applyContent, TUT_FADE_MS);
+  } else {
+    applyContent();
+  }
+}
+function applyTutHighlight(){
+  clearTutHighlight();
+  const step = S.tutorialStep;
+  if(step === "labor") document.getElementById("workCard")?.classList.add("tut-hl");
+  else if(step === "seeManualTP") document.getElementById("meterManual")?.classList.add("tut-hl");
+  else if(step === "lottery") document.getElementById("lotteryCard")?.classList.add("tut-hl");
+  else if(step === "navFacility") document.querySelector('.nv[data-scr="facility"]')?.classList.add("tut-hl");
+  else if(step === "facility"){
+    if(screenId !== "facility"){
+      document.querySelector('.nv[data-scr="facility"]')?.classList.add("tut-hl");
+    } else {
+      const row = document.querySelector("#facList .row");
+      (row || document.getElementById("scr-facility"))?.classList.add("tut-hl");
+    }
+  } else if(step === "seeAutoTP") document.getElementById("meterAuto")?.classList.add("tut-hl");
+}
+function scheduleTutHighlight(switching){
+  if(tutHlTimer){ clearTimeout(tutHlTimer); tutHlTimer = null; }
+  const delay = switching ? TUT_FADE_MS + 80 : 80;
+  tutHlTimer = setTimeout(()=> requestAnimationFrame(applyTutHighlight), delay);
+}
+function refreshTutorialUI(){
+  if(S.tutorialDone || !S.tutorialStep){ hideTutCoach(); return; }
+  if(S.tutorialStep === "goal"){
+    hideTutCoach();
+    document.getElementById("tutGoalModal").hidden = false;
+    return;
+  }
+  if(!TUT_SCRIPT[S.tutorialStep]){ hideTutCoach(); return; }
+  const coach = document.getElementById("tutCoach");
+  const switching = !!(coach && coach.classList.contains("is-on"));
+  showTutCoach(S.tutorialStep);
+  scheduleTutHighlight(switching);
+}
+function beginTutorial(){
+  if(S.tutorialDone) return;
+  S.tutorialStep = "labor";
+  save();
+  syncTutWorkLock();
+  refreshTutorialUI();
+}
+function advanceTutorial(from){
+  if(S.tutorialDone || S.tutorialStep !== from) return;
+  if(from === "labor"){
+    S.tutorialStep = "seeManualTP";
+    /* 説明を読むまで追加の労働を即座に止める */
+    syncTutWorkLock();
+    if(workActive){ combo = 0; renderCombo(); idleWork(); }
+  } else if(from === "seeManualTP"){
+    S.tutorialStep = "lottery";
+  } else if(from === "lottery"){
+    S.tutorialStep = "navFacility";
+  } else if(from === "navFacility"){
+    S.tutorialStep = "facility";
+  } else if(from === "facility"){
+    S.tutorialStep = "seeAutoTP";
+  } else if(from === "seeAutoTP"){
+    S.tutorialStep = "goal";
+    hideTutCoach();
+    setTimeout(()=>{
+      document.getElementById("tutGoalModal").hidden = false;
+    }, TUT_FADE_MS);
+    save();
+    return;
+  } else {
+    return;
+  }
+  save();
+  refreshTutorialUI();
+}
+function onTutorialNav(id){
+  if(S.tutorialDone) return;
+  if(S.tutorialStep === "navFacility" && id === "facility"){
+    advanceTutorial("navFacility");
+    return;
+  }
+  if(S.tutorialStep === "facility" || S.tutorialStep === "seeAutoTP" || S.tutorialStep === "seeManualTP"){
+    applyTutHighlight();
+  }
+}
+function finishTutorial(){
+  S.tutorialDone = true;
+  S.tutorialStep = "";
+  hideTutCoach();
+  syncTutWorkLock();
+  document.getElementById("tutGoalModal").hidden = true;
+  sfx.tutComplete();
+  save();
+}
+document.getElementById("tutGoalOk")?.addEventListener("click", ()=> finishTutorial());
+document.getElementById("tutNext")?.addEventListener("click", ()=>{
+  if(S.tutorialStep === "seeManualTP") advanceTutorial("seeManualTP");
+  else if(S.tutorialStep === "seeAutoTP") advanceTutorial("seeAutoTP");
+});
+
+function showLegalModal(fromSettings){
+  const ok = document.getElementById("legalOk");
+  ok.textContent = fromSettings ? "閉じる" : "同 意 し て は じ め る";
+  ok.dataset.mode = fromSettings ? "close" : "accept";
+  document.getElementById("legalModal").hidden = false;
+}
+function hideLegalModal(){
+  document.getElementById("legalModal").hidden = true;
+}
+document.getElementById("legalOk").addEventListener("click", ()=>{
+  const mode = document.getElementById("legalOk").dataset.mode || "accept";
+  if(mode === "accept"){
+    S.legalAccepted = true;
+    save();
+    hideLegalModal();
+    if(!S.tutorialDone) beginTutorial();
+    return;
+  }
+  hideLegalModal();
+});
+document.getElementById("legalTerms").addEventListener("click", ()=> openExternalUrl(STORE_LINKS.terms));
+document.getElementById("legalPrivacy").addEventListener("click", ()=> openExternalUrl(STORE_LINKS.privacy));
+
+function boot(){
+  buildPads();
+  idleWork();
+  initMascot();
+  updateApexNav();
+  renderCombo();
+  renderHeader();
+  renderScreen();
+  if(!S.legalAccepted) showLegalModal(false);
+  else if(!S.tutorialDone && S.tutorialStep) refreshTutorialUI();
+  else if(!S.tutorialDone) beginTutorial();
+}
+load();
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,797 @@
+{
+  "config": "LIVE_NOW",
+  "runs": 16,
+  "days": 180,
+  "lifeNames": [
+    "ベンチ",
+    "ネカフェ",
+    "アパート",
+    "マンショ",
+    "タワマン",
+    "豪邸",
+    "島",
+    "月面",
+    "火星",
+    "銀河",
+    "パラレル",
+    "バグ空間"
+  ],
+  "pay": {
+    "f2p": "無課金",
+    "ad": "広告",
+    "soft": "軽課金",
+    "whale": "重課金"
+  },
+  "engage": {
+    "light": {
+      "label": "ライト",
+      "playMinPerDay": 15
+    },
+    "mid": {
+      "label": "標準",
+      "playMinPerDay": 30
+    },
+    "deep": {
+      "label": "やり込み",
+      "playMinPerDay": 60
+    },
+    "hard": {
+      "label": "ガチ",
+      "playMinPerDay": 90
+    }
+  },
+  "cells": [
+    {
+      "pay": "f2p",
+      "payLabel": "無課金",
+      "eng": "light",
+      "engLabel": "ライト",
+      "playMin": 15,
+      "D7": 6,
+      "D14": 9,
+      "D21": 9,
+      "D60": 9,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 13,
+        "medLabel": "13日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 70,
+        "medLabel": "70日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "f2p",
+      "payLabel": "無課金",
+      "eng": "mid",
+      "engLabel": "標準",
+      "playMin": 30,
+      "D7": 7,
+      "D14": 9,
+      "D21": 9,
+      "D60": 9,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 11,
+        "medLabel": "11日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 67,
+        "medLabel": "67日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "f2p",
+      "payLabel": "無課金",
+      "eng": "deep",
+      "engLabel": "やり込み",
+      "playMin": 60,
+      "D7": 8,
+      "D14": 9,
+      "D21": 9,
+      "D60": 9,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 8,
+        "medLabel": "8日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 64,
+        "medLabel": "64日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "f2p",
+      "payLabel": "無課金",
+      "eng": "hard",
+      "engLabel": "ガチ",
+      "playMin": 90,
+      "D7": 9,
+      "D14": 9,
+      "D21": 9,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 7,
+        "medLabel": "7日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 58,
+        "medLabel": "58日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "ad",
+      "payLabel": "広告",
+      "eng": "light",
+      "engLabel": "ライト",
+      "playMin": 15,
+      "D7": 7,
+      "D14": 9,
+      "D21": 9,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 11,
+        "medLabel": "11日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 53,
+        "medLabel": "53日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "ad",
+      "payLabel": "広告",
+      "eng": "mid",
+      "engLabel": "標準",
+      "playMin": 30,
+      "D7": 8,
+      "D14": 9,
+      "D21": 9,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 10,
+        "medLabel": "10日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 48,
+        "medLabel": "48日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "ad",
+      "payLabel": "広告",
+      "eng": "deep",
+      "engLabel": "やり込み",
+      "playMin": 60,
+      "D7": 8,
+      "D14": 9,
+      "D21": 9,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 8,
+        "medLabel": "8日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 42,
+        "medLabel": "42日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "ad",
+      "payLabel": "広告",
+      "eng": "hard",
+      "engLabel": "ガチ",
+      "playMin": 90,
+      "D7": 9,
+      "D14": 9,
+      "D21": 9,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 7,
+        "medLabel": "7日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 33,
+        "medLabel": "33日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "soft",
+      "payLabel": "軽課金",
+      "eng": "light",
+      "engLabel": "ライト",
+      "playMin": 15,
+      "D7": 7,
+      "D14": 10,
+      "D21": 10,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 10,
+        "medLabel": "10日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 13,
+        "medLabel": "13日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "soft",
+      "payLabel": "軽課金",
+      "eng": "mid",
+      "engLabel": "標準",
+      "playMin": 30,
+      "D7": 8,
+      "D14": 10,
+      "D21": 10,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 9,
+        "medLabel": "9日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 12,
+        "medLabel": "12日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "soft",
+      "payLabel": "軽課金",
+      "eng": "deep",
+      "engLabel": "やり込み",
+      "playMin": 60,
+      "D7": 9,
+      "D14": 10,
+      "D21": 10,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 6,
+        "medLabel": "6日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 9,
+        "medLabel": "9日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "soft",
+      "payLabel": "軽課金",
+      "eng": "hard",
+      "engLabel": "ガチ",
+      "playMin": 90,
+      "D7": 9,
+      "D14": 10,
+      "D21": 10,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 5,
+        "medLabel": "5日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 8,
+        "medLabel": "8日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "whale",
+      "payLabel": "重課金",
+      "eng": "light",
+      "engLabel": "ライト",
+      "playMin": 15,
+      "D7": 8,
+      "D14": 10,
+      "D21": 10,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 8,
+        "medLabel": "8日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 10,
+        "medLabel": "10日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "whale",
+      "payLabel": "重課金",
+      "eng": "mid",
+      "engLabel": "標準",
+      "playMin": 30,
+      "D7": 9,
+      "D14": 10,
+      "D21": 10,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 7,
+        "medLabel": "7日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 9,
+        "medLabel": "9日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "whale",
+      "payLabel": "重課金",
+      "eng": "deep",
+      "engLabel": "やり込み",
+      "playMin": 60,
+      "D7": 9,
+      "D14": 10,
+      "D21": 10,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 6,
+        "medLabel": "6日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 8,
+        "medLabel": "8日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    },
+    {
+      "pay": "whale",
+      "payLabel": "重課金",
+      "eng": "hard",
+      "engLabel": "ガチ",
+      "playMin": 90,
+      "D7": 10,
+      "D14": 10,
+      "D21": 10,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "galaxy": {
+        "rate": 1,
+        "medDay": 5,
+        "medLabel": "5日"
+      },
+      "parallel": {
+        "rate": 1,
+        "medDay": 7,
+        "medLabel": "7日"
+      },
+      "bug": {
+        "rate": 0,
+        "medDay": null,
+        "medLabel": "—"
+      },
+      "nameFinal": "パラレル"
+    }
+  ],
+  "matrices": {
+    "lifeD7": [
+      {
+        "pay": "無課金",
+        "light": 6,
+        "mid": 7,
+        "deep": 8,
+        "hard": 9
+      },
+      {
+        "pay": "広告",
+        "light": 7,
+        "mid": 8,
+        "deep": 8,
+        "hard": 9
+      },
+      {
+        "pay": "軽課金",
+        "light": 7,
+        "mid": 8,
+        "deep": 9,
+        "hard": 9
+      },
+      {
+        "pay": "重課金",
+        "light": 8,
+        "mid": 9,
+        "deep": 9,
+        "hard": 10
+      }
+    ],
+    "lifeD14": [
+      {
+        "pay": "無課金",
+        "light": 9,
+        "mid": 9,
+        "deep": 9,
+        "hard": 9
+      },
+      {
+        "pay": "広告",
+        "light": 9,
+        "mid": 9,
+        "deep": 9,
+        "hard": 9
+      },
+      {
+        "pay": "軽課金",
+        "light": 10,
+        "mid": 10,
+        "deep": 10,
+        "hard": 10
+      },
+      {
+        "pay": "重課金",
+        "light": 10,
+        "mid": 10,
+        "deep": 10,
+        "hard": 10
+      }
+    ],
+    "lifeD21": [
+      {
+        "pay": "無課金",
+        "light": 9,
+        "mid": 9,
+        "deep": 9,
+        "hard": 9
+      },
+      {
+        "pay": "広告",
+        "light": 9,
+        "mid": 9,
+        "deep": 9,
+        "hard": 9
+      },
+      {
+        "pay": "軽課金",
+        "light": 10,
+        "mid": 10,
+        "deep": 10,
+        "hard": 10
+      },
+      {
+        "pay": "重課金",
+        "light": 10,
+        "mid": 10,
+        "deep": 10,
+        "hard": 10
+      }
+    ],
+    "lifeD90": [
+      {
+        "pay": "無課金",
+        "light": 10,
+        "mid": 10,
+        "deep": 10,
+        "hard": 10
+      },
+      {
+        "pay": "広告",
+        "light": 10,
+        "mid": 10,
+        "deep": 10,
+        "hard": 10
+      },
+      {
+        "pay": "軽課金",
+        "light": 10,
+        "mid": 10,
+        "deep": 10,
+        "hard": 10
+      },
+      {
+        "pay": "重課金",
+        "light": 10,
+        "mid": 10,
+        "deep": 10,
+        "hard": 10
+      }
+    ],
+    "lifeD180": [
+      {
+        "pay": "無課金",
+        "light": 10,
+        "mid": 10,
+        "deep": 10,
+        "hard": 10
+      },
+      {
+        "pay": "広告",
+        "light": 10,
+        "mid": 10,
+        "deep": 10,
+        "hard": 10
+      },
+      {
+        "pay": "軽課金",
+        "light": 10,
+        "mid": 10,
+        "deep": 10,
+        "hard": 10
+      },
+      {
+        "pay": "重課金",
+        "light": 10,
+        "mid": 10,
+        "deep": 10,
+        "hard": 10
+      }
+    ],
+    "lifeFinal": [
+      {
+        "pay": "無課金",
+        "light": "10 パラレル",
+        "mid": "10 パラレル",
+        "deep": "10 パラレル",
+        "hard": "10 パラレル"
+      },
+      {
+        "pay": "広告",
+        "light": "10 パラレル",
+        "mid": "10 パラレル",
+        "deep": "10 パラレル",
+        "hard": "10 パラレル"
+      },
+      {
+        "pay": "軽課金",
+        "light": "10 パラレル",
+        "mid": "10 パラレル",
+        "deep": "10 パラレル",
+        "hard": "10 パラレル"
+      },
+      {
+        "pay": "重課金",
+        "light": "10 パラレル",
+        "mid": "10 パラレル",
+        "deep": "10 パラレル",
+        "hard": "10 パラレル"
+      }
+    ],
+    "daysToParallel": [
+      {
+        "pay": "無課金",
+        "light": "70日",
+        "mid": "67日",
+        "deep": "64日",
+        "hard": "58日"
+      },
+      {
+        "pay": "広告",
+        "light": "53日",
+        "mid": "48日",
+        "deep": "42日",
+        "hard": "33日"
+      },
+      {
+        "pay": "軽課金",
+        "light": "13日",
+        "mid": "12日",
+        "deep": "9日",
+        "hard": "8日"
+      },
+      {
+        "pay": "重課金",
+        "light": "10日",
+        "mid": "9日",
+        "deep": "8日",
+        "hard": "7日"
+      }
+    ],
+    "daysToBugSpace": [
+      {
+        "pay": "無課金",
+        "light": "—",
+        "mid": "—",
+        "deep": "—",
+        "hard": "—"
+      },
+      {
+        "pay": "広告",
+        "light": "—",
+        "mid": "—",
+        "deep": "—",
+        "hard": "—"
+      },
+      {
+        "pay": "軽課金",
+        "light": "—",
+        "mid": "—",
+        "deep": "—",
+        "hard": "—"
+      },
+      {
+        "pay": "重課金",
+        "light": "—",
+        "mid": "—",
+        "deep": "—",
+        "hard": "—"
+      }
+    ],
+    "reachBugRate": [
+      {
+        "pay": "無課金",
+        "light": "0%",
+        "mid": "0%",
+        "deep": "0%",
+        "hard": "0%"
+      },
+      {
+        "pay": "広告",
+        "light": "0%",
+        "mid": "0%",
+        "deep": "0%",
+        "hard": "0%"
+      },
+      {
+        "pay": "軽課金",
+        "light": "0%",
+        "mid": "0%",
+        "deep": "0%",
+        "hard": "0%"
+      },
+      {
+        "pay": "重課金",
+        "light": "0%",
+        "mid": "0%",
+        "deep": "0%",
+        "hard": "0%"
+      }
+    ]
+  }
+}

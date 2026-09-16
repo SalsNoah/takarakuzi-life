@@ -1,0 +1,15 @@
+{
+  "round": 3,
+  "verdict": "FAIL",
+  "agreeWithAudit": true,
+  "f2pLife": {"D7": 7, "D14": 9, "D21": 10},
+  "adLiftD14": 1,
+  "paramMatch": true,
+  "paramIssues": [],
+  "topFindings": [
+    "F2P life med 7/9/10 vs R6 targets 4–5/5–6/6–7 — pace ~3–4 levels too fast by D14–D21",
+    "Soft/whale max life early: soft D14 med=10 (P≥9 by D14=100%); whale D7 med=9 already",
+    "No Infinity (collapseRate=0); adLiftD14=+1 is in-band but ceiling-compressed (F2P already life 9 at D14)"
+  ],
+  "confidence": "high"
+}

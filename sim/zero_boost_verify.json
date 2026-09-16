@@ -1,0 +1,187 @@
+{
+  "pass": true,
+  "checks": [
+    {
+      "id": "ZERO_MAX_BUY_10000",
+      "ok": true,
+      "detail": "ZERO_MAX_BUY = 10000"
+    },
+    {
+      "id": "zeroPlanCount_max_capped",
+      "ok": true,
+      "detail": "zeroPlanCount: max → Math.min(left, ZERO_MAX_BUY)"
+    },
+    {
+      "id": "zeroPlanCount_want_capped",
+      "ok": true,
+      "detail": "zeroPlanCount: Math.min(left, want, ZERO_MAX_BUY)"
+    },
+    {
+      "id": "runtime_MAX_cap_10000",
+      "ok": true,
+      "detail": "max→10000, want10000→10000, want99999→10000"
+    },
+    {
+      "id": "ZERO_COST_BASE_10",
+      "ok": true,
+      "detail": "ZERO_COST_BASE = 10"
+    },
+    {
+      "id": "zeroCostPerAttempt_formula",
+      "ok": true,
+      "detail": "cost = ZERO_COST_BASE * 10^exp"
+    },
+    {
+      "id": "ZERO_BOOST_MAX_EXP_12",
+      "ok": true,
+      "detail": "ZERO_BOOST_MAX_EXP = 12"
+    },
+    {
+      "id": "ZERO_SKIP_PER_BOOST_3",
+      "ok": true,
+      "detail": "ZERO_SKIP_PER_BOOST = 3"
+    },
+    {
+      "id": "zeroSkipStreak_formula",
+      "ok": true,
+      "detail": "skip = ZERO_SKIP_PER_BOOST * exp"
+    },
+    {
+      "id": "boost_exp_0_to_12_formulas",
+      "ok": true,
+      "detail": "e0:cost=10,skip=0,×1; e1:cost=100,skip=3,×10; e2:cost=1000,skip=6,×100; e3:cost=10000,skip=9,×1000; e4:cost=100000,skip=12,×10000; e5:cost=1000000,skip=15,×100000; e6:cost=10000000,skip=18,×1000000; e7:cost=100000000,skip=21,×10000000; e8:cost=1000000000,skip=24,×100000000; e9:cost=10000000000,skip=27,×1000000000; e10:cost=100000000000,skip=30,×10000000000; e11:cost=1000000000000,skip=33,×100000000000; e12:cost=10000000000000,skip=36,×1000000000000"
+    },
+    {
+      "id": "boost_exp1_x10_cost100_skip3",
+      "ok": true,
+      "detail": "exp1: cost=100, skip=3, mult=10"
+    },
+    {
+      "id": "boost_exp12_x1e12_cost1e13_skip36",
+      "ok": true,
+      "detail": "exp12: cost=10000000000000, skip=36, mult=1000000000000"
+    },
+    {
+      "id": "boost_buttons_0_to_max",
+      "ok": true,
+      "detail": "boostHtml: Array.from({length: ZERO_BOOST_MAX_EXP+1}) with data-zero-boost"
+    },
+    {
+      "id": "ZERO_STREAK_13",
+      "ok": true,
+      "detail": "ZERO_STREAK = 13"
+    },
+    {
+      "id": "resolveZeroSilent_startStreak",
+      "ok": true,
+      "detail": "resolveZeroSilent(startStreak) initializes streak from startStreak"
+    },
+    {
+      "id": "resolveZeroSilent_win_ge_ZERO_STREAK",
+      "ok": true,
+      "detail": "win: streak >= ZERO_STREAK"
+    },
+    {
+      "id": "animateZeroCell_startStreak",
+      "ok": true,
+      "detail": "animateZeroCell(cell, idx, startStreak); streak=start; won = streak >= ZERO_STREAK"
+    },
+    {
+      "id": "runZeroBatch_passes_skip_streak",
+      "ok": true,
+      "detail": "runZeroBatch: startStreak=zeroSkipStreak(); passed to animate/resolve"
+    },
+    {
+      "id": "runtime_skip36_already_win",
+      "ok": true,
+      "detail": "start36 + always-fail RNG → streak=36, win=true"
+    },
+    {
+      "id": "runtime_from0_13wins",
+      "ok": true,
+      "detail": "start0 + 13 heads → streak=13, win=true"
+    },
+    {
+      "id": "runtime_start3_need10_more",
+      "ok": true,
+      "detail": "start3 + 10 heads → streak=13, win=true"
+    },
+    {
+      "id": "state_has_zeroSpentSuper",
+      "ok": true,
+      "detail": "S default includes zeroSpentSuper:0"
+    },
+    {
+      "id": "zeroAttemptsLeft_uses_zeroSpentSuper",
+      "ok": true,
+      "detail": "attempts = floor((superWins - zeroSpentSuper) / cost)"
+    },
+    {
+      "id": "zeroAttemptsLeft_not_zeroUsed_div10_only",
+      "ok": true,
+      "detail": "zeroAttemptsLeft does not use zeroUsed/10 as spend pool"
+    },
+    {
+      "id": "runZeroBatch_charges_zeroSpentSuper",
+      "ok": true,
+      "detail": "runZeroBatch: S.zeroSpentSuper += totalCost"
+    },
+    {
+      "id": "runtime_attempts_left_formula",
+      "ok": true,
+      "detail": "a0=1000, a1=500, a2=50, a3=0"
+    },
+    {
+      "id": "migrate_zeroSpentSuper_from_zeroUsed",
+      "ok": true,
+      "detail": "null zeroSpentSuper migrates from zeroUsed * ZERO_COST_BASE"
+    },
+    {
+      "id": "no_dup_zeroOddsLabel",
+      "ok": true,
+      "detail": "function zeroOddsLabel defined 1 time(s)"
+    },
+    {
+      "id": "no_dup_zeroPlanCount",
+      "ok": true,
+      "detail": "function zeroPlanCount defined 1 time(s)"
+    },
+    {
+      "id": "no_dup_zeroAttemptsLeft",
+      "ok": true,
+      "detail": "function zeroAttemptsLeft defined 1 time(s)"
+    },
+    {
+      "id": "data-zero-boost_present",
+      "ok": true,
+      "detail": "data-zero-boost attribute present in UI"
+    },
+    {
+      "id": "data-zero-amt_present",
+      "ok": true,
+      "detail": "data-zero-amt attribute present in UI"
+    },
+    {
+      "id": "data-zero-amt_includes_10000",
+      "ok": true,
+      "detail": "zeroOpts = [[1,\"×1\"],[10,\"×10\"],[100,\"×100\"],[1000,\"×1000\"],[10000,\"×1万\"],[\"max\",\"MAX\"]]"
+    },
+    {
+      "id": "click_handler_data-zero-boost",
+      "ok": true,
+      "detail": "click handler for [data-zero-boost]"
+    },
+    {
+      "id": "click_handler_data-zero-amt",
+      "ok": true,
+      "detail": "click handler for [data-zero-amt]"
+    },
+    {
+      "id": "getZeroBoostExp_clamped",
+      "ok": true,
+      "detail": "getZeroBoostExp clamps to [0, ZERO_BOOST_MAX_EXP]"
+    }
+  ],
+  "failures": [],
+  "summary": "PASS: all 36 checks ok (ZERO_MAX_BUY=10000, COST_BASE=10, STREAK=13, boost 0..12)"
+}

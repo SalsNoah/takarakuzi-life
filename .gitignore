@@ -1,0 +1,15 @@
+node_modules/
+.DS_Store
+*.log
+.idea/
+.vscode/
+.capacitor/
+*.keystore
+*.jks
+local.properties
+**/build/
+**/.gradle/
+**/DerivedData/
+**/Pods/
+xcuserdata/
+*.xcuserstate

@@ -1,0 +1,609 @@
+{
+  "config": "LIVE_NOW",
+  "runs": 16,
+  "days": 730,
+  "hours": 17520,
+  "lifeMax": 12,
+  "lifeNames": [
+    "ベンチ",
+    "ネカフェ",
+    "アパート",
+    "マンショ",
+    "タワマン",
+    "豪邸",
+    "島",
+    "月面",
+    "火星",
+    "銀河",
+    "パラレル",
+    "高次元",
+    "バグ"
+  ],
+  "archetypes": {
+    "f2p": {
+      "player": "f2p",
+      "label": "無課金",
+      "elapsedSec": 3.2,
+      "lifeFinal": 10,
+      "atMaxRate": 0,
+      "lifeReach": {
+        "1": {
+          "name": "ネカフェ",
+          "rate": 1,
+          "medSec": 86400,
+          "medDay": 1,
+          "medLabel": "1日0時間"
+        },
+        "2": {
+          "name": "アパート",
+          "rate": 1,
+          "medSec": 172800,
+          "medDay": 2,
+          "medLabel": "2日0時間"
+        },
+        "3": {
+          "name": "マンショ",
+          "rate": 1,
+          "medSec": 259200,
+          "medDay": 3,
+          "medLabel": "3日0時間"
+        },
+        "4": {
+          "name": "タワマン",
+          "rate": 1,
+          "medSec": 345600,
+          "medDay": 4,
+          "medLabel": "4日0時間"
+        },
+        "5": {
+          "name": "豪邸",
+          "rate": 1,
+          "medSec": 432000,
+          "medDay": 5,
+          "medLabel": "5日0時間"
+        },
+        "6": {
+          "name": "島",
+          "rate": 1,
+          "medSec": 518400,
+          "medDay": 6,
+          "medLabel": "6日0時間"
+        },
+        "7": {
+          "name": "月面",
+          "rate": 1,
+          "medSec": 604800,
+          "medDay": 7,
+          "medLabel": "7日0時間"
+        },
+        "8": {
+          "name": "火星",
+          "rate": 1,
+          "medSec": 691200,
+          "medDay": 8,
+          "medLabel": "8日0時間"
+        },
+        "9": {
+          "name": "銀河",
+          "rate": 1,
+          "medSec": 950400,
+          "medDay": 11,
+          "medLabel": "11日0時間"
+        },
+        "10": {
+          "name": "パラレル",
+          "rate": 1,
+          "medSec": 8726400,
+          "medDay": 101,
+          "medLabel": "101日0時間"
+        },
+        "11": {
+          "name": "高次元",
+          "rate": 0,
+          "medDay": null,
+          "medLabel": "—"
+        },
+        "12": {
+          "name": "バグ",
+          "rate": 0,
+          "medDay": null,
+          "medLabel": "—"
+        }
+      },
+      "checkpoints": {
+        "D7": {
+          "life": 7,
+          "prizeM": 1,
+          "rhc": 0
+        },
+        "D14": {
+          "life": 9,
+          "prizeM": 86.49755859375,
+          "rhc": 11
+        },
+        "D21": {
+          "life": 9,
+          "prizeM": 194.6195068359375,
+          "rhc": 13
+        },
+        "D42": {
+          "life": 9,
+          "prizeM": 291.92926025390625,
+          "rhc": 14
+        },
+        "D60": {
+          "life": 9,
+          "prizeM": 291.92926025390625,
+          "rhc": 14
+        },
+        "D90": {
+          "life": 9,
+          "prizeM": 437.8938903808594,
+          "rhc": 15
+        },
+        "D120": {
+          "life": 10,
+          "prizeM": 656.8408355712891,
+          "rhc": 16
+        },
+        "D150": {
+          "life": 10,
+          "prizeM": 985.2612533569336,
+          "rhc": 17
+        },
+        "D730": {
+          "life": 10,
+          "prizeM": 2216.8378200531006,
+          "rhc": 19
+        }
+      },
+      "final": {
+        "life": 10,
+        "prizeM": 2216.8378200531006,
+        "rhc": 19,
+        "zero": 105473826,
+        "money": 9.835919505780927e+27,
+        "rate": 9541233965245819000
+      }
+    },
+    "ad": {
+      "player": "ad",
+      "label": "広告視聴",
+      "elapsedSec": 3,
+      "lifeFinal": 10,
+      "atMaxRate": 0,
+      "lifeReach": {
+        "1": {
+          "name": "ネカフェ",
+          "rate": 1,
+          "medSec": 1200,
+          "medDay": 0,
+          "medLabel": "20分"
+        },
+        "2": {
+          "name": "アパート",
+          "rate": 1,
+          "medSec": 86400,
+          "medDay": 1,
+          "medLabel": "1日0時間"
+        },
+        "3": {
+          "name": "マンショ",
+          "rate": 1,
+          "medSec": 172800,
+          "medDay": 2,
+          "medLabel": "2日0時間"
+        },
+        "4": {
+          "name": "タワマン",
+          "rate": 1,
+          "medSec": 259200,
+          "medDay": 3,
+          "medLabel": "3日0時間"
+        },
+        "5": {
+          "name": "豪邸",
+          "rate": 1,
+          "medSec": 345600,
+          "medDay": 4,
+          "medLabel": "4日0時間"
+        },
+        "6": {
+          "name": "島",
+          "rate": 1,
+          "medSec": 432000,
+          "medDay": 5,
+          "medLabel": "5日0時間"
+        },
+        "7": {
+          "name": "月面",
+          "rate": 1,
+          "medSec": 518400,
+          "medDay": 6,
+          "medLabel": "6日0時間"
+        },
+        "8": {
+          "name": "火星",
+          "rate": 1,
+          "medSec": 605400,
+          "medDay": 7,
+          "medLabel": "7日0時間"
+        },
+        "9": {
+          "name": "銀河",
+          "rate": 1,
+          "medSec": 864000,
+          "medDay": 10,
+          "medLabel": "10日0時間"
+        },
+        "10": {
+          "name": "パラレル",
+          "rate": 1,
+          "medSec": 5875200,
+          "medDay": 68,
+          "medLabel": "68日0時間"
+        },
+        "11": {
+          "name": "高次元",
+          "rate": 0,
+          "medDay": null,
+          "medLabel": "—"
+        },
+        "12": {
+          "name": "バグ",
+          "rate": 0,
+          "medDay": null,
+          "medLabel": "—"
+        }
+      },
+      "checkpoints": {
+        "D7": {
+          "life": 8,
+          "prizeM": 1,
+          "rhc": 0
+        },
+        "D14": {
+          "life": 9,
+          "prizeM": 86.49755859375,
+          "rhc": 11
+        },
+        "D21": {
+          "life": 9,
+          "prizeM": 194.6195068359375,
+          "rhc": 13
+        },
+        "D42": {
+          "life": 9,
+          "prizeM": 291.92926025390625,
+          "rhc": 14
+        },
+        "D60": {
+          "life": 9,
+          "prizeM": 437.8938903808594,
+          "rhc": 15
+        },
+        "D90": {
+          "life": 10,
+          "prizeM": 656.8408355712891,
+          "rhc": 16
+        },
+        "D120": {
+          "life": 10,
+          "prizeM": 985.2612533569336,
+          "rhc": 17
+        },
+        "D150": {
+          "life": 10,
+          "prizeM": 1477.8918800354004,
+          "rhc": 18
+        },
+        "D730": {
+          "life": 10,
+          "prizeM": 2216.8378200531006,
+          "rhc": 19
+        }
+      },
+      "final": {
+        "life": 10,
+        "prizeM": 2216.8378200531006,
+        "rhc": 19,
+        "zero": 169919811,
+        "money": 1.7038129192075956e+28,
+        "rate": 9755737573126113000
+      }
+    },
+    "soft": {
+      "player": "soft",
+      "label": "軽課金",
+      "elapsedSec": 3,
+      "lifeFinal": 10,
+      "atMaxRate": 0,
+      "lifeReach": {
+        "1": {
+          "name": "ネカフェ",
+          "rate": 1,
+          "medSec": 86400,
+          "medDay": 1,
+          "medLabel": "1日0時間"
+        },
+        "2": {
+          "name": "アパート",
+          "rate": 1,
+          "medSec": 86400,
+          "medDay": 1,
+          "medLabel": "1日0時間"
+        },
+        "3": {
+          "name": "マンショ",
+          "rate": 1,
+          "medSec": 172800,
+          "medDay": 2,
+          "medLabel": "2日0時間"
+        },
+        "4": {
+          "name": "タワマン",
+          "rate": 1,
+          "medSec": 174600,
+          "medDay": 2,
+          "medLabel": "2日0時間"
+        },
+        "5": {
+          "name": "豪邸",
+          "rate": 1,
+          "medSec": 259200,
+          "medDay": 3,
+          "medLabel": "3日0時間"
+        },
+        "6": {
+          "name": "島",
+          "rate": 1,
+          "medSec": 345600,
+          "medDay": 4,
+          "medLabel": "4日0時間"
+        },
+        "7": {
+          "name": "月面",
+          "rate": 1,
+          "medSec": 432000,
+          "medDay": 5,
+          "medLabel": "5日0時間"
+        },
+        "8": {
+          "name": "火星",
+          "rate": 1,
+          "medSec": 518400,
+          "medDay": 6,
+          "medLabel": "6日0時間"
+        },
+        "9": {
+          "name": "銀河",
+          "rate": 1,
+          "medSec": 691200,
+          "medDay": 8,
+          "medLabel": "8日0時間"
+        },
+        "10": {
+          "name": "パラレル",
+          "rate": 1,
+          "medSec": 1382400,
+          "medDay": 16,
+          "medLabel": "16日0時間"
+        },
+        "11": {
+          "name": "高次元",
+          "rate": 0,
+          "medDay": null,
+          "medLabel": "—"
+        },
+        "12": {
+          "name": "バグ",
+          "rate": 0,
+          "medDay": null,
+          "medLabel": "—"
+        }
+      },
+      "checkpoints": {
+        "D7": {
+          "life": 8,
+          "prizeM": 11.390625,
+          "rhc": 6
+        },
+        "D14": {
+          "life": 9,
+          "prizeM": 194.6195068359375,
+          "rhc": 13
+        },
+        "D21": {
+          "life": 10,
+          "prizeM": 656.8408355712891,
+          "rhc": 16
+        },
+        "D42": {
+          "life": 10,
+          "prizeM": 1477.8918800354004,
+          "rhc": 18
+        },
+        "D60": {
+          "life": 10,
+          "prizeM": 1477.8918800354004,
+          "rhc": 18
+        },
+        "D90": {
+          "life": 10,
+          "prizeM": 2216.8378200531006,
+          "rhc": 19
+        },
+        "D120": {
+          "life": 10,
+          "prizeM": 2216.8378200531006,
+          "rhc": 19
+        },
+        "D150": {
+          "life": 10,
+          "prizeM": 2216.8378200531006,
+          "rhc": 19
+        },
+        "D730": {
+          "life": 10,
+          "prizeM": 2216.8378200531006,
+          "rhc": 19
+        }
+      },
+      "final": {
+        "life": 10,
+        "prizeM": 2216.8378200531006,
+        "rhc": 19,
+        "zero": 1057846318,
+        "money": 8.12815506571376e+28,
+        "rate": 15511674702993424000
+      }
+    },
+    "whale": {
+      "player": "whale",
+      "label": "重課金",
+      "elapsedSec": 3.2,
+      "lifeFinal": 11,
+      "atMaxRate": 0,
+      "lifeReach": {
+        "1": {
+          "name": "ネカフェ",
+          "rate": 1,
+          "medSec": 86400,
+          "medDay": 1,
+          "medLabel": "1日0時間"
+        },
+        "2": {
+          "name": "アパート",
+          "rate": 1,
+          "medSec": 86400,
+          "medDay": 1,
+          "medLabel": "1日0時間"
+        },
+        "3": {
+          "name": "マンショ",
+          "rate": 1,
+          "medSec": 172800,
+          "medDay": 2,
+          "medLabel": "2日0時間"
+        },
+        "4": {
+          "name": "タワマン",
+          "rate": 1,
+          "medSec": 173400,
+          "medDay": 2,
+          "medLabel": "2日0時間"
+        },
+        "5": {
+          "name": "豪邸",
+          "rate": 1,
+          "medSec": 259200,
+          "medDay": 3,
+          "medLabel": "3日0時間"
+        },
+        "6": {
+          "name": "島",
+          "rate": 1,
+          "medSec": 345600,
+          "medDay": 4,
+          "medLabel": "4日0時間"
+        },
+        "7": {
+          "name": "月面",
+          "rate": 1,
+          "medSec": 432000,
+          "medDay": 5,
+          "medLabel": "5日0時間"
+        },
+        "8": {
+          "name": "火星",
+          "rate": 1,
+          "medSec": 432000,
+          "medDay": 5,
+          "medLabel": "5日0時間"
+        },
+        "9": {
+          "name": "銀河",
+          "rate": 1,
+          "medSec": 604800,
+          "medDay": 7,
+          "medLabel": "7日0時間"
+        },
+        "10": {
+          "name": "パラレル",
+          "rate": 1,
+          "medSec": 777600,
+          "medDay": 9,
+          "medLabel": "9日0時間"
+        },
+        "11": {
+          "name": "高次元",
+          "rate": 1,
+          "medSec": 47260800,
+          "medDay": 547,
+          "medLabel": "547日0時間"
+        },
+        "12": {
+          "name": "バグ",
+          "rate": 0,
+          "medDay": null,
+          "medLabel": "—"
+        }
+      },
+      "checkpoints": {
+        "D7": {
+          "life": 9,
+          "prizeM": 38.443359375,
+          "rhc": 9
+        },
+        "D14": {
+          "life": 10,
+          "prizeM": 985.2612533569336,
+          "rhc": 17
+        },
+        "D21": {
+          "life": 10,
+          "prizeM": 1477.8918800354004,
+          "rhc": 18
+        },
+        "D42": {
+          "life": 10,
+          "prizeM": 2216.8378200531006,
+          "rhc": 19
+        },
+        "D60": {
+          "life": 10,
+          "prizeM": 2216.8378200531006,
+          "rhc": 19
+        },
+        "D90": {
+          "life": 10,
+          "prizeM": 2216.8378200531006,
+          "rhc": 19
+        },
+        "D120": {
+          "life": 10,
+          "prizeM": 2216.8378200531006,
+          "rhc": 19
+        },
+        "D150": {
+          "life": 10,
+          "prizeM": 2216.8378200531006,
+          "rhc": 19
+        },
+        "D730": {
+          "life": 11,
+          "prizeM": 2216.8378200531006,
+          "rhc": 19
+        }
+      },
+      "final": {
+        "life": 11,
+        "prizeM": 2216.8378200531006,
+        "rhc": 19,
+        "zero": 50108819469,
+        "money": 7.579563464977534e+30,
+        "rate": 1.274359867809762e+21
+      }
+    }
+  }
+}

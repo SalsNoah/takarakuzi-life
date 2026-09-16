@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>効果音ラボ — 宝くじ生活</title>
+<style>
+  :root{
+    --bg:#0b0c0e; --panel:#131519; --line:#242832;
+    --text:#e7e4dd; --sub:#8b8f99; --dim:#585d68;
+    --gold:#c8a951; --gold-lo:#9c8235; --gold-hi:#e5d3a0;
+    --peak:#b4707a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    min-height:100dvh;background:var(--bg);color:var(--text);
+    font-family:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+    padding:28px 18px 48px;max-width:720px;margin:0 auto;
+  }
+  h1{
+    font-family:"Yu Mincho","Hiragino Mincho ProN",serif;
+    font-size:22px;letter-spacing:.18em;color:var(--gold-hi);font-weight:400;
+  }
+  .lead{margin-top:10px;font-size:12px;color:var(--sub);line-height:1.7;}
+  .bar{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 28px;align-items:center;}
+  button{
+    font-family:inherit;border:1px solid var(--line);background:var(--panel);
+    color:var(--text);border-radius:3px;padding:10px 14px;font-size:12px;
+    letter-spacing:.06em;cursor:pointer;
+  }
+  button:active{background:#1a1e26;}
+  button.gold{border-color:var(--gold-lo);color:var(--gold);}
+  button.peak{border-color:#7a3d45;color:var(--peak);}
+  button.on{background:rgba(200,169,81,.12);border-color:var(--gold-lo);color:var(--gold);}
+  .sec{margin-bottom:28px;}
+  .sec h2{
+    font-size:11px;letter-spacing:.22em;color:var(--dim);margin-bottom:12px;
+    font-weight:400;
+  }
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
+  .grid button{width:100%;text-align:left;min-height:44px;}
+  .note{font-size:11px;color:var(--dim);line-height:1.65;margin-top:24px;}
+  .now{font-size:11px;color:var(--gold);letter-spacing:.08em;min-height:1.2em;}
+</style>
+</head>
+<body>
+  <h1>効 果 音 ラ ボ</h1>
+  <p class="lead">
+    ゲーム本体とは独立した試聴スペースです。<br>
+    soft（落ち着いた日常音）と peak（一等・極みの高揚音）を分けて聴けます。
+  </p>
+  <div class="bar">
+    <button type="button" class="gold" id="unlockBtn">音声を有効化</button>
+    <button type="button" id="muteBtn">ミュート切替</button>
+    <span class="now" id="nowPlaying"></span>
+  </div>
+
+  <section class="sec">
+    <h2>S O F T ─ A S M R 寄 り</h2>
+    <div class="grid" id="softGrid"></div>
+  </section>
+  <section class="sec">
+    <h2>P E A K ─ ア ド レ ナ リ ン</h2>
+    <div class="grid" id="peakGrid"></div>
+  </section>
+  <p class="note">
+    このページは www/sfx-lab.html 単体で動作します。ゲームの進行・セーブには触れません。<br>
+    音色エンジンはゲームと同じ合成ロジックを内蔵しています。
+  </p>
+
+<script>
+"use strict";
+
+/* —— ゲームと同じ効果音エンジン（このファイル内に完結） —— */
+const SFX_MUTE_KEY = "takarakuji_sfx_muted";
+const sfx = (()=>{
+  let ctx = null, master = null, comp = null;
+  let muted = false;
+  try{ muted = localStorage.getItem(SFX_MUTE_KEY) === "1"; }catch(e){}
+  let lastTapAt = 0;
+  const now = ()=> ctx ? ctx.currentTime : 0;
+
+  function ensure(){
+    if(ctx) return ctx;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.55;
+    comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -24;
+    comp.knee.value = 18;
+    comp.ratio.value = 3.2;
+    comp.attack.value = 0.003;
+    comp.release.value = 0.22;
+    master.connect(comp);
+    comp.connect(ctx.destination);
+    return ctx;
+  }
+  function unlock(){
+    const c = ensure();
+    if(!c) return;
+    if(c.state === "suspended") c.resume().catch(()=>{});
+  }
+  function setMuted(v){
+    muted = !!v;
+    try{ localStorage.setItem(SFX_MUTE_KEY, muted ? "1" : "0"); }catch(e){}
+    if(master) master.gain.setTargetAtTime(muted ? 0 : 0.55, now(), 0.02);
+  }
+  function isMuted(){ return muted; }
+  function live(){
+    if(muted) return null;
+    const c = ensure();
+    if(!c || c.state === "suspended"){ unlock(); }
+    return c && !muted ? c : null;
+  }
+  function env(g, t0, a, d, s, r, peak){
+    const p = peak == null ? 1 : peak;
+    g.gain.cancelScheduledValues(t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, p), t0 + Math.max(0.005, a));
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, p * s), t0 + a + d);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d + r);
+  }
+  function tone(type, freq, dur, opts){
+    const c = live(); if(!c) return;
+    opts = opts || {};
+    const t0 = now() + (opts.delay || 0);
+    const o = c.createOscillator();
+    const g = c.createGain();
+    const f = c.createBiquadFilter();
+    o.type = type || "sine";
+    o.frequency.setValueAtTime(freq, t0);
+    if(opts.slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, opts.slide), t0 + dur);
+    f.type = opts.filter || "lowpass";
+    f.frequency.setValueAtTime(opts.cutoff || 1800, t0);
+    if(opts.cutSlide) f.frequency.exponentialRampToValueAtTime(opts.cutSlide, t0 + dur);
+    f.Q.value = opts.q || 0.7;
+    env(g, t0, opts.a || 0.02, opts.d || 0.08, opts.s || 0.35, opts.r || Math.max(0.08, dur * 0.55), opts.vol || 0.2);
+    o.connect(f); f.connect(g); g.connect(master);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function noiseBurst(dur, opts){
+    const c = live(); if(!c) return;
+    opts = opts || {};
+    const t0 = now() + (opts.delay || 0);
+    const n = Math.max(1, Math.floor(c.sampleRate * dur));
+    const buf = c.createBuffer(1, n, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i=0;i<n;i++) data[i] = (Math.random()*2-1) * Math.pow(1 - i/n, opts.pow || 1.6);
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    const f = c.createBiquadFilter();
+    f.type = opts.filter || "bandpass";
+    f.frequency.value = opts.cutoff || 1200;
+    f.Q.value = opts.q || 0.8;
+    const g = c.createGain();
+    env(g, t0, opts.a || 0.005, opts.d || 0.04, 0.2, opts.r || dur * 0.7, opts.vol || 0.12);
+    src.connect(f); f.connect(g); g.connect(master);
+    src.start(t0); src.stop(t0 + dur + 0.02);
+  }
+  /* —— soft family：近接・低中域・触覚。刺さる高域／saw／UIチャイムを避ける —— */
+  function tapHit(comboLv){
+    const c = live(); if(!c) return;
+    const t = performance.now();
+    if(t - lastTapAt < 28) return;
+    lastTapAt = t;
+    const step = Math.min(20, comboLv|0);
+    const base = 68 + step * 4.5;
+    tone("sine", base, 0.16, { a:0.008, d:0.055, s:0.3, r:0.12, vol:0.14, cutoff:780 });
+    tone("triangle", base * 2.01, 0.12, { a:0.01, d:0.045, s:0.2, r:0.09, vol:0.035, cutoff:1200 });
+    noiseBurst(0.04, { cutoff:280, q:0.5, vol:0.028, filter:"lowpass", pow:2.2 });
+  }
+  function tapMiss(){
+    tone("sine", 150, 0.22, { a:0.02, d:0.08, s:0.28, r:0.16, vol:0.09, cutoff:520, slide:88 });
+    noiseBurst(0.1, { cutoff:320, q:0.45, vol:0.045, filter:"lowpass", pow:1.8 });
+  }
+  function comboTier(tier){
+    const f0 = 95 + tier * 12;
+    tone("sine", f0, 0.34, { a:0.04, d:0.12, s:0.4, r:0.24, vol:0.11, cutoff:900 });
+    tone("sine", f0 * 0.67, 0.38, { delay:0.09, a:0.05, d:0.14, s:0.35, r:0.28, vol:0.055, cutoff:700 });
+    noiseBurst(0.08, { delay:0.01, cutoff:450, q:0.7, vol:0.04, filter:"bandpass", pow:1.6 });
+  }
+  function lotteryBuy(){
+    noiseBurst(0.14, { cutoff:780, q:0.65, vol:0.07, filter:"bandpass", pow:1.35, a:0.008 });
+    noiseBurst(0.06, { delay:0.05, cutoff:420, q:0.5, vol:0.04, filter:"lowpass", pow:2.0 });
+    tone("triangle", 220, 0.22, { delay:0.02, a:0.02, d:0.08, s:0.25, r:0.14, vol:0.07, cutoff:1200, slide:360 });
+    tone("sine", 110, 0.26, { delay:0.04, a:0.03, d:0.1, s:0.22, r:0.16, vol:0.06, cutoff:700 });
+  }
+  function winSmall(){
+    noiseBurst(0.1, { cutoff:450, q:0.5, vol:0.05, filter:"lowpass", pow:1.8 });
+    tone("sine", 98, 0.5, { a:0.04, d:0.14, s:0.4, r:0.38, vol:0.08, cutoff:700 });
+    tone("sine", 196, 0.48, { delay:0.03, a:0.05, d:0.14, s:0.4, r:0.36, vol:0.1, cutoff:1200, cutSlide:900 });
+    tone("sine", 246.94, 0.48, { delay:0.03, a:0.05, d:0.14, s:0.4, r:0.36, vol:0.085, cutoff:1200, cutSlide:900 });
+    tone("triangle", 98, 0.55, { delay:0.05, a:0.06, d:0.16, s:0.35, r:0.4, vol:0.045, cutoff:900 });
+  }
+  function loseSoft(){
+    tone("sine", 210, 0.32, { a:0.03, d:0.1, s:0.25, r:0.24, vol:0.07, cutoff:700, slide:120 });
+    noiseBurst(0.12, { delay:0.02, cutoff:280, vol:0.03, filter:"lowpass", pow:2.0 });
+  }
+  function upgradeBuild(){
+    noiseBurst(0.07, { cutoff:300, q:0.5, vol:0.045, filter:"lowpass", pow:2.2 });
+    tone("sine", 130, 0.28, { a:0.03, d:0.1, s:0.35, r:0.2, vol:0.1, cutoff:900, slide:165 });
+    tone("triangle", 196, 0.32, { delay:0.12, a:0.04, d:0.12, s:0.3, r:0.24, vol:0.055, cutoff:1100 });
+  }
+  function facMultBreak(){
+    noiseBurst(0.25, { a:0.05, cutoff:500, q:0.55, vol:0.05, filter:"bandpass", pow:1.2 });
+    tone("sine", 500, 0.25, { a:0.06, d:0.1, s:0.3, r:0.18, vol:0.03, cutoff:900, slide:350 });
+    subImpact(0.12, 65, 0.12);
+    tone("sine", 174.61, 0.85, { delay:0.18, a:0.08, d:0.22, s:0.45, r:0.7, vol:0.09, cutoff:1400, cutSlide:900 });
+    tone("sine", 220, 0.85, { delay:0.18, a:0.08, d:0.22, s:0.45, r:0.7, vol:0.08, cutoff:1400, cutSlide:900 });
+    tone("sine", 349.23, 0.9, { delay:0.4, a:0.1, d:0.25, s:0.3, r:0.7, vol:0.025, cutoff:1800 });
+  }
+  function lifeUpgrade(){
+    noiseBurst(0.2, { a:0.04, cutoff:280, q:0.5, vol:0.045, filter:"lowpass", pow:1.7 });
+    tone("sine", 98, 0.95, { a:0.06, d:0.25, s:0.5, r:0.7, vol:0.1, cutoff:600, cutSlide:1400 });
+    tone("sine", 164.81, 0.7, { delay:0.35, a:0.07, d:0.2, s:0.4, r:0.55, vol:0.065, cutoff:1200 });
+    tone("triangle", 123.47, 0.8, { delay:0.15, a:0.08, d:0.22, s:0.35, r:0.6, vol:0.04, cutoff:900 });
+  }
+  function luxBuy(){
+    tone("sine", 220, 0.65, { a:0.07, d:0.2, s:0.4, r:0.55, vol:0.095, cutoff:1600 });
+    tone("triangle", 330, 0.7, { delay:0.08, a:0.08, d:0.22, s:0.35, r:0.58, vol:0.055, cutoff:1800 });
+    noiseBurst(0.22, { delay:0.04, cutoff:900, q:0.35, vol:0.03, filter:"bandpass", pow:1.4 });
+    tone("sine", 110, 0.8, { delay:0.05, a:0.08, d:0.25, s:0.4, r:0.6, vol:0.05, cutoff:600 });
+  }
+  function unlockSoft(){
+    tone("sine", 98, 1.0, { a:0.07, d:0.28, s:0.5, r:0.75, vol:0.085, cutoff:600 });
+    noiseBurst(0.22, { delay:0.08, cutoff:480, vol:0.04, filter:"lowpass", pow:1.5 });
+    tone("sine", 196, 0.85, { delay:0.12, a:0.08, d:0.22, s:0.45, r:0.65, vol:0.085, cutoff:1600 });
+    tone("sine", 246.94, 0.85, { delay:0.12, a:0.08, d:0.22, s:0.45, r:0.65, vol:0.075, cutoff:1600 });
+    tone("sine", 293.66, 0.85, { delay:0.12, a:0.08, d:0.22, s:0.45, r:0.65, vol:0.065, cutoff:1600 });
+    tone("sine", 392, 0.95, { delay:0.6, a:0.12, d:0.25, s:0.3, r:0.75, vol:0.03, cutoff:2000 });
+  }
+  function unlockApex(){
+    tone("sine", 55, 1.1, { a:0.08, d:0.3, s:0.55, r:0.85, vol:0.1, cutoff:400 });
+    noiseBurst(0.35, { delay:0.1, cutoff:480, vol:0.05, filter:"lowpass", pow:1.3 });
+    tone("triangle", 110, 1.0, { delay:0.1, a:0.08, d:0.28, s:0.4, r:0.75, vol:0.05, cutoff:700 });
+    tone("sine", 146.83, 0.95, { delay:0.12, a:0.08, d:0.25, s:0.45, r:0.7, vol:0.08, cutoff:1500 });
+    tone("sine", 185, 0.95, { delay:0.12, a:0.08, d:0.25, s:0.45, r:0.7, vol:0.07, cutoff:1500 });
+    tone("sine", 220, 0.95, { delay:0.12, a:0.08, d:0.25, s:0.45, r:0.7, vol:0.06, cutoff:1500 });
+    tone("sine", 523.25, 1.05, { delay:0.65, a:0.12, d:0.28, s:0.3, r:0.85, vol:0.03, cutoff:2000 });
+  }
+  function rhcSpin(){
+    noiseBurst(0.28, { a:0.04, cutoff:600, q:0.55, vol:0.055, filter:"bandpass", pow:1.2 });
+    tone("sine", 90, 0.45, { a:0.05, d:0.15, s:0.35, r:0.3, vol:0.07, cutoff:700, slide:180 });
+    tone("triangle", 180, 0.5, { delay:0.06, a:0.06, d:0.18, s:0.3, r:0.35, vol:0.045, cutoff:1100, slide:320 });
+  }
+  function adReward(){
+    noiseBurst(0.05, { cutoff:420, q:0.55, vol:0.05, filter:"lowpass", pow:2.2 });
+    tone("sine", 92, 0.28, { a:0.015, d:0.08, s:0.3, r:0.2, vol:0.05, cutoff:600 });
+    tone("sine", 185, 0.26, { a:0.02, d:0.08, s:0.3, r:0.2, vol:0.1, cutoff:1000, slide:210 });
+  }
+  function tutComplete(){
+    noiseBurst(0.35, { a:0.06, cutoff:600, q:0.5, vol:0.045, filter:"bandpass", pow:1.15 });
+    tone("sine", 600, 0.35, { a:0.08, d:0.12, s:0.3, r:0.22, vol:0.03, cutoff:900, slide:400 });
+    tone("sine", 87.31, 1.1, { delay:0.12, a:0.08, d:0.28, s:0.5, r:0.85, vol:0.08, cutoff:500 });
+    tone("sine", 174.61, 1.0, { delay:0.2, a:0.1, d:0.28, s:0.45, r:0.75, vol:0.08, cutoff:1300 });
+    tone("sine", 220, 1.0, { delay:0.2, a:0.1, d:0.28, s:0.45, r:0.75, vol:0.07, cutoff:1300 });
+    tone("sine", 261.63, 1.0, { delay:0.2, a:0.1, d:0.28, s:0.45, r:0.75, vol:0.06, cutoff:1300 });
+  }
+  function mascotRare(){
+    noiseBurst(0.12, { a:0.03, cutoff:700, q:0.5, vol:0.04, filter:"bandpass", pow:1.5 });
+    tone("sine", 185, 0.42, { a:0.05, d:0.14, s:0.35, r:0.32, vol:0.09, cutoff:1400, slide:247 });
+    tone("triangle", 277, 0.48, { delay:0.1, a:0.06, d:0.16, s:0.28, r:0.36, vol:0.03, cutoff:1600 });
+  }
+  function zeroFlipOk(streak){
+    const s = Math.min(24, streak|0);
+    const f = 78 + s * 5;
+    noiseBurst(0.035, { cutoff:260, q:0.5, vol:0.03, filter:"lowpass", pow:2.3 });
+    noiseBurst(0.025, { delay:0.01, cutoff:500, q:0.7, vol:0.02, filter:"bandpass", pow:2.0 });
+    tone("sine", f, 0.12, { a:0.012, d:0.04, s:0.28, r:0.08, vol:0.11, cutoff:900 });
+    tone("triangle", f * 2.01, 0.1, { a:0.012, d:0.035, s:0.18, r:0.07, vol:0.028, cutoff:1200 });
+  }
+  function zeroFlipNg(){
+    tone("sine", 160, 0.24, { a:0.02, d:0.09, s:0.25, r:0.18, vol:0.085, cutoff:600, slide:95 });
+    noiseBurst(0.1, { cutoff:300, vol:0.035, filter:"lowpass", pow:1.9 });
+  }
+
+  /* —— peak：#flash / body.shake に同期した「どしん」高揚 ——
+     flashIn は 2.6s、6%≈0.156s で画面が全開（本打撃）
+     shake は 0.42s×3 → 0.42 / 0.84 に余震
+     sliver は 0–0.6s 遅延で降り始め、フラッシュ保持〜2.0s で余韻 */
+  function slam(delay, freq, vol){
+    tone("sine", freq, 0.95, { delay, a:0.0012, d:0.055, s:0.78, r:0.8, vol, cutoff:170 });
+    tone("sine", freq * 2, 0.58, { delay, a:0.0018, d:0.05, s:0.55, r:0.48, vol:vol * 0.7, cutoff:320 });
+    tone("triangle", freq * 3, 0.38, { delay, a:0.002, d:0.05, s:0.32, r:0.3, vol:vol * 0.3, cutoff:500 });
+    noiseBurst(0.22, { delay, a:0.001, cutoff:120, q:0.35, vol:vol * 0.7, filter:"lowpass", pow:3.1 });
+  }
+  function subImpact(delay, freq, vol){
+    /* 余震・弱い打撃（facMultBreak 等からも利用） */
+    tone("sine", freq, 0.7, { delay, a:0.002, d:0.07, s:0.65, r:0.55, vol, cutoff:200 });
+    tone("sine", freq * 2, 0.45, { delay, a:0.003, d:0.06, s:0.4, r:0.35, vol:vol * 0.55, cutoff:380 });
+    noiseBurst(0.14, { delay, a:0.002, cutoff:150, q:0.4, vol:vol * 0.5, filter:"lowpass", pow:2.8 });
+  }
+  function bodyBed(freq, delay, vol, dur){
+    tone("sine", freq, dur, {
+      delay, a:0.02, d:0.25, s:0.72, r:dur * 0.75, vol, cutoff:240, cutSlide:480
+    });
+    tone("sine", freq * 2, dur * 0.92, {
+      delay, a:0.025, d:0.26, s:0.55, r:dur * 0.7, vol:vol * 0.48, cutoff:440
+    });
+  }
+  function chordBlast(notes, delay, vol){
+    notes.forEach((f,i)=>{
+      const d = delay + i * 0.004;
+      tone("sine", f, 1.1, {
+        delay:d, a:0.006, d:0.14, s:0.55, r:0.9, vol:Math.max(0.04, vol - i*0.006), cutoff:2600
+      });
+      tone("triangle", f * 0.5, 1.25, {
+        delay:d, a:0.01, d:0.18, s:0.5, r:1.0, vol:Math.max(0.02, (vol - i*0.006)*0.48), cutoff:1200
+      });
+    });
+  }
+  function energyRush(f0, f1, dur, vol, delay){
+    tone("sine", f0, dur, {
+      delay:delay||0, a:0.015, d:dur*0.28, s:0.55, r:dur*0.42, vol,
+      cutoff:1200, cutSlide:5600, slide:f1
+    });
+    tone("triangle", f0 * 0.5, dur*1.05, {
+      delay:delay||0, a:0.02, d:dur*0.3, s:0.45, r:dur*0.45, vol:vol*0.5,
+      cutoff:800, cutSlide:2800, slide:f1*0.5
+    });
+  }
+  function shimmerTail(freq, delay, dur, vol){
+    tone("sine", freq, dur, { delay, a:0.08, d:dur*0.22, s:0.4, r:dur*0.78, vol, cutoff:4800 });
+    tone("triangle", freq * 1.498, dur*1.05, {
+      delay:delay + 0.06, a:0.1, d:dur*0.24, s:0.32, r:dur*0.8, vol:vol*0.4, cutoff:3800
+    });
+  }
+  function crown(freq, delay, vol, dur){
+    tone("sine", freq, dur||0.95, {
+      delay, a:0.02, d:0.15, s:0.35, r:0.75, vol, cutoff:5200
+    });
+  }
+  function winFirst(){
+    unlock();
+    /* 0→0.15: フラッシュが立ち上がる圧 */
+    tone("sine", 48, 0.16, { a:0.05, d:0.07, s:0.35, r:0.06, vol:0.045, cutoff:220, slide:34 });
+    /* ≈flash 6% 全開どしん */
+    slam(0.15, 30, 0.46);
+    chordBlast([261.63, 329.63, 392, 523.25], 0.17, 0.13);
+    bodyBed(34, 0.15, 0.17, 1.9);
+    /* shake 2拍目 */
+    slam(0.42, 38, 0.16);
+    energyRush(140, 720, 0.5, 0.12, 0.28);
+    crown(988, 0.62, 0.04, 0.95);
+    /* sliver 降り／フラッシュ保持 */
+    shimmerTail(1174, 0.7, 2.2, 0.055);
+    shimmerTail(1568, 0.95, 2.0, 0.03);
+  }
+  function winSuper(){
+    unlock();
+    tone("sine", 40, 0.16, { a:0.05, d:0.07, s:0.4, r:0.06, vol:0.05, cutoff:200, slide:28 });
+    slam(0.15, 24, 0.52);
+    chordBlast([196, 246.94, 311.13, 392, 493.88], 0.17, 0.14);
+    bodyBed(26, 0.15, 0.2, 2.3);
+    tone("sine", 52, 2.0, { delay:0.16, a:0.03, d:0.35, s:0.65, r:1.6, vol:0.09, cutoff:380 });
+    /* shake 2・3拍 + vibrate の連続どしん感 */
+    slam(0.42, 32, 0.2);
+    slam(0.84, 28, 0.14);
+    energyRush(70, 820, 0.58, 0.135, 0.3);
+    crown(1108.7, 0.68, 0.038, 1.0);
+    shimmerTail(1397, 0.78, 2.4, 0.06);
+    shimmerTail(1760, 1.05, 2.2, 0.035);
+    shimmerTail(2217, 1.35, 2.0, 0.018);
+  }
+  function winRhc(){
+    unlock();
+    tone("sine", 44, 0.16, { a:0.05, d:0.07, s:0.38, r:0.06, vol:0.048, cutoff:210, slide:30 });
+    slam(0.15, 28, 0.48);
+    chordBlast([220, 277.18, 330, 415.3, 554.37], 0.17, 0.13);
+    bodyBed(30, 0.15, 0.185, 2.15);
+    tone("triangle", 830, 0.2, { delay:0.22, a:0.005, d:0.05, s:0.25, r:0.14, vol:0.055, cutoff:4800 });
+    slam(0.42, 36, 0.17);
+    energyRush(90, 700, 0.52, 0.12, 0.3);
+    crown(987.77, 0.65, 0.036, 0.95);
+    shimmerTail(1318, 0.78, 2.3, 0.055);
+    shimmerTail(1661, 1.05, 2.1, 0.03);
+  }
+  function winZero(){
+    unlock();
+    tone("sine", 36, 0.17, { a:0.055, d:0.08, s:0.42, r:0.06, vol:0.055, cutoff:190, slide:22 });
+    slam(0.15, 20, 0.56);
+    chordBlast([146.83, 185, 220, 277.18, 349.23, 440], 0.17, 0.135);
+    bodyBed(22, 0.15, 0.23, 2.7);
+    tone("sine", 44, 2.5, { delay:0.16, a:0.03, d:0.4, s:0.7, r:2.0, vol:0.11, cutoff:320 });
+    slam(0.42, 26, 0.22);
+    slam(0.84, 24, 0.16);
+    /* フラッシュ終盤のもう一発（保持ピーク感） */
+    slam(1.26, 22, 0.1);
+    energyRush(50, 900, 0.7, 0.15, 0.3);
+    crown(1318.5, 0.72, 0.045, 1.1);
+    crown(1865, 0.72, 0.025, 1.0);
+    shimmerTail(1568, 0.85, 2.6, 0.065);
+    shimmerTail(1976, 1.15, 2.4, 0.04);
+    shimmerTail(2489, 1.45, 2.2, 0.02);
+  }
+
+
+  return {
+    unlock, setMuted, isMuted,
+    tapHit, tapMiss, comboTier,
+    lotteryBuy, winSmall, loseSoft,
+    upgradeBuild, facMultBreak, lifeUpgrade, luxBuy,
+    unlockSoft, unlockApex, rhcSpin, adReward, tutComplete, mascotRare,
+    zeroFlipOk, zeroFlipNg,
+    winFirst, winSuper, winRhc, winZero,
+  };
+})();
+
+const CATALOG = [
+  { group:"soft", label:"労働ヒット", play:()=>sfx.tapHit(8) },
+  { group:"soft", label:"労働ミス", play:()=>sfx.tapMiss() },
+  { group:"soft", label:"コンボ段階", play:()=>sfx.comboTier(2) },
+  { group:"soft", label:"くじ購入", play:()=>sfx.lotteryBuy() },
+  { group:"soft", label:"小〜中当たり", play:()=>sfx.winSmall() },
+  { group:"soft", label:"ハズレ", play:()=>sfx.loseSoft() },
+  { group:"soft", label:"設備強化", play:()=>sfx.upgradeBuild() },
+  { group:"soft", label:"設備倍率突破", play:()=>sfx.facMultBreak() },
+  { group:"soft", label:"生活引っ越し", play:()=>sfx.lifeUpgrade() },
+  { group:"soft", label:"嗜好品購入", play:()=>sfx.luxBuy() },
+  { group:"soft", label:"超一等解禁", play:()=>sfx.unlockSoft() },
+  { group:"soft", label:"極み解禁", play:()=>sfx.unlockApex() },
+  { group:"soft", label:"RHC抽選", play:()=>sfx.rhcSpin() },
+  { group:"soft", label:"広告／コイン", play:()=>sfx.adReward() },
+  { group:"soft", label:"チュート完了", play:()=>sfx.tutComplete() },
+  { group:"soft", label:"レア猫", play:()=>sfx.mascotRare() },
+  { group:"soft", label:"零等・表", play:()=>sfx.zeroFlipOk(10) },
+  { group:"soft", label:"零等・裏", play:()=>sfx.zeroFlipNg() },
+  { group:"peak", label:"一等", play:()=>sfx.winFirst() },
+  { group:"peak", label:"超一等", play:()=>sfx.winSuper() },
+  { group:"peak", label:"RHC一等", play:()=>sfx.winRhc() },
+  { group:"peak", label:"零等達成", play:()=>sfx.winZero() },
+];
+
+const nowEl = document.getElementById("nowPlaying");
+const muteBtn = document.getElementById("muteBtn");
+
+function syncMute(){
+  muteBtn.textContent = sfx.isMuted() ? "ミュート中（解除）" : "ミュート切替";
+  muteBtn.classList.toggle("on", sfx.isMuted());
+}
+function playItem(item){
+  sfx.unlock();
+  if(sfx.isMuted()) sfx.setMuted(false);
+  syncMute();
+  nowEl.textContent = "▶ " + item.label;
+  item.play();
+}
+
+function fill(group, elId){
+  const host = document.getElementById(elId);
+  CATALOG.filter(x=>x.group===group).forEach(item=>{
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = item.label;
+    if(group === "peak") b.classList.add("peak");
+    else b.classList.add("gold");
+    b.addEventListener("click", ()=> playItem(item));
+    host.appendChild(b);
+  });
+}
+
+fill("soft", "softGrid");
+fill("peak", "peakGrid");
+document.getElementById("unlockBtn").addEventListener("click", ()=>{
+  sfx.unlock();
+  nowEl.textContent = "音声コンテキスト有効";
+  sfx.tapHit(1);
+});
+muteBtn.addEventListener("click", ()=>{
+  sfx.unlock();
+  sfx.setMuted(!sfx.isMuted());
+  syncMute();
+});
+syncMute();
+</script>
+</body>
+</html>

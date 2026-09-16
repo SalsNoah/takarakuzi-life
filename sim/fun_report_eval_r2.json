@@ -1,0 +1,126 @@
+{
+  "round": 2,
+  "target": "canvases/fun-evaluation-report.canvas.tsx",
+  "targetVersion": "v1.1",
+  "evaluatorRole": "strict product/design report evaluator",
+  "evaluatedAt": "2026-09-04",
+  "comparedTo": {
+    "round": 1,
+    "file": "sim/fun_report_eval_r1.json",
+    "overallGrade": "C",
+    "dimensionScores": {
+      "clarityOfVerdict": 4,
+      "evidenceQuality": 3,
+      "actionability": 3,
+      "alignmentWithDesignIntent": 5,
+      "completeness": 2,
+      "honestyCalibration": 3
+    }
+  },
+  "overallGrade": "B",
+  "dimensions": {
+    "clarityOfVerdict": {
+      "score": 5,
+      "max": 5,
+      "deltaVsR1": 1,
+      "note": "総合=7観点単純平均・条件付きGo・コア出荷可／長期KPI未達想定がヘッダ・Callout・結論で揃う。採点ソース列で主観／シミュ比重も明示。意思決定フレーミングの欠落は解消。"
+    },
+    "evidenceQuality": {
+      "score": 4,
+      "max": 5,
+      "deltaVsR1": 1,
+      "note": "§4が matrix 実数表（runs=16/セル・medDay/rate・D7/D21）＋to_end補足に差し替わり、spot-check（F2Pライト13/70/バグ0、softライト10/13、whaleハード5/7、to_end高次元547等）と整合。強みは設計観察ラベル付き。実機ログ／retention／プレイテスト人数は依然ゼロで5には届かない。"
+    },
+    "actionability": {
+      "score": 4,
+      "max": 5,
+      "deltaVsR1": 1,
+      "note": "P0-A/Bに解放条件・新行動・受け入れ条件・監視KPI・工数が揃い、コスト増・待ち延長を成功条件から排除。P1も行動増系の列挙と帯域（D14〜D70）あり。実装チケット化は可能だが、ミッション中身の具体リストやUI仕様までは未達のため満点ではない。"
+    },
+    "alignmentWithDesignIntent": {
+      "score": 5,
+      "max": 5,
+      "deltaVsR1": 0,
+      "note": "『重くせず量を増やす』軸は維持・強化。やらない明示、間隔短縮を成功定義にしない監視節、P0-Bの速度バフ不可が方針と一貫。"
+    },
+    "completeness": {
+      "score": 4,
+      "max": 5,
+      "deltaVsR1": 2,
+      "note": "監視KPI／検証計画節・チャーン仮説分離・層別matrix数値・マネタイズ根拠・未計測retentionの明示が追加され、R1欠落の大半を構造的に埋めた。競合は1行ベンチのみ、課金ファネル（ARPU等）はデータ無し宣言止まり、matrix 16セル中6行提示に留まる点が残りギャップ。"
+    },
+    "honestyCalibration": {
+      "score": 4,
+      "max": 5,
+      "deltaVsR1": 1,
+      "note": "崖の三段分離と『パラレル≠未到達』の修正は正確。独自性／演出の比較タイトル無し主観、retention未計測、体験差=速度を明記。独自性・演出8はラベル付きでも依然やや甘い可能性。広告ライトD7の生活名省略など表の体裁の軽いばらつきは残る。"
+    }
+  },
+  "dimensionScores": {
+    "clarityOfVerdict": 5,
+    "evidenceQuality": 4,
+    "actionability": 4,
+    "alignmentWithDesignIntent": 5,
+    "completeness": 4,
+    "honestyCalibration": 4
+  },
+  "dimensionDeltasVsR1": {
+    "clarityOfVerdict": 1,
+    "evidenceQuality": 1,
+    "actionability": 1,
+    "alignmentWithDesignIntent": 0,
+    "completeness": 2,
+    "honestyCalibration": 1
+  },
+  "strengths": [
+    "Round1 mustFix3件を実質すべて解消し、数値表・崖の分離・P0受入/KPI・採点ルール・条件付きGoが揃ってレポートとして使える粒度になった",
+    "設計方針（サクサク＋量増／コストで伸ばさない）との整合が、施策・監視の成功定義まで一貫している",
+    "未知データ（retention・ARPU・比較タイトル）を推測で埋めず、主観とシミュを分離して書いている"
+  ],
+  "weaknesses": [
+    "実機 retention / プレイテスト根拠がなく、中終盤・マネタイズ点はシミュ曲線＋主観のまま",
+    "独自性・演出8は比較タイトル無し主観と明記されても、校正可能な基準は弱い",
+    "P0のミッション／新抽選の中身はまだテーマ級で、コンテンツ一覧やUI差分までは落ちていない",
+    "matrixは代表6セル提示のみで mid/deep 帯の記述が薄い",
+    "競合ベンチは1行、課金ファネル深度は『データ無し』止まり"
+  ],
+  "mustFixBeforeUseful": [],
+  "round1MustFixStatus": [
+    {
+      "item": "シミュ表を具体数値＋ソースに差し替え、銀河／パラレル／バグの崖を分けて記述する",
+      "status": "resolved",
+      "evidence": "§3三段崖＋§4 matrix表（runs=16）＋to_end補足。パラレルを未到達と書いていない"
+    },
+    {
+      "item": "P0ごとに受け入れ条件と監視KPIを1行以上付ける",
+      "status": "resolved",
+      "evidence": "§6 P0-A/Bに解放・新行動・受入・KPI・工数。コスト増を成功条件にしていない"
+    },
+    {
+      "item": "総合点と各観点の採点ルールを短く明示し、主観とシミュを分離する",
+      "status": "resolved",
+      "evidence": "§1注記＋採点ソース列＋『シミュ単体ではない／retention未計測』＋条件付きGo"
+    }
+  ],
+  "acceptanceCheckVsReviseR1": {
+    "source": "sim/fun_report_revise_r1.json",
+    "results": [
+      { "check": "§4 matrix具体値＋runs=16、目安のみ行なし", "met": true },
+      { "check": "パラレル≠未到達、バグ/高次元分離", "met": true },
+      { "check": "総合単純平均＋観点ソース", "met": true },
+      { "check": "P0に解放・新行動・受入・KPI、コスト増非成功", "met": true },
+      { "check": "§5 pay×engage実数＋単調化帯特定", "met": true },
+      { "check": "監視節＋retention未計測＋チャーン分離", "met": true },
+      { "check": "doNotChange維持", "met": true },
+      { "check": "版履歴 Round1反映", "met": true }
+    ],
+    "allMet": true
+  },
+  "notes": {
+    "simSpotCheck": {
+      "reportVsMatrix": "F2Pライト・adライト・softライト・whaleライト/ハードの表値は audit_matrix_report.json と一致。to_endの無課金パラレル101・whale高次元547 rate=1・バグ0・F2P D14 rhc≈11→D730≈19も一致。",
+      "gradeRationale": "mustFix解消と acceptanceCheck全クリアで C→B。Aにしない理由は実機エビデンス欠如と施策コンテンツ粒度・競合深度の残り。"
+    },
+    "revisionInstructions": "deferred — Round 2 evaluation only"
+  }
+}

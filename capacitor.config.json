@@ -1,0 +1,14 @@
+{
+  "appId": "jp.takarakuzi.life",
+  "appName": "宝くじ生活",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "backgroundColor": "#0b0c0e"
+    }
+  }
+}

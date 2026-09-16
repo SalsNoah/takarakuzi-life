@@ -1,0 +1,286 @@
+{
+  "base": {
+    "f2p": {
+      "label": "無課金",
+      "playMin": 25,
+      "D7": 7,
+      "D14": 9,
+      "D21": 9,
+      "D60": 9,
+      "D90": 9,
+      "D180": 10,
+      "final": 10,
+      "parallel": {
+        "name": "パラレル",
+        "rate": 1,
+        "med": "116日",
+        "day": 116
+      },
+      "high": {
+        "name": "高次元",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "bug": {
+        "name": "バグ",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "galaxy": {
+        "name": "銀河",
+        "rate": 1,
+        "med": "11日",
+        "day": 11
+      }
+    },
+    "ad": {
+      "label": "広告視聴",
+      "playMin": 30,
+      "D7": 7,
+      "D14": 9,
+      "D21": 9,
+      "D60": 9,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "parallel": {
+        "name": "パラレル",
+        "rate": 1,
+        "med": "75日",
+        "day": 75
+      },
+      "high": {
+        "name": "高次元",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "bug": {
+        "name": "バグ",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "galaxy": {
+        "name": "銀河",
+        "rate": 1,
+        "med": "10日",
+        "day": 10
+      }
+    },
+    "soft": {
+      "label": "軽課金",
+      "playMin": 35,
+      "D7": 8,
+      "D14": 10,
+      "D21": 10,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "parallel": {
+        "name": "パラレル",
+        "rate": 1,
+        "med": "15日",
+        "day": 15
+      },
+      "high": {
+        "name": "高次元",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "bug": {
+        "name": "バグ",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "galaxy": {
+        "name": "銀河",
+        "rate": 1,
+        "med": "8日",
+        "day": 8
+      }
+    },
+    "whale": {
+      "label": "重課金",
+      "playMin": 45,
+      "D7": 9,
+      "D14": 10,
+      "D21": 10,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "parallel": {
+        "name": "パラレル",
+        "rate": 1,
+        "med": "9日",
+        "day": 9
+      },
+      "high": {
+        "name": "高次元",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "bug": {
+        "name": "バグ",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "galaxy": {
+        "name": "銀河",
+        "rate": 1,
+        "med": "6日",
+        "day": 6
+      }
+    }
+  },
+  "hour1": {
+    "f2p": {
+      "label": "無課金",
+      "playMin": 60,
+      "D7": 8,
+      "D14": 9,
+      "D21": 9,
+      "D60": 9,
+      "D90": 9,
+      "D180": 10,
+      "final": 10,
+      "parallel": {
+        "name": "パラレル",
+        "rate": 1,
+        "med": "101日",
+        "day": 101
+      },
+      "high": {
+        "name": "高次元",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "bug": {
+        "name": "バグ",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "galaxy": {
+        "name": "銀河",
+        "rate": 1,
+        "med": "9日",
+        "day": 9
+      }
+    },
+    "ad": {
+      "label": "広告視聴",
+      "playMin": 60,
+      "D7": 8,
+      "D14": 9,
+      "D21": 9,
+      "D60": 9,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "parallel": {
+        "name": "パラレル",
+        "rate": 1,
+        "med": "63日",
+        "day": 63
+      },
+      "high": {
+        "name": "高次元",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "bug": {
+        "name": "バグ",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "galaxy": {
+        "name": "銀河",
+        "rate": 1,
+        "med": "8日",
+        "day": 8
+      }
+    },
+    "soft": {
+      "label": "軽課金",
+      "playMin": 60,
+      "D7": 9,
+      "D14": 10,
+      "D21": 10,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "parallel": {
+        "name": "パラレル",
+        "rate": 1,
+        "med": "13日",
+        "day": 13
+      },
+      "high": {
+        "name": "高次元",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "bug": {
+        "name": "バグ",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "galaxy": {
+        "name": "銀河",
+        "rate": 1,
+        "med": "6日",
+        "day": 6
+      }
+    },
+    "whale": {
+      "label": "重課金",
+      "playMin": 60,
+      "D7": 9,
+      "D14": 10,
+      "D21": 10,
+      "D60": 10,
+      "D90": 10,
+      "D180": 10,
+      "final": 10,
+      "parallel": {
+        "name": "パラレル",
+        "rate": 1,
+        "med": "8日",
+        "day": 8
+      },
+      "high": {
+        "name": "高次元",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "bug": {
+        "name": "バグ",
+        "rate": 0,
+        "med": "—",
+        "day": null
+      },
+      "galaxy": {
+        "name": "銀河",
+        "rate": 1,
+        "med": "6日",
+        "day": 6
+      }
+    }
+  }
+}

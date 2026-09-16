@@ -1,0 +1,25 @@
+{
+  "name": "takarakuzi-life",
+  "version": "1.0.0",
+  "description": "宝くじ生活 — 当選金だけで暮らす放置ゲーム",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/sync-www.js",
+    "sync": "npm run build && npx cap sync",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios",
+    "preview": "npx --yes serve www -p 5173"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/app": "^7.1.0",
+    "@capacitor/browser": "^7.0.2",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/haptics": "^7.0.2",
+    "@capacitor/ios": "^7.4.3",
+    "@capacitor/status-bar": "^7.0.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3"
+  }
+}

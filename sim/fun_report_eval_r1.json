@@ -1,0 +1,81 @@
+{
+  "round": 1,
+  "target": "canvases/fun-evaluation-report.canvas.tsx",
+  "targetVersion": "v1",
+  "evaluatorRole": "strict product/design report evaluator",
+  "evaluatedAt": "2026-09-04",
+  "overallGrade": "C",
+  "dimensions": {
+    "clarityOfVerdict": {
+      "score": 4,
+      "max": 5,
+      "note": "総合6.5・入口強い・中終盤課題・「次は量の設計」は一目で読める。ただし go/no-go/条件付き出荷のような意思決定フレーミングはなく、6.5の算出根拠（単純平均か加重か）も本文では明示されていない。"
+    },
+    "evidenceQuality": {
+      "score": 3,
+      "max": 5,
+      "note": "audit_matrix / audit_to_end / LIVE_NOW を参照している点は良いが、表は『島〜火星』『約2ヶ月』など目安表現に留まり、medDay・到達率・runs数の引用がない。強み（零等・RHC・ハズレ再生）は設計観察で、プレイテスト／ログ根拠は未提示。"
+    },
+    "actionability": {
+      "score": 3,
+      "max": 5,
+      "note": "P0–P2と『やらない』があり方向は使える。一方、ミッション内容・解放条件・成功指標・工数目安がなく、実装チケットに落とせる粒度ではない。"
+    },
+    "alignmentWithDesignIntent": {
+      "score": 5,
+      "max": 5,
+      "note": "『サクサク＋量が増える／コストで伸ばさない』に対し、方針整合4点・やらない明示・改善案が速度ではなく系統増・達成後の盤面拡大に寄っており、意図との整合はレポート内で最も明確。"
+    },
+    "completeness": {
+      "score": 2,
+      "max": 5,
+      "note": "retention（D1/D7/D30等）・競合比較・監視KPI・チャーン仮説の検証計画・課金ファネル詳細が欠落。プレイヤー別表は仮説のみで薄い。"
+    },
+    "honestyCalibration": {
+      "score": 3,
+      "max": 5,
+      "note": "サブスコアにばらつきがあり総合も過大ではない。ただし『パラレル以降は数十日〜未到達』は、matrix上F2Pでもパラレル到達率1・中央値約58–70日である一方バグは180日未達が多く、崖の位置が曖昧。独自性・演出8点は比較根拠なしでやや甘い可能性。"
+    }
+  },
+  "dimensionScores": {
+    "clarityOfVerdict": 4,
+    "evidenceQuality": 3,
+    "actionability": 3,
+    "alignmentWithDesignIntent": 5,
+    "completeness": 2,
+    "honestyCalibration": 3
+  },
+  "strengths": [
+    "結論が一貫しており、『面白い核はある／伸ばすのは速度ではなく盤面の広がり』という製品論がぶれない",
+    "設計方針（重くせず量を増やす）に対する『やらない』と方針整合スコアが明示され、レポートの軸がはっきりしている",
+    "強み→弱み→シミュ根拠→層別仮説→優先施策という構成で、初稿として読み進めやすい"
+  ],
+  "weaknesses": [
+    "シミュ根拠が定性的で、audit_matrixの具体値（例: F2Pライト 銀河中央値13日・パラレル70日・バグ到達率0、D7生活=島、D21=銀河）やruns数が本文に出てこない",
+    "ペース二極の記述が『パラレル未到達』と『バグ未達』を混同しやすく、崖の診断がやや不正確",
+    "P0施策がテーマ止まりで、何を増やすか・どう測るか・どれだけやれば成功かの受け入れ条件がない",
+    "retention・競合・監視メトリクス・課金体験の定量がほぼなく、商品レポートとして欠けている角度が多い",
+    "各観点スコアの採点基準（実機プレイ／シミュ／主観の比重）が不明で、再現性・校正可能性が低い"
+  ],
+  "mustFixBeforeUseful": [
+    "シミュ表を具体数値＋ソース（matrix/to_end、n、pay×engageセル）に差し替え、銀河／パラレル／バグの崖を分けて記述する",
+    "P0ごとに受け入れ条件と監視KPI（例: 銀河到達後の日次アクション種数、RHC取得後の新系統利用率）を1行以上付ける",
+    "総合点と各観点の採点ルール（何を見て何点か）を短く明示し、主観とシミュを分離する"
+  ],
+  "notes": {
+    "simSpotCheck": {
+      "f2p_light": {
+        "D7_lifeIndex": 6,
+        "D7_name": "島",
+        "D21_lifeIndex": 9,
+        "D21_name": "銀河",
+        "galaxy_medDay": 13,
+        "parallel_medDay": 70,
+        "parallel_rate": 1,
+        "bug_rate_180d": 0
+      },
+      "reportClaimFit": "D7『島〜火星』とD21『銀河付近』は概ね妥当。パラレル『約2ヶ月』も妥当。『未到達』はバグ空間向けでありパラレルには過言。"
+    },
+    "revisionInstructions": "deferred — Round 1 evaluation only"
+  }
+}
