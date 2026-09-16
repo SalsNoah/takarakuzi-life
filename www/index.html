@@ -219,6 +219,14 @@
     color:transparent;-webkit-text-fill-color:transparent;
     animation:glossShine 2.6s ease-in-out infinite;
   }
+  .rcell.zeroth{grid-column:1 / -1;}
+  .rcell.zeroth .tier,.rcell.zeroth .cnt{
+    background:linear-gradient(115deg,#6b7280 0%,#e5e7eb 26%,#ffffff 46%,#f8fafc 56%,#94a3b8 78%,#ffffff 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:glossShine 2.6s ease-in-out infinite;
+  }
   .rcell.lose .tier,.rcell.lose .cnt{color:var(--dim);}
   @keyframes rainbowShift{to{background-position:220% center;}}
   @keyframes glossShine{
@@ -389,6 +397,11 @@
   .shop-row .nm{font-size:12.5px;}
   .shop-row .ds{font-size:10px;color:var(--dim);margin-top:3px;line-height:1.55;}
   .shop-row .have{flex-shrink:0;font-size:9.5px;letter-spacing:.2em;color:var(--gold-lo);}
+  .daily-box{
+    border:1px solid var(--line);border-radius:4px;padding:2px 12px 4px;
+    margin-bottom:16px;background:var(--panel);
+  }
+  .daily-box .shop-row:last-child{border-bottom:none;}
   .price-c{color:var(--gold);}
   .sec{margin-top:20px;}
   .sec:first-child{margin-top:0;}
@@ -513,11 +526,13 @@
   #flash.super{background:radial-gradient(ellipse at center,rgba(48,28,60,.92),rgba(8,8,10,.96));}
   #flash.rhc{background:radial-gradient(ellipse at center,rgba(12,48,36,.92),rgba(8,8,10,.96));}
   #flash.zero{background:radial-gradient(ellipse at center,rgba(36,16,56,.92),rgba(8,8,10,.96));}
+  #flash.zeroth{background:radial-gradient(ellipse at center,rgba(14,14,18,.97),rgba(0,0,0,.985));}
   @keyframes flashIn{0%{opacity:0;}6%{opacity:1;}78%{opacity:1;}100%{opacity:0;}}
   #flashInner{border-top:1px solid var(--gold);border-bottom:1px solid var(--gold);padding:26px 40px;text-align:center;}
   #flash.super #flashInner{border-color:#b388ff;}
   #flash.rhc #flashInner{border-color:#34d399;}
   #flash.zero #flashInner{border-color:#a78bfa;}
+  #flash.zeroth #flashInner{border-color:#e5e7eb;}
   #flashTitle{font-family:var(--serif);font-size:38px;letter-spacing:.2em;text-indent:.2em;color:var(--gold-hi);text-shadow:0 0 26px rgba(200,169,81,.55);}
   #flashSub{font-family:var(--serif);font-size:19px;color:var(--gold);margin-top:12px;letter-spacing:.06em;}
   #flashTag{font-size:9px;letter-spacing:.34em;color:var(--gold-lo);margin-bottom:10px;text-indent:.34em;}
@@ -545,6 +560,16 @@
   #flash.zero #flashTag,
   #flash.zero #flashSub{
     background:linear-gradient(115deg,#2e1065 0%,#7c3aed 28%,#f3e8ff 48%,#a78bfa 58%,#5b21b6 78%,#ddd6fe 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:glossShine 2.6s ease-in-out infinite;
+    text-shadow:none;
+  }
+  #flash.zeroth #flashTitle,
+  #flash.zeroth #flashTag,
+  #flash.zeroth #flashSub{
+    background:linear-gradient(115deg,#6b7280 0%,#e5e7eb 26%,#ffffff 46%,#f8fafc 56%,#94a3b8 78%,#ffffff 100%);
     background-size:200% auto;
     -webkit-background-clip:text;background-clip:text;
     color:transparent;-webkit-text-fill-color:transparent;
@@ -729,6 +754,16 @@
     -webkit-background-clip:text;background-clip:text;
     color:transparent;-webkit-text-fill-color:transparent;
     animation:glossShine 2.6s ease-in-out infinite;
+  }
+  .apex-box.zeroth-box .apex-hd .nm{
+    background:linear-gradient(115deg,#6b7280 0%,#e5e7eb 26%,#ffffff 46%,#f8fafc 56%,#94a3b8 78%,#ffffff 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent;
+    animation:glossShine 2.6s ease-in-out infinite;
+  }
+  .apex-box.zeroth-box.is-locked{
+    opacity:.72;
   }
   .zero-log{font-size:10.5px;color:var(--dim);line-height:1.7;max-height:88px;overflow-y:auto;text-align:left;}
   .zero-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
@@ -994,7 +1029,7 @@
   <button class="nv" data-scr="facility"><span class="g">▩</span><span class="l">設備</span><i class="badge" id="bdgF"></i></button>
   <button class="nv" data-scr="life"><span class="g">⌂</span><span class="l">生活</span><i class="badge" id="bdgL"></i></button>
   <button class="nv" data-scr="recycle"><span class="g">♺</span><span class="l">再生</span><i class="badge" id="bdgR"></i></button>
-  <button class="nv" data-scr="shop"><span class="g">◎</span><span class="l">ショップ</span></button>
+  <button class="nv" data-scr="shop"><span class="g">◎</span><span class="l">ショップ</span><i class="badge" id="bdgS"></i></button>
   <button class="nv" data-scr="apex" id="nvApex" hidden><span class="g">✧</span><span class="l">極み</span><i class="badge" id="bdgA"></i></button>
   <button class="nv" data-scr="record"><span class="g">▤</span><span class="l">記録</span></button>
 </nav>
@@ -1051,9 +1086,23 @@
     <div class="body">
       超一等の当選により、さらに上の領域が開かれた。<br>
       <b style="color:var(--gold)">RHC</b>（リベンジハズレチャレンジ）と<br>
-      <b style="color:var(--gold-hi)">零等</b> への挑戦が可能になる。
+      <b style="color:var(--gold-hi)">絶等</b> への挑戦が可能になる。
     </div>
     <button class="ok" id="apexUnlockOk">確 認</button>
+  </div>
+</div>
+
+<div id="zerothUnlockModal" class="modal" hidden>
+  <div class="modal-card unlock-card">
+    <div class="tag">ABSOLUTE ZERO UNLOCKED</div>
+    <div class="ttl">零 等 出 現</div>
+    <div class="body">
+      RHC一等 と 絶一等、ふたつの頂を越えた者にだけ<br>
+      最後のくじ <b style="color:var(--gold-hi)">零等</b> が姿を現す。<br><br>
+      以降、宝くじ 1 枚ごとに <b style="color:var(--gold-hi)">1/無量大数</b> で<br>
+      <b style="color:var(--gold)">零等 10,000無量大数G</b> が当たる。
+    </div>
+    <button class="ok" id="zerothUnlockOk">確 認</button>
   </div>
 </div>
 
@@ -1096,12 +1145,12 @@
 <div id="zeroModal" class="modal" hidden>
   <div class="modal-card zero-card">
     <div class="zero-hd">
-      <span class="t">零 等 チ ャ レ ン ジ</span>
+      <span class="t">絶 等 チ ャ レ ン ジ</span>
       <button type="button" class="zero-skip" id="zeroSkip">スキップ</button>
     </div>
     <div class="zero-meta">
       <span id="zeroRound">挑戦 10 件</span>
-      <span id="zeroHits">零等 0</span>
+      <span id="zeroHits">絶等 0</span>
     </div>
     <div class="zero-grid" id="zeroGrid"></div>
     <div class="zero-log" id="zeroLog"></div>
@@ -1321,6 +1370,11 @@ const sfx = (()=>{
     const c = ensure();
     if(!c || c.state === "suspended"){ unlock(); }
     return c && !muted ? c : null;
+  }
+  /* BGM など外部モジュールと AudioContext / 出力バスを共有する */
+  function audioBus(){
+    const c = ensure();
+    return c ? { ctx:c, node:comp } : null;
   }
   function env(g, t0, a, d, s, r, peak){
     const p = peak == null ? 1 : peak;
@@ -1609,7 +1663,7 @@ const sfx = (()=>{
   });
 
   return {
-    unlock, setMuted, isMuted,
+    unlock, setMuted, isMuted, audioBus,
     tapHit, tapMiss, comboTier,
     lotteryBuy, winSmall, loseSoft,
     upgradeBuild, facMultBreak, lifeUpgrade, luxBuy,
@@ -1617,6 +1671,137 @@ const sfx = (()=>{
     zeroFlipOk, zeroFlipNg,
     winFirst, winSuper, winRhc, winZero,
   };
+})();
+
+/* ==========================================================
+   BGM（Web Audio 生成・完全ループ）
+   暖色・低中域のアンビエント。4 コードをゆっくり循環し、
+   コードトーンのオクターブ上をまばらに鳴らす。
+   SFX と同じコンプレッサーに送るので、当選演出時は自然に沈む。
+========================================================== */
+const BGM_MUTE_KEY = "takarakuji_bgm_muted";
+const bgm = (()=>{
+  let muted = false;
+  try{ muted = localStorage.getItem(BGM_MUTE_KEY) === "1"; }catch(e){}
+  let ctx = null, out = null;
+  let timer = null;
+  let nextAt = 0;
+  let step = 0;
+
+  const OUT_VOL = 0.18;  /* BGM 全体の音量（SFX より下に置く） */
+  const BAR = 7.2;       /* 1 コードの長さ（秒） */
+  const OVERLAP = 2.6;   /* 次のコードと重ねてなめらかにつなぐ */
+  /* Fmaj7 → Am7 → Dm7 → Cmaj7（暖かく落ち着いた循環） */
+  const PROG = [
+    [174.61, 220.00, 261.63, 329.63],
+    [164.81, 220.00, 261.63, 329.63],
+    [146.83, 174.61, 220.00, 261.63],
+    [130.81, 164.81, 196.00, 246.94],
+  ];
+  const BASS = [87.31, 82.41, 73.42, 65.41]; /* F2 / E2 / D2 / C2 */
+
+  function ensure(){
+    if(ctx) return true;
+    const bus = sfx.audioBus();
+    if(!bus) return false;
+    ctx = bus.ctx;
+    out = ctx.createGain();
+    out.gain.value = 0.0001;
+    out.connect(bus.node);
+    return true;
+  }
+  function padTone(type, freq, t0, dur, peak, cutoff, detune){
+    const o = ctx.createOscillator();
+    const f = ctx.createBiquadFilter();
+    const g = ctx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    if(detune) o.detune.value = detune;
+    f.type = "lowpass";
+    f.frequency.value = cutoff;
+    f.Q.value = 0.5;
+    const a = Math.min(2.6, dur * 0.35);
+    const r = Math.min(3.2, dur * 0.45);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t0 + a);
+    g.gain.setValueAtTime(Math.max(0.0002, peak), t0 + dur - r);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(f); f.connect(g); g.connect(out);
+    o.start(t0); o.stop(t0 + dur + 0.1);
+  }
+  function sparkTone(freq, t0){
+    const o = ctx.createOscillator();
+    const f = ctx.createBiquadFilter();
+    const g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.value = freq;
+    f.type = "lowpass";
+    f.frequency.value = 1800;
+    f.Q.value = 0.6;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.032, t0 + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 2.4);
+    o.connect(f); f.connect(g); g.connect(out);
+    o.start(t0); o.stop(t0 + 2.5);
+  }
+  function scheduleBar(t0, idx){
+    const chord = PROG[idx % PROG.length];
+    const dur = BAR + OVERLAP;
+    chord.forEach((fr, i)=>{
+      padTone("sine", fr, t0, dur, 0.07 - i * 0.008, 850, 0);
+      padTone("triangle", fr, t0 + 0.05, dur, 0.02, 620, 5);
+    });
+    padTone("sine", BASS[idx % BASS.length], t0, dur, 0.09, 420, 0);
+    /* まばらな上音：コードトーンのオクターブ上（0〜2 音） */
+    const n = Math.random() < 0.75 ? (Math.random() < 0.4 ? 2 : 1) : 0;
+    for(let k = 0; k < n; k++){
+      const fr = chord[(Math.random() * chord.length) | 0] * 2;
+      sparkTone(fr, t0 + BAR * (0.2 + 0.6 * Math.random()));
+    }
+  }
+  function schedule(){
+    if(!ctx) return;
+    while(nextAt < ctx.currentTime + 2.0){
+      scheduleBar(nextAt, step);
+      nextAt += BAR;
+      step = (step + 1) % PROG.length;
+    }
+  }
+  function start(){
+    if(muted || timer) return;
+    if(!ensure()) return;
+    sfx.unlock();
+    nextAt = Math.max(nextAt, ctx.currentTime + 0.1);
+    out.gain.cancelScheduledValues(ctx.currentTime);
+    out.gain.setTargetAtTime(OUT_VOL, ctx.currentTime, 1.2); /* ゆっくりフェードイン */
+    schedule();
+    timer = setInterval(schedule, 250);
+  }
+  function stop(){
+    if(timer){ clearInterval(timer); timer = null; }
+    if(ctx && out){
+      out.gain.cancelScheduledValues(ctx.currentTime);
+      out.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.4); /* フェードアウト */
+    }
+  }
+  function setMuted(v){
+    muted = !!v;
+    try{ localStorage.setItem(BGM_MUTE_KEY, muted ? "1" : "0"); }catch(e){}
+    if(muted) stop(); else start();
+  }
+  function isMuted(){ return muted; }
+
+  /* 最初の操作で開始（自動再生制限対策）。開始済みなら何もしない */
+  ["pointerdown","keydown","touchstart"].forEach(ev=>{
+    window.addEventListener(ev, ()=> start(), { passive:true });
+  });
+  /* バックグラウンドでは止め、復帰したら再開する */
+  document.addEventListener("visibilitychange", ()=>{
+    if(document.hidden) stop();
+    else start();
+  });
+
+  return { start, stop, setMuted, isMuted };
 })();
 
 /* ==========================================================
@@ -1645,7 +1830,7 @@ const PROD_POINT_MULT_STEP = 0.1;  /* 10 Pt ごとに +10% */
 const SUPER_RATE  = 0.0001; /* 一等の 1/10000 */
 const SUPER_PRIZE = 70000000000; /* 超一等 700億G */
 const RHC_COST = 1e8;       /* ハズレ券 1億枚で 1 回 */
-const ZERO_STREAK = 13;     /* 2^13 = 8192 で零等成立 */
+const ZERO_STREAK = 13;     /* 2^13 = 8192 で絶等成立 */
 const ZERO_STREAK_CAP = 64; /* 演出・連勝記録の上限 */
 const ZERO_COST_BASE = 10;  /* 基礎: 超一等 10 回で 1 挑戦 */
 const ZERO_BATCH = 10;      /* 演出は最初の 10 件のみ */
@@ -1653,6 +1838,12 @@ const ZERO_MAX_BUY = 10000; /* まとめ買い上限（×1〜×1万、MAX は残
 const ZERO_BOOST_MAX_EXP = 68; /* 無量大数倍 = 10^68（MAX_EXP と同値） */
 const ZERO_SKIP_PER_BOOST = 3; /* 10 倍ごとに 1/2 抽選を 3 回スキップ */
 const ZERO_LABOR_MULT_BASE = 1.1; /* 最大到達 n 連で労働 TP ×1.1^n */
+/* 零等：RHC一等 1 回以上 かつ 絶等 1 回以上で解禁される最後のくじ。
+   通常くじ 1 枚ごとに独立で 1/無量大数（1e-68）で当たる */
+const ZEROTH_RATE = 1e-68;
+const ZEROTH_PRIZE = 1e72; /* 賞金 10,000無量大数G */
+const ZEROTH_ODDS_LABEL = "1/無量大数";
+const ZEROTH_PRIZE_LABEL = "10,000無量大数G";
 /* 1枚あたりの理論期待値 */
 const EV_PER_TICKET = TIERS.reduce((s,t)=> s + t.prize*t.count, 0) / UNIT;
 
@@ -1661,14 +1852,16 @@ const EV_PER_TICKET = TIERS.reduce((s,t)=> s + t.prize*t.count, 0) / UNIT;
 ========================================================== */
 const FACILITIES = [
   { name:"貯金箱ロボ",      icon:"◈", base:0.5,    baseCost:100,   costMult:1.22 },
-  { name:"内職マシン",      icon:"◉", base:10,     baseCost:8e4,   costMult:1.24 },
+  { name:"内職マシン",      icon:"◉", base:10,     baseCost:1.2e5, costMult:1.24 },
   { name:"TP 印刷工場",     icon:"▣", base:80,     baseCost:1e7,   costMult:1.26 },
   { name:"AI 労働センター", icon:"◍", base:2500,   baseCost:3e9,   costMult:1.28 },
   { name:"量子タップ炉",    icon:"✦", base:120000, baseCost:1.5e13,costMult:1.30 },
   { name:"異次元プラント",  icon:"❖", base:8e6,    baseCost:4e17, costMult:1.32 },
   { name:"因果改変炉",      icon:"⊛", base:4e8,    baseCost:2e22, costMult:1.34 },
   { name:"確率崩壊コア",    icon:"⟐", base:3e10,   baseCost:8e26, costMult:1.36 },
-  { name:"運命演算機",      icon:"۞", base:2e12,   baseCost:4e31, costMult:1.38 },
+  { name:"運命演算機",      icon:"۞", base:4e14,   baseCost:8e33, costMult:1.38 }, /* 1000万倍 / 生産×13333 */
+  { name:"世界線確定炉",    icon:"⌬", base:16e27/3,baseCost:8e48, costMult:1.40 }, /* 1000兆倍 / 生産×1.333e13 */
+  { name:"概念閉止核",      icon:"⏣", base:64e42/9,baseCost:8e66, costMult:1.42 }, /* 100京倍 / 生産×1.333e15 */
 ];
 /* 設備の生産倍率は累計レベルで決まる。Lv10で×2、Lv100で×10、以降10Lvごとに×1.1 */
 const FAC_OWNED_MULT = [
@@ -1679,17 +1872,19 @@ const FAC_POST100_STEP = 10;   /* 100 以降このレベルごと */
 const FAC_POST100_MULT = 1.1;  /* 上記ごとに乗算 */
 const LIFE_LEVELS = [
   { name:"公園のベンチ",     icon:"☗", cost:0,     tap:1,      auto:1 },
-  { name:"ネットカフェ暮らし",icon:"☖", cost:2000,  tap:4,      auto:2 },
-  { name:"ボロアパート",     icon:"⌂", cost:1e5,   tap:15,     auto:6 },
-  { name:"分譲マンション",   icon:"▤", cost:3e6,   tap:60,     auto:20 },
-  { name:"タワマン最上階",   icon:"▥", cost:5e8,   tap:250,    auto:80 },
-  { name:"丘の上の大豪邸",   icon:"⛨", cost:6e10,  tap:1200,   auto:350 },
-  { name:"プライベート島",   icon:"❉", cost:1.2e13,tap:6000,   auto:1600 },
-  { name:"月面ヴィラ",       icon:"☾", cost:1.5e15,tap:35000,  auto:9000 },
-  { name:"火星コロニー領主", icon:"✧", cost:8e16,  tap:220000, auto:60000 },
-  { name:"銀河系オーナー",   icon:"✵", cost:1.5e21,tap:1.5e6,  auto:450000 },
-  { name:"パラレルワールド", icon:"∞", cost:1.5e25,tap:1e7,    auto:3500000 },
-  { name:"バグ空間",         icon:"※", cost:1.5e29,tap:7e7,    auto:25000000 },
+  { name:"ネットカフェ暮らし",icon:"☖", cost:2000,  tap:16,     auto:2 },
+  { name:"ボロアパート",     icon:"⌂", cost:1e5,   tap:60,     auto:6 },
+  { name:"分譲マンション",   icon:"▤", cost:3e6,   tap:240,    auto:20 },
+  { name:"タワマン最上階",   icon:"▥", cost:5e8,   tap:1000,   auto:80 },
+  { name:"丘の上の大豪邸",   icon:"⛨", cost:6e10,  tap:4800,   auto:350 },
+  { name:"プライベート島",   icon:"❉", cost:1.2e13,tap:24000,  auto:1600 },
+  { name:"月面ヴィラ",       icon:"☾", cost:1.5e15,tap:140000, auto:9000 },
+  { name:"火星コロニー領主", icon:"✧", cost:8e16,  tap:880000, auto:60000 },
+  { name:"銀河系オーナー",   icon:"✵", cost:1.5e21,tap:6e6,    auto:450000 },
+  { name:"パラレルワールド", icon:"∞", cost:1.5e25,tap:4e7,    auto:3500000 },
+  { name:"バグ空間",         icon:"※", cost:1.5e29,tap:2.8e8,  auto:25000000 },
+  { name:"ゼロの空間",       icon:"○", cost:1.5e33,tap:2e9,    auto:1.8e8 },
+  { name:"始まりの地",       icon:"☉", cost:1.5e37,tap:1.4e10, auto:1.3e9 },
 ];
 const RECYCLE = { firstCost:10, baseCost:500, costMult:13, multPerLv:1.49 };
 /* 枚数は常に 10^e（1,10,…,1兆,10兆,100兆,…,無量大数）。e=0..68 */
@@ -1797,6 +1992,9 @@ const SHARE_TP_MINUTES = 30; /* 記録シートを X 投稿で 1 日 1 回 */
 const RHC_PRIZE_MULT = 1.5; /* RHC一等 1 枚ごとの通常くじ倍率 */
 const RHC_RATE_DIV = 2;     /* RHC一等 1 枚ごとに確率が 1/2 */
 const TP_HOUR_PACK = { cost:100, minutes:60 }; /* コインで買う自動 TP */
+const DAILY_BONUS_COIN = 5;
+const DAILY_LABOR_TAP_BLOCK = 100;
+const DAILY_LABOR_MAX = 3;
 const AUTO_TP_BOOST_BASE_COST = 200; /* 初回 200C で ×2。以降コスト・倍率とも 2 倍ずつ */
 const COST_CUT = { cost:50, perLv:0.01, maxLv:30 }; /* 設備コスト 1% 減、最大 30%、定額 50C */
 
@@ -1953,6 +2151,7 @@ const DEFAULT_STATE = () => ({
   superWinsManual:0, superWinsAuto:0,
   rhcFirst:0, rhcDraws:0, rhcLoseGain:0, rhcUnlocked:false, rhcAmt:1,
   zeroWins:0, zeroUsed:0, zeroSpentSuper:0, zeroBestStreak:0, zeroAmt:1, zeroBoostExp:0,
+  zerothWins:0, zerothSeen:false,
   facLv:FACILITIES.map(()=>0), lifeLv:0, recycleLv:0,
   luxOwned:LUXURIES.map(()=>false),
   qtyExp:0, qtyMax:false, buyAmt:1,
@@ -1965,6 +2164,11 @@ const DEFAULT_STATE = () => ({
   costCutLv:0,
   starterKitOwned:false,
   adDay:"", adUsed:0,
+  dailyBonusDay:"",
+  dailyLoginClaimed:false,
+  dailyAdClaimed:false,
+  dailyLaborTaps:0,
+  dailyLaborClaimed:0,
   shareRewardDay:"",
   reviewDone:false,
   reviewPrompted:{ life1:false, tickets1k:false, tickets100k:false },
@@ -1974,7 +2178,7 @@ const DEFAULT_STATE = () => ({
   cleared:false,
   clearedAt:0,
   milestones:{
-    firstFirst:false, firstSuper:false, firstZero:false,
+    firstFirst:false, firstSuper:false, firstZero:false, firstZeroth:false,
     lifeMax:false, luxAll:false,
   },
   /* 記録帳 */
@@ -1995,6 +2199,43 @@ function ensureAdDay(){
   const t = todayKey();
   if(S.adDay !== t){ S.adDay = t; S.adUsed = 0; }
 }
+function ensureDailyBonus(){
+  const t = todayKey();
+  if(S.dailyBonusDay === t) return;
+  S.dailyBonusDay = t;
+  S.dailyLoginClaimed = false;
+  S.dailyAdClaimed = false;
+  S.dailyLaborTaps = 0;
+  S.dailyLaborClaimed = 0;
+}
+function dailyLaborReady(){
+  ensureDailyBonus();
+  const earned = Math.min(DAILY_LABOR_MAX, Math.floor((S.dailyLaborTaps || 0) / DAILY_LABOR_TAP_BLOCK));
+  return Math.max(0, earned - (S.dailyLaborClaimed || 0));
+}
+function dailyBonusClaimable(){
+  ensureDailyBonus();
+  return !S.dailyLoginClaimed || !S.dailyAdClaimed || dailyLaborReady() > 0;
+}
+function dailyBonusEarned(){
+  ensureDailyBonus();
+  return (S.dailyLoginClaimed ? DAILY_BONUS_COIN : 0)
+    + (S.dailyAdClaimed ? DAILY_BONUS_COIN : 0)
+    + (S.dailyLaborClaimed || 0) * DAILY_BONUS_COIN;
+}
+function dailyBonusMax(){
+  return DAILY_BONUS_COIN * (2 + DAILY_LABOR_MAX);
+}
+function grantDailyCoins(n, label){
+  if(!(n > 0)) return;
+  S.coins += n;
+  sfx.adReward();
+  toast(`${label} +${fmt(n)} C`);
+  renderHeader();
+  if(screenId === "shop") renderShop();
+  refreshBadges();
+  save();
+}
 function offlineCapSec(){ return (S.offlineHours || BASE_OFFLINE_HOURS) * 3600; }
 function adMinutes(){ return S.adBoostOwned ? AD_MINUTES_BOOSTED : AD_MINUTES_BASE; }
 function comboTimeMult(){
@@ -2014,7 +2255,7 @@ function load(){
     S.luxOwned = LUXURIES.map((_,i)=> !!(d.luxOwned && d.luxOwned[i]));
     S.tierWins = Object.assign({}, d.tierWins || {});
     S.milestones = Object.assign({
-      firstFirst:false, firstSuper:false, firstZero:false,
+      firstFirst:false, firstSuper:false, firstZero:false, firstZeroth:false,
       lifeMax:false, luxAll:false,
     }, d.milestones || {});
     if(S.cleared == null) S.cleared = false;
@@ -2023,6 +2264,7 @@ function load(){
     if((S.firstWins||0) > 0) S.milestones.firstFirst = true;
     if((S.superWins||0) > 0) S.milestones.firstSuper = true;
     if((S.zeroWins||0) > 0) S.milestones.firstZero = true;
+    if((S.zerothWins||0) > 0) S.milestones.firstZeroth = true;
     if(S.lifeLv >= LIFE_LEVELS.length - 1) S.milestones.lifeMax = true;
     if(S.luxOwned.every(Boolean)) S.milestones.luxAll = true;
     /* 既に条件を満たす既存セーブはモーダルなしで完結扱いにする */
@@ -2034,8 +2276,14 @@ function load(){
     if(S.superWins > 0) S.apexUnlocked = true;
     if((S.rhcFirst||0) > 0) S.rhcUnlocked = true;
     if(S.lifeLv >= LIFE_LEVELS.length) S.lifeLv = LIFE_LEVELS.length - 1;
+    S.milestones.lifeMax = S.lifeLv >= LIFE_LEVELS.length - 1;
+    if(S.cleared && (S.lifeLv < LIFE_LEVELS.length - 1 || !S.luxOwned.every(Boolean))){
+      S.cleared = false;
+    }
     if(S.zeroAmt == null) S.zeroAmt = 1;
     if(S.zeroBoostExp == null) S.zeroBoostExp = 0;
+    /* 既に条件を満たしている既存セーブには起動後に零等の出現を告知する */
+    maybeAnnounceZeroth();
     S.zeroBoostExp = Math.max(0, Math.min(ZERO_BOOST_MAX_EXP, Math.floor(Number(S.zeroBoostExp) || 0)));
     if(S.zeroSpentSuper == null){
       S.zeroSpentSuper = (S.zeroUsed || 0) * ZERO_COST_BASE;
@@ -2049,6 +2297,13 @@ function load(){
     S.costCutLv = Math.max(0, Math.min(COST_CUT.maxLv, Math.floor(Number(S.costCutLv) || 0)));
     if(S.starterKitOwned == null) S.starterKitOwned = false;
     if(S.shareRewardDay == null) S.shareRewardDay = "";
+    if(S.dailyBonusDay == null) S.dailyBonusDay = "";
+    if(S.dailyLoginClaimed == null) S.dailyLoginClaimed = false;
+    if(S.dailyAdClaimed == null) S.dailyAdClaimed = false;
+    if(S.dailyLaborTaps == null || !isFinite(Number(S.dailyLaborTaps))) S.dailyLaborTaps = 0;
+    S.dailyLaborTaps = Math.max(0, Math.floor(Number(S.dailyLaborTaps) || 0));
+    if(S.dailyLaborClaimed == null || !isFinite(Number(S.dailyLaborClaimed))) S.dailyLaborClaimed = 0;
+    S.dailyLaborClaimed = Math.max(0, Math.min(DAILY_LABOR_MAX, Math.floor(Number(S.dailyLaborClaimed) || 0)));
     if(S.prodPoints == null || !isFinite(Number(S.prodPoints))) S.prodPoints = 0;
     S.prodPoints = Math.max(0, Math.min(PROD_POINT_CAP, Number(S.prodPoints) || 0));
     S.qtyMax = !!S.qtyMax;
@@ -2068,6 +2323,7 @@ function load(){
     }
     if(!S.tutorialStep) S.tutorialStep = "";
     ensureAdDay();
+    ensureDailyBonus();
     updateApexNav();
     const rawDt = (Date.now() - (d.lastTime || Date.now())) / 1000;
     const dt = Math.min(Math.max(0, rawDt), offlineCapSec());
@@ -2087,13 +2343,37 @@ const UNITS = [
   [1e48,"極"],[1e44,"載"],[1e40,"正"],[1e36,"澗"],[1e32,"溝"],
   [1e28,"穣"],[1e24,"秭"],[1e20,"垓"],[1e16,"京"],[1e12,"兆"],[1e8,"億"],[1e4,"万"],
 ];
+function fmtComma(n){
+  return Math.round(n).toLocaleString("en-US");
+}
+function fmtMuryo(n){
+  const x = n / 1e68;
+  if(!isFinite(x) || x <= 0) return "∞";
+  /* 12 桁未満は 10,000無量大数 のようにカンマのみ */
+  if(x < 1e11){
+    const s = x >= 100
+      ? fmtComma(x)
+      : String(parseFloat(x.toFixed(x >= 10 ? 1 : 2)));
+    return s + "無量大数";
+  }
+  /* 12 桁以降は 100,000,000,000+e2無量大数 */
+  const exp = Math.floor(Math.log10(x) + 1e-12);
+  let extra = Math.max(0, exp - 11);
+  let man = x / Math.pow(10, extra);
+  if(man >= 9.995e11){
+    extra++;
+    man = x / Math.pow(10, extra);
+  }
+  return fmtComma(man) + (extra > 0 ? "+e" + extra : "") + "無量大数";
+}
 function fmt(n){
   if(!isFinite(n)) return "∞";
   if(n < 0) return "-" + fmt(-n);
+  if(n >= 1e68) return fmtMuryo(n);
   for(const [v,u] of UNITS){
     if(n >= v){
       const x = n / v;
-      const s = x >= 100 ? Math.floor(x).toLocaleString() : String(parseFloat(x.toFixed(x >= 10 ? 1 : 2)));
+      const s = x >= 100 ? Math.round(x).toLocaleString() : String(parseFloat(x.toFixed(x >= 10 ? 1 : 2)));
       return s + u;
     }
   }
@@ -2155,13 +2435,18 @@ function binom(n,p){
 ========================================================== */
 const TUTORIAL_SEVENTH_AT = 2; /* 累計この枚数目は七等確定（その 1 枚の結果を置き換え） */
 
+/** 零等くじの解禁：RHC一等 1 回以上 かつ 絶等 1 回以上 */
+function zerothUnlocked(){
+  return (S.rhcFirst || 0) >= 1 && (S.zeroWins || 0) >= 1;
+}
+
 function drawTickets(n, pool){
-  const hits={}; let totalPrize=0, winners=0, superCount=0;
+  const hits={}; let totalPrize=0, winners=0, superCount=0, zerothCount=0;
   const unlocked = S.superUnlocked;
   const beforeTickets = S.ticketsBought || 0;
   n = Math.floor(Number(n));
   if(!isFinite(n) || n < 1){
-    return { hits, totalPrize:0, losers:0, jackpot:false, superHit:false };
+    return { hits, totalPrize:0, losers:0, jackpot:false, superHit:false, zerothHit:false };
   }
 
   /* 2 枚目は抽選枠から外し、あとで七等として確定させる（追加当選にしない） */
@@ -2188,6 +2473,16 @@ function drawTickets(n, pool){
       totalPrize += SUPER_PRIZE*superCount;
       winners += superCount;
       S.tierWins.super = (S.tierWins.super||0) + superCount;
+    }
+    /* 零等：1 枚ごとに独立で 1/無量大数（等級とは別枠の追加当選） */
+    if(zerothUnlocked()){
+      zerothCount = binom(randomN, ZEROTH_RATE);
+      if(zerothCount > 0){
+        hits.zeroth = zerothCount;
+        totalPrize += ZEROTH_PRIZE * zerothCount;
+        S.tierWins.zeroth = (S.tierWins.zeroth||0) + zerothCount;
+        S.zerothWins = (S.zerothWins||0) + zerothCount;
+      }
     }
   }
 
@@ -2223,7 +2518,12 @@ function drawTickets(n, pool){
     setTimeout(()=>{ sfx.unlockApex(); showApexUnlockModal(); }, 3400);
   }
   totalPrize *= lotteryPrizeMult();
-  return { hits, totalPrize, losers:Math.max(0, n-winners), jackpot:(firstCount+superCount)>0, superHit:superCount>0 };
+  return {
+    hits, totalPrize, losers:Math.max(0, n-winners),
+    jackpot:(firstCount+superCount+zerothCount)>0,
+    superHit:superCount>0,
+    zerothHit:zerothCount>0,
+  };
 }
 
 function lotteryPrizeMult(){
@@ -2247,11 +2547,11 @@ function zeroOddsDenomDigits(streak){
   /* digits(2^s) = floor(s * log10(2)) + 1 （大きな連勝でも Number 溢れなし） */
   return Math.floor(s * Math.LOG10E * Math.LN2) + 1;
 }
-/** 零等バフ用：最大到達 1/n の n の桁数（例: 8192→4、16384→5） */
+/** 絶等バフ用：最大到達 1/n の n の桁数（例: 8192→4、16384→5） */
 function zeroWinsDigits(){
   return zeroOddsDenomDigits(S.zeroBestStreak || 0);
 }
-/** 零等：最大到達 n 連に対する労働 TP 倍率（×1.1^n） */
+/** 絶等：最大到達 n 連に対する労働 TP 倍率（×1.1^n） */
 function zeroLaborMult(){
   const n = Math.max(0, Math.floor(Number(S.zeroBestStreak) || 0));
   if(n <= 0) return 1;
@@ -2291,7 +2591,7 @@ function apexProdBreakdown(){
     mult: apexProdMult(),
   };
 }
-/** 次の零等に必要な連勝数（初回 13、以降 1 ずつ増加） */
+/** 次の絶等に必要な連勝数（初回 13、以降 1 ずつ増加） */
 function zeroRequiredStreak(){
   return ZERO_STREAK + (S.zeroWins || 0);
 }
@@ -2443,6 +2743,17 @@ function grantProdPointsFromTap(){
     if(gained > 0) toast(`生産ポイント +${fmt(gained)}（${fmt(Math.floor(next))} / ${PROD_POINT_CAP}）`);
   }
 }
+function noteDailyLaborTap(){
+  ensureDailyBonus();
+  const before = S.dailyLaborTaps || 0;
+  S.dailyLaborTaps = before + 1;
+  const prev = Math.min(DAILY_LABOR_MAX, Math.floor(before / DAILY_LABOR_TAP_BLOCK));
+  const next = Math.min(DAILY_LABOR_MAX, Math.floor(S.dailyLaborTaps / DAILY_LABOR_TAP_BLOCK));
+  if(next > prev){
+    toast(`デイリー労働 ${next} / ${DAILY_LABOR_MAX}　ショップで +${DAILY_BONUS_COIN} C`);
+    refreshBadges();
+  }
+}
 function autoTpBoostLv(){
   return Math.max(0, Math.floor(Number(S.autoTpBoostLv) || 0));
 }
@@ -2530,20 +2841,21 @@ function vibrateJackpot(isSuper){
   setTimeout(()=>document.body.classList.remove("shake"), 1400);
 }
 function showFlash(mode, subText){
-  /* mode: false/"first" | true/"super" | "rhc" | "zero" */
+  /* mode: false/"first" | true/"super" | "rhc" | "zero"(絶等) | "zeroth"(零等) */
   const kind = mode === true ? "super"
     : mode === false || mode === "first" ? "first"
     : mode;
   if(kind === "super") sfx.winSuper();
   else if(kind === "rhc") sfx.winRhc();
-  else if(kind === "zero") sfx.winZero();
+  else if(kind === "zero" || kind === "zeroth") sfx.winZero();
   else sfx.winFirst();
   if(kind === "first") markMilestone("firstFirst");
   else if(kind === "super") markMilestone("firstSuper");
   else if(kind === "zero") markMilestone("firstZero");
+  else if(kind === "zeroth") markMilestone("firstZeroth");
   const f = document.getElementById("flash");
-  f.classList.remove("super", "rhc", "zero");
-  if(kind === "super" || kind === "rhc" || kind === "zero") f.classList.add(kind);
+  f.classList.remove("super", "rhc", "zero", "zeroth");
+  if(kind === "super" || kind === "rhc" || kind === "zero" || kind === "zeroth") f.classList.add(kind);
 
   const tag = document.getElementById("flashTag");
   const title = document.getElementById("flashTitle");
@@ -2554,6 +2866,9 @@ function showFlash(mode, subText){
     tag.textContent = "REVENGE HIT";
     title.textContent = "RHC一等";
   } else if(kind === "zero"){
+    tag.textContent = "ABSOLUTE PRIZE";
+    title.textContent = "絶等当選";
+  } else if(kind === "zeroth"){
     tag.textContent = "ABSOLUTE ZERO";
     title.textContent = "零等当選";
   } else {
@@ -2568,6 +2883,8 @@ function showFlash(mode, subText){
     ? ["#064e3b","#10b981","#d1fae5","#34d399","#a7f3d0"]
     : kind === "zero"
     ? ["#2e1065","#7c3aed","#f3e8ff","#a78bfa","#ddd6fe"]
+    : kind === "zeroth"
+    ? ["#ffffff","#f8fafc","#e5e7eb","#cbd5e1","#94a3b8"]
     : ["#c8a951","#e5d3a0","#9c8235","#e7e4dd"];
   for(let i=0;i<(kind==="first"?34:42);i++){
     const s=document.createElement("div");
@@ -2740,6 +3057,7 @@ document.getElementById("pads").addEventListener("pointerdown", (e)=>{
     S.manualTP += gain;
     S.workTaps++;
     grantProdPointsFromTap();
+    noteDailyLaborTap();
     combo++;
     if(combo > S.bestCombo) S.bestCombo = combo;
     popText(pad, "+" + fmt(gain), false);
@@ -2862,8 +3180,8 @@ function buyLottery(pool){
     toast(`${fmt(bought)} 枚を購入（指定 ${fmt(want)} 枚中）`);
   }
   if(r.jackpot){
-    vibrateJackpot(r.superHit);
-    showFlash(r.superHit, "+" + moneyLabel(r.totalPrize));
+    vibrateJackpot(r.superHit || r.zerothHit);
+    showFlash(r.zerothHit ? "zeroth" : r.superHit, "+" + moneyLabel(r.totalPrize));
   } else if(r.totalPrize > 0){
     sfx.winSmall();
   } else {
@@ -2887,6 +3205,7 @@ function renderResult(n, r){
   document.getElementById("resultSum").textContent = "+" + moneyLabel(r.totalPrize);
 
   const rows = [];
+  if(r.hits.zeroth) rows.push({ cls:"zeroth", name:"零等", sub:ZEROTH_PRIZE_LABEL, c:r.hits.zeroth, v:ZEROTH_PRIZE*r.hits.zeroth });
   if(r.hits.super) rows.push({ cls:"sup", name:"超一等", sub:"700億G", c:r.hits.super, v:SUPER_PRIZE*r.hits.super });
   for(const t of TIERS){
     if(r.hits[t.key]) rows.push({
@@ -2894,7 +3213,8 @@ function renderResult(n, r){
       name:t.name, sub:t.sub, c:r.hits[t.key], v:t.prize*r.hits[t.key]
     });
   }
-  rows.sort((a,b)=> (a.cls==="sup"?-1:b.cls==="sup"?1: a.cls==="top"?-1:b.cls==="top"?1: b.v-a.v));
+  const clsOrd = c => c==="zeroth"?0 : c==="sup"?1 : c==="top"?2 : 3;
+  rows.sort((a,b)=> clsOrd(a.cls)-clsOrd(b.cls) || b.v-a.v);
 
   let html = "";
   for(const w of rows){
@@ -3040,7 +3360,7 @@ function renderLife(){
       </button>
     </div>`;
   } else {
-    html += `<div class="maxed">バグ空間に住み着いた — 生活の最終形</div>`;
+    html += `<div class="maxed">${LIFE_LEVELS[LIFE_LEVELS.length-1].name}に住み着いた — 生活の最終形</div>`;
   }
   document.getElementById("lifeList").innerHTML = html;
   renderLuxury();
@@ -3183,13 +3503,12 @@ function renderApex(){
     <div class="apex-prod">
       <div class="apex-hd"><span class="nm">現 在 の TP 生 産 倍 率</span></div>
       <div class="apex-mult"><small>×</small>${fmt(bd.mult)}</div>
-      <div class="apex-mult-note">${prodActive ? "自動 TP に乗算（労働は別枠の ×1.1^n）" : "未整備のため ×1"}　／　次の零等 ${needNext} 連（${zeroOddsLabel(needNext)}）</div>
+      <div class="apex-mult-note">${prodActive ? "自動 TP がこの倍率で増える" : "未整備のため ×1"}</div>
       <div class="apex-stat">
-        RHCバフ <b>${buffLv}</b>　×　1/n の桁数 <b>${fmt(bd.digits)}</b>（最大 ${zeroOddsLabel(bd.bestStreak)}）　×　手動係数 <b>${fmt(bd.manual)}</b><br>
-        手動係数 = 1 + 手動一等 <b>${fmt(bd.firstM)}</b>×0.1 + 手動超一等 <b>${fmt(bd.superM)}</b>×10<br>
-        労働 TP 倍率 <b>×${fmt(zeroLaborMult())}</b>（最大到達 ${fmt(bd.bestStreak)} 連 → ×${ZERO_LABOR_MULT_BASE}^n）
+        RHC一等を当てる → 生産倍率が上がる<br>
+        絶等の記録を伸ばす → 生産倍率と労働 TP が上がる（現在 ×${fmt(zeroLaborMult())}）<br>
+        手動で一等・超一等を当てる → 生産倍率が上がる
       </div>
-      <div class="apex-formula">RHC Lv ×（最大到達 1/n の n の桁数）×（1 + 手動一等×0.1 + 手動超一等×10）</div>
     </div>
 
     <div class="apex-box rhc-box">
@@ -3198,10 +3517,9 @@ function renderApex(){
         <span class="tag">リベンジハズレチャレンジ</span>
       </div>
       <div class="apex-ds">
-        ハズレ券 <b>1億枚</b> で「ハズレくじ」を 1 回引く。まとめ買い可。<br>
-        一等以外の当選確率は通常くじと同じ。一等以外は当選金の代わりにハズレ券を得る。<br>
-        <b>RHC一等</b> が当たるとバフ Lv が上がり、以降の RHC一等確率は 1/2 になる。<br>
-        通常くじの当選金は RHC一等 1 枚ごとに <b>×${RHC_PRIZE_MULT}</b>（現在 ×${fmt(lotteryPrizeMult())}）。
+        ハズレ券 <b>1億枚</b> で「ハズレくじ」を 1 回引ける。<br>
+        <b>RHC一等</b> を当てると、TP 生産倍率と宝くじの当選金が増える。<br>
+        一等以外の当たりはハズレ券になって戻ってくる。
       </div>
       <div class="apex-stat">
         所持ハズレ券 <b>${fmt(S.loseTickets)}</b> 枚（最大 ${fmt(Math.floor(S.loseTickets/RHC_COST))} 回分）<br>
@@ -3217,22 +3535,18 @@ function renderApex(){
 
     <div class="apex-box zero-box">
       <div class="apex-hd">
-        <span class="nm">零 等</span>
+        <span class="nm">絶 等</span>
         <span class="tag">次 ${needNext} 連 / ${zeroOddsLabel(needNext)}</span>
       </div>
       <div class="apex-ds">
-        基礎は超一等 <b>${ZERO_COST_BASE}</b> 回で 1 挑戦。<br>
-        倍率を上げるほど消費が増え、1/2 抽選を先頭からスキップできる<br>
-        （<b>×10 で 3 回</b>スキップ。最大 <b>×${fmt(Math.pow(10, ZERO_BOOST_MAX_EXP))}</b>＝${ZERO_SKIP_PER_BOOST * ZERO_BOOST_MAX_EXP} 回スキップ）。<br>
-        初回は <b>${ZERO_STREAK} 連勝</b>（1/${Math.pow(2,ZERO_STREAK).toLocaleString()}）。成立後は必要連勝が <b>+1</b> ずつ増える。<br>
-        最大到達 <b>n 連</b> に応じて労働の 1 打 TP に <b>×${ZERO_LABOR_MULT_BASE}^n</b> がかかる（現在 ×${fmt(zeroLaborMult())}）。<br>
-        成立後も外れまで続行。まとめ買いは最大 <b>${fmt(ZERO_MAX_BUY)}</b> 件。<br>
-        演出は最初の <b>${ZERO_BATCH} 件</b>のみ（以降は即時判定）。
+        超一等 <b>${ZERO_COST_BASE}</b> 回ぶんで 1 回挑戦できる。コイントスの連勝に挑む。<br>
+        連勝記録を伸ばすと、TP 生産倍率と労働 TP が増える。<br>
+        消費倍率を上げると、序盤の抽選をスキップして始められる。
       </div>
       <div class="apex-stat">
         未使用の超一等 <b>${fmt(poolLeft)}</b> 回　／　挑戦残数 <b>${fmt(left)}</b> 回<br>
         現在倍率 <b>×${fmt(boostMult)}</b>　→　1 回あたり超一等 <b>${fmt(costEach)}</b>　／　スキップ <b>${skipN}</b> 回<br>
-        零等 <b>${fmt(S.zeroWins||0)}</b> 回　／　最大到達 <b>${zeroOddsLabel(S.zeroBestStreak||0)}</b>　／　次の必要 <b>${needNext} 連</b>
+        絶等 <b>${fmt(S.zeroWins||0)}</b> 回　／　最大到達 <b>${zeroOddsLabel(S.zeroBestStreak||0)}</b>　／　次の必要 <b>${needNext} 連</b>
       </div>
       <div class="apex-ds" style="margin-top:8px">消費倍率</div>
       ${boostHtml}
@@ -3248,6 +3562,29 @@ function renderApex(){
             : (zeroRunning ? "演出中…" : "挑戦回数が足りません")
         }</span>
       </button>
+    </div>
+
+    <div class="apex-box zeroth-box ${zerothUnlocked()?"":"is-locked"}">
+      <div class="apex-hd">
+        <span class="nm">零 等</span>
+        <span class="tag">${zerothUnlocked() ? "稼働中" : "未出現"}</span>
+      </div>
+      ${zerothUnlocked() ? `
+      <div class="apex-ds">
+        通常の宝くじ 1 枚ごとに、独立して当たる最後のくじ。<br>
+        当たると <b>${ZEROTH_PRIZE_LABEL}</b> が入る。
+      </div>
+      <div class="apex-stat">
+        確率 <b>${ZEROTH_ODDS_LABEL}</b>　／　獲得 <b>${fmt(S.zerothWins||0)}</b> 回
+      </div>
+      ` : `
+      <div class="apex-ds">
+        RHC一等 と 絶一等を 1 回ずつ当てると、このくじが現れる。
+      </div>
+      <div class="apex-stat">
+        RHC一等 <b>${fmt(S.rhcFirst||0)}</b> / 1　／　絶一等 <b>${fmt(S.zeroWins||0)}</b> / 1
+      </div>
+      `}
     </div>
   `;
 }
@@ -3290,7 +3627,7 @@ function applyZeroVisual(cell, result){
     cell.classList.remove("fail");
     cell.classList.add("win");
     frac.textContent = zeroOddsCompact(result.streak);
-    label.textContent = result.streak > need ? `零等 ${result.streak}連` : "零等";
+    label.textContent = result.streak > need ? `絶等 ${result.streak}連` : "絶等";
   } else {
     syncZeroBits(bits, result.streak, result.streak, need);
     cell.classList.remove("win");
@@ -3312,7 +3649,7 @@ function recordZeroResult(r, no, log){
   if(r.win){
     S.zeroWins = (S.zeroWins || 0) + 1;
     const need = r.need != null ? r.need : (ZERO_STREAK + (S.zeroWins - 1));
-    log.push(`#${no}  零等達成　${r.streak} 連（必要 ${need}・${zeroOddsLabel(r.streak)}）`);
+    log.push(`#${no}  絶等達成　${r.streak} 連（必要 ${need}・${zeroOddsLabel(r.streak)}）`);
     return 1;
   }
   log.push(`#${no}  ${r.streak} 連勝（必要 ${r.need ?? zeroRequiredStreak()}・${zeroOddsLabel(Math.max(r.streak,1))}）で終了`);
@@ -3334,7 +3671,7 @@ async function animateZeroCell(cell, idx, startStreak, need){
   if(won){
     cell.classList.add("win");
     frac.textContent = zeroOddsCompact(streak);
-    label.textContent = streak > req ? `零等 ${streak}連` : "零等（スキップ）";
+    label.textContent = streak > req ? `絶等 ${streak}連` : "絶等（スキップ）";
   } else if(streak > 0){
     frac.textContent = zeroOddsCompact(streak);
     label.textContent = streak + "連（スキップ）";
@@ -3357,7 +3694,7 @@ async function animateZeroCell(cell, idx, startStreak, need){
       if(streak >= req){
         won = true;
         cell.classList.add("win");
-        label.textContent = streak > req ? `零等 ${streak}連` : "零等";
+        label.textContent = streak > req ? `絶等 ${streak}連` : "絶等";
       } else {
         label.textContent = streak+"連";
       }
@@ -3369,14 +3706,14 @@ async function animateZeroCell(cell, idx, startStreak, need){
         cell.classList.add("fail");
         label.textContent = streak === 0 ? "外れ" : streak+"連止";
       } else {
-        label.textContent = `零等 ${streak}連止`;
+        label.textContent = `絶等 ${streak}連止`;
       }
       await sleep(1000);
       return { streak, win:won, need: req };
     }
   }
   cell.classList.add("win");
-  label.textContent = `零等 ${streak}連`;
+  label.textContent = `絶等 ${streak}連`;
   frac.textContent = zeroOddsCompact(streak);
   await sleep(1200);
   return { streak, win:true, need: req };
@@ -3415,7 +3752,7 @@ async function runZeroBatch(){
     toast("演出をスキップ");
   };
 
-  hitsEl.textContent = `零等 0`;
+  hitsEl.textContent = `絶等 0`;
   logEl.innerHTML = startStreak > 0
     ? `<div>開始スキップ ${startStreak} 連（×${fmt(zeroBoostMult())}）</div>`
     : "";
@@ -3440,7 +3777,7 @@ async function runZeroBatch(){
       const need = zeroRequiredStreak();
       const r = await animateZeroCell(cells[i], i, startStreak, need);
       gained += recordZeroResult(r, i + 1, log);
-      hitsEl.textContent = `零等 ${gained}`;
+      hitsEl.textContent = `絶等 ${gained}`;
       logEl.innerHTML = (startStreak > 0 ? `<div>開始スキップ ${startStreak} 連（×${fmt(zeroBoostMult())}）</div>` : "")
         + log.map(l=>`<div>${l}</div>`).join("");
     }
@@ -3455,7 +3792,7 @@ async function runZeroBatch(){
       const r = resolveZeroSilent(startStreak, need);
       gained += recordZeroResult(r, i+1, log);
     }
-    hitsEl.textContent = `零等 ${gained}`;
+    hitsEl.textContent = `絶等 ${gained}`;
     logEl.innerHTML = (startStreak > 0 ? `<div>開始スキップ ${startStreak} 連（×${fmt(zeroBoostMult())}）</div>` : "")
       + log.map(l=>`<div>${l}</div>`).join("");
     if(!zeroSkip) await sleep(400);
@@ -3468,10 +3805,11 @@ async function runZeroBatch(){
   if(gained > 0 && navigator.vibrate) navigator.vibrate([80,40,80,40,160]);
 
   if(gained > 0){
-    showFlash("zero", `零等 ×${gained}`);
-    toast(`零等を ${gained} 回獲得した`);
+    showFlash("zero", `絶等 ×${gained}`);
+    toast(`絶等を ${gained} 回獲得した`);
+    maybeAnnounceZeroth();
   } else {
-    toast("零等には届かなかった");
+    toast("絶等には届かなかった");
   }
   await new Promise(r=>setTimeout(r, skipped ? 500 : 2000));
   modal.hidden = true;
@@ -3498,6 +3836,7 @@ function buyRHC(){
     toast(firstTime
       ? `RHC一等！ 記録帳に刻まれた　当選バフ ${rhcBuffLabel()}`
       : `RHC一等 ×${r.rhcFirst}！ 当選バフ ${rhcBuffLabel()}`);
+    maybeAnnounceZeroth();
   } else if(r.loseGain > 0){
     toast(`${fmt(n)} 回抽選　+${fmt(r.loseGain)} 枚`);
   } else {
@@ -3612,6 +3951,7 @@ function refreshScreen(){
 
 function refreshBadges(){
   ensureAdDay();
+  ensureDailyBonus();
   let f = S.adUsed < AD_DAILY_LIMIT;
   for(let i=0;i<FACILITIES.length;i++){ if(S.money >= facPlan(i).cost){ f=true; break; } }
   const next = LIFE_LEVELS[S.lifeLv+1];
@@ -3621,6 +3961,8 @@ function refreshBadges(){
   document.getElementById("bdgF").classList.toggle("on", f);
   document.getElementById("bdgL").classList.toggle("on", lifeReady);
   document.getElementById("bdgR").classList.toggle("on", S.loseTickets >= recyclePlan().cost);
+  const bdgS = document.getElementById("bdgS");
+  if(bdgS) bdgS.classList.toggle("on", dailyBonusClaimable());
   const bdgA = document.getElementById("bdgA");
   if(bdgA){
     bdgA.classList.toggle("on",
@@ -3767,9 +4109,13 @@ function renderRecord(){
     winRows += stat("RHC一等確率", rhcFirstOddsLabel());
   }
   if(S.apexUnlocked || (S.zeroWins||0) > 0 || (S.zeroBestStreak||0) > 0){
-    winRows += stat("零等", fmt(S.zeroWins||0)+" <small>回</small>", (S.zeroWins||0)>0?"amethyst":"zero");
+    winRows += stat("絶等", fmt(S.zeroWins||0)+" <small>回</small>", (S.zeroWins||0)>0?"amethyst":"zero");
     winRows += stat("最大到達", zeroOddsLabel(S.zeroBestStreak||0), (S.zeroBestStreak||0)>0?"amethyst":"zero");
-    winRows += stat("次の零等", zeroRequiredStreak()+" 連 <small>"+zeroOddsLabel(zeroRequiredStreak())+"</small>", "amethyst");
+    winRows += stat("次の絶等", zeroRequiredStreak()+" 連 <small>"+zeroOddsLabel(zeroRequiredStreak())+"</small>", "amethyst");
+  }
+  if(zerothUnlocked() || (S.zerothWins||0) > 0){
+    winRows += stat("零等 <small>"+ZEROTH_PRIZE_LABEL+"</small>", fmt(S.zerothWins||0)+" <small>回</small>", (S.zerothWins||0)>0?"sup":"zero");
+    winRows += stat("零等の確率", ZEROTH_ODDS_LABEL+" <small>/ 枚</small>");
   }
   for(const t of TIERS){
     if(t.key === "first") continue;
@@ -3783,7 +4129,8 @@ function renderRecord(){
     <div class="ms-list">
       ${msRow(!!ms.firstFirst, "初めての一等", ms.firstFirst ? "達成" : "未達成")}
       ${S.superUnlocked ? msRow(!!ms.firstSuper, "初めての超一等", ms.firstSuper ? "達成" : "未達成") : ""}
-      ${S.apexUnlocked ? msRow(!!ms.firstZero, "初めての零等", ms.firstZero ? "達成" : "未達成") : ""}
+      ${S.apexUnlocked ? msRow(!!ms.firstZero, "初めての絶等", ms.firstZero ? "達成" : "未達成") : ""}
+      ${zerothUnlocked() || ms.firstZeroth ? msRow(!!ms.firstZeroth, "初めての零等", ms.firstZeroth ? "達成" : "未達成") : ""}
       ${msRow(!!ms.lifeMax, "生活の最終形", ms.lifeMax ? LIFE_LEVELS[LIFE_LEVELS.length-1].name : "未達成")}
       ${msRow(!!ms.luxAll, "嗜好品 全収集", ms.luxAll ? LUXURIES.length+" / "+LUXURIES.length : luxOwnedCount()+" / "+LUXURIES.length)}
       ${msRow(!!S.cleared, "物語の完結", S.cleared ? (S.clearedAt ? fmtDate(S.clearedAt) : "完") : "未達成")}
@@ -3818,7 +4165,7 @@ function renderRecord(){
       ${stat("命中率", acc+" <small>%</small>")}
       ${stat("最高連鎖", fmt(S.bestCombo)+" <small>連</small>")}
       ${stat("1 打の獲得量", "+"+fmt(tapPower() * zeroLaborMult())+" <small>TP</small>")}
-      ${zeroLaborMult()>1 ? stat("零等労働倍率", "×"+fmt(zeroLaborMult())+" <small>("+fmt(S.zeroBestStreak||0)+" 連)</small>", "amethyst") : ""}
+      ${zeroLaborMult()>1 ? stat("絶等労働倍率", "×"+fmt(zeroLaborMult())+" <small>("+fmt(S.zeroBestStreak||0)+" 連)</small>", "amethyst") : ""}
       ${stat("持ち時間", comboName)}
       ${stat("労働モード", laborMode, S.simpleLabor?"hl":"")}
     </div>
@@ -3891,6 +4238,7 @@ function buildShareTweetText(){
     `総資産 ${moneyLabel(S.money)}\n` +
     `一等 ${fmt(S.firstWins)} 回` +
     (S.superUnlocked ? ` ／ 超一等 ${fmt(S.superWins)} 回` : "") +
+    ((S.zerothWins||0) > 0 ? ` ／ 零等 ${fmt(S.zerothWins)} 回` : "") +
     `\n#宝くじ生活`;
   const link = shareStoreUrl();
   if(link) text += `\n${link}`;
@@ -3951,9 +4299,10 @@ function shareCardRows(){
   if(S.superUnlocked) rows.push(["超一等", fmt(S.superWins) + " 回"]);
   if(S.rhcUnlocked || (S.rhcFirst||0) > 0) rows.push(["RHC一等", fmt(S.rhcFirst||0) + " 枚"]);
   if((S.zeroWins||0) > 0 || (S.zeroBestStreak||0) > 0){
-    rows.push(["零等", fmt(S.zeroWins||0) + " 回"]);
+    rows.push(["絶等", fmt(S.zeroWins||0) + " 回"]);
     rows.push(["最大到達", zeroOddsLabel(S.zeroBestStreak||0)]);
   }
+  if((S.zerothWins||0) > 0) rows.push(["零等", fmt(S.zerothWins) + " 回"]);
   rows.push(["労働", fmt(S.workTaps) + " 打"]);
   rows.push(["最高連鎖", fmt(S.bestCombo) + " 連"]);
   rows.push(["購入", fmt(S.ticketsBought) + " 枚"]);
@@ -4146,9 +4495,12 @@ function openShare(){
     : "";
   const zeroRow = ((S.zeroWins||0)>0 || (S.zeroBestStreak||0)>0)
     ? `<div class="sh-row">${
-        shPair("零等", fmt(S.zeroWins||0)+" 回", (S.zeroWins||0)>0?"amethyst":"") +
+        shPair("絶等", fmt(S.zeroWins||0)+" 回", (S.zeroWins||0)>0?"amethyst":"") +
         shPair("最大到達", zeroOddsLabel(S.zeroBestStreak||0), "amethyst")
       }</div>`
+    : "";
+  const zerothRow = (S.zerothWins||0) > 0
+    ? `<div class="sh-row">${shPair("零等", fmt(S.zerothWins)+" 回", "s")}</div>`
     : "";
   document.getElementById("shareCard").innerHTML = `
     <div class="sh-brand">宝くじ生活</div>
@@ -4165,6 +4517,7 @@ function openShare(){
       ${superRow}
       ${apexRows}
       ${zeroRow}
+      ${zerothRow}
       ${shPair("労働", fmt(S.workTaps)+" 打")}
       ${shPair("最高連鎖", fmt(S.bestCombo)+" 連")}
       ${shPair("購入", fmt(S.ticketsBought)+" 枚")}
@@ -4226,6 +4579,25 @@ document.getElementById("apexUnlockOk").addEventListener("click", ()=>{
   m.hidden = true;
   m.classList.remove("unlock-appear");
 });
+function showZerothUnlockModal(){
+  const m = document.getElementById("zerothUnlockModal");
+  m.classList.remove("unlock-appear");
+  void m.offsetWidth;
+  m.classList.add("unlock-appear");
+  m.hidden = false;
+}
+document.getElementById("zerothUnlockOk").addEventListener("click", ()=>{
+  const m = document.getElementById("zerothUnlockModal");
+  m.hidden = true;
+  m.classList.remove("unlock-appear");
+});
+/** RHC一等・絶等の両方を達成した瞬間に一度だけ零等の出現を告知する */
+function maybeAnnounceZeroth(){
+  if(S.zerothSeen || !zerothUnlocked()) return;
+  S.zerothSeen = true;
+  setTimeout(()=>{ sfx.unlockApex(); showZerothUnlockModal(); }, 3400);
+  save();
+}
 
 function markMilestone(key){
   if(!S.milestones) S.milestones = {};
@@ -4266,6 +4638,46 @@ document.getElementById("reviewModal").addEventListener("click", (e)=>{
   if(e.target.id === "reviewModal") hideReviewModal();
 });
 
+function dailyBonusHtml(){
+  ensureDailyBonus();
+  const loginDone = !!S.dailyLoginClaimed;
+  const adDone = !!S.dailyAdClaimed;
+  const laborClaimed = S.dailyLaborClaimed || 0;
+  const laborTaps = S.dailyLaborTaps || 0;
+  const laborReady = dailyLaborReady();
+  const laborMaxed = laborClaimed >= DAILY_LABOR_MAX;
+  const laborInto = laborTaps % DAILY_LABOR_TAP_BLOCK;
+  function row(kind, name, ds, done, can, a1, a2){
+    return `<div class="shop-row">
+      <div class="info">
+        <div class="nm">${name}</div>
+        <div class="ds">${ds}</div>
+      </div>
+      ${done
+        ? `<span class="have">受取済</span>`
+        : `<button class="act ${can?"can":""}" data-daily="${kind}" ${can?"":"disabled"}>
+             <span class="a1">${a1}</span><span class="a2">${a2}</span>
+           </button>`}
+    </div>`;
+  }
+  return `
+    <div class="scr-title">デ イ リ ー ボ ー ナ ス</div>
+    <div class="note">毎日リセット。ログイン・広告・労働でコインを入手。<br>本日 <b style="color:var(--gold)">${fmt(dailyBonusEarned())} / ${fmt(dailyBonusMax())} C</b></div>
+    <div class="daily-box">
+      ${row("login", "ログイン", `アプリを開く　+${DAILY_BONUS_COIN} C（1 日 1 回）`, loginDone, !loginDone, "受け取る", `+${DAILY_BONUS_COIN} C`)}
+      ${row("ad", "広告視聴", `広告を 1 回視聴　+${DAILY_BONUS_COIN} C（1 日 1 回）`, adDone, !adDone, "視聴する", `+${DAILY_BONUS_COIN} C`)}
+      ${row(
+        "labor",
+        "労働",
+        `100 タップごとに +${DAILY_BONUS_COIN} C（最大 ${DAILY_LABOR_MAX} 回）<br>本日 ${fmt(laborTaps)} タップ　受取 ${laborClaimed} / ${DAILY_LABOR_MAX}`,
+        laborMaxed,
+        laborReady > 0,
+        laborReady > 0 ? "受け取る" : "労働中",
+        laborReady > 0 ? `+${laborReady * DAILY_BONUS_COIN} C` : `${laborInto} / ${DAILY_LABOR_TAP_BLOCK}`
+      )}
+    </div>`;
+}
+
 function renderShop(){
   const body = document.getElementById("shopBody");
   if(!body) return;
@@ -4277,6 +4689,7 @@ function renderShop(){
   const cutMaxed = cutLv >= COST_CUT.maxLv;
   const cutCan = !cutMaxed && S.coins >= COST_CUT.cost;
   body.innerHTML = `
+    ${dailyBonusHtml()}
     <div class="scr-title">シ ョ ッ プ</div>
     <div class="note">所持コイン <b style="color:var(--gold)">${fmt(S.coins)} C</b><br>${envNote}</div>
 
@@ -4452,8 +4865,45 @@ async function spendCoinsConfirmed(label, cost){
   S.coins -= cost;
   return true;
 }
+async function handleDailyBonusClick(kind, btn){
+  ensureDailyBonus();
+  if(kind === "login"){
+    if(S.dailyLoginClaimed) return;
+    S.dailyLoginClaimed = true;
+    grantDailyCoins(DAILY_BONUS_COIN, "デイリーログイン");
+    return;
+  }
+  if(kind === "labor"){
+    const n = dailyLaborReady();
+    if(n <= 0) return;
+    S.dailyLaborClaimed += n;
+    grantDailyCoins(n * DAILY_BONUS_COIN, "デイリー労働");
+    return;
+  }
+  if(kind !== "ad") return;
+  if(S.dailyAdClaimed) return;
+  shopBusy = true;
+  if(btn) btn.disabled = true;
+  try{
+    const res = await StoreBridge.showRewardedAd();
+    if(!res || !res.ok) return;
+    ensureDailyBonus();
+    if(S.dailyAdClaimed) return;
+    S.dailyAdClaimed = true;
+    grantDailyCoins(DAILY_BONUS_COIN, (res.mocked ? "（開発）" : "") + "デイリー広告");
+  } finally {
+    shopBusy = false;
+    if(screenId === "shop" && !S.dailyAdClaimed) renderShop();
+  }
+}
 async function handleShopClick(e){
   if(shopBusy) return;
+  const daily = e.target.closest("[data-daily]");
+  if(daily){
+    if(daily.disabled) return;
+    await handleDailyBonusClick(daily.dataset.daily, daily);
+    return;
+  }
   const starter = e.target.closest("[data-starter]");
   if(starter){
     if(S.starterKitOwned){ toast("スターターキットは購入済みです"); return; }
@@ -4576,7 +5026,8 @@ function renderHeader(){
   const hint = document.getElementById("lotteryMultHint");
   if(hint){
     const lv = rhcBuffLv();
-    hint.textContent = lv > 0 ? `当選バフ ${rhcBuffLabel()}` : "1 枚 30 TP";
+    if(zerothUnlocked()) hint.textContent = `零等 ${ZEROTH_ODDS_LABEL}`;
+    else hint.textContent = lv > 0 ? `当選バフ ${rhcBuffLabel()}` : "1 枚 30 TP";
   }
   renderQty();
 }
@@ -4600,6 +5051,7 @@ document.getElementById("menuBtn").addEventListener("click", ()=> openSettings()
 function openSettings(){
   const body = document.getElementById("settingsBody");
   const muteLabel = sfx.isMuted() ? "効果音：オフ（タップでオン）" : "効果音：オン（タップでオフ）";
+  const bgmLabel = bgm.isMuted() ? "BGM：オフ（タップでオン）" : "BGM：オン（タップでオフ）";
   body.innerHTML = `
     <div class="modal-hd">
       <span class="t">メ ニ ュ ー</span>
@@ -4607,6 +5059,7 @@ function openSettings(){
     </div>
     <div class="settings-list">
       <button type="button" data-set="sfx">${muteLabel}</button>
+      <button type="button" data-set="bgm">${bgmLabel}</button>
       <button type="button" data-set="terms">利用規約</button>
       <button type="button" data-set="privacy">プライバシーポリシー</button>
       <button type="button" data-set="support">サポート</button>
@@ -4649,6 +5102,11 @@ document.getElementById("settingsModal").addEventListener("click", (e)=>{
   if(act === "sfx"){
     sfx.unlock();
     sfx.setMuted(!sfx.isMuted());
+    openSettings();
+    return;
+  }
+  if(act === "bgm"){
+    bgm.setMuted(!bgm.isMuted());
     openSettings();
     return;
   }
