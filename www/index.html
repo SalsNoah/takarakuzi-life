@@ -492,16 +492,16 @@
 
   /* ================= 下部ナビ ================= */
   #nav{
-    flex-shrink:0;display:grid;grid-template-columns:repeat(5,1fr);
+    flex-shrink:0;display:grid;grid-template-columns:repeat(6,1fr);
     border-top:1px solid var(--line);background:var(--panel);
     padding-bottom:env(safe-area-inset-bottom);
     position:relative;z-index:300;
   }
-  #nav.has-apex{grid-template-columns:repeat(6,1fr);}
+  #nav.has-apex{grid-template-columns:repeat(7,1fr);}
   #nvApex[hidden]{display:none;}
   .nv{position:relative;padding:9px 0 10px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--dim);}
   .nv .g{font-size:14px;line-height:1;}
-  .nv .l{font-size:9px;letter-spacing:.16em;text-indent:.16em;}
+  .nv .l{font-size:8.5px;letter-spacing:.08em;text-indent:.08em;}
   .nv.on{color:var(--gold);}
   .nv.on::before{content:"";position:absolute;top:0;left:22%;right:22%;height:1px;background:var(--gold);}
   .nv .badge{position:absolute;top:7px;right:calc(50% - 17px);width:5px;height:5px;border-radius:50%;background:var(--gold);opacity:0;transition:opacity .2s;}
@@ -940,7 +940,7 @@
   <section class="screen" id="scr-facility">
     <div class="scroll">
       <div class="scr-title">設 備 ─ 自 動 生 産</div>
-      <div class="note">各レベルで <b>一定量</b> の自動 TP が増える。その設備の累計レベルが <b>10</b> で生産 <b>2 倍</b>、<b>100</b> で <b>10 倍</b>、以降は <b>10 レベルごと</b>にさらに <b>1.1 倍</b>（まとめ買い自体のボーナスはなし）。労働の生産ポイントでも自動 TP が上がる（10 Pt ごと +10%、上限 100 Pt、1 時間で 20 Pt 減少）。</div>
+      <div class="note">設備を購入するとTPが生産される。たくさん買うとボーナスがつく</div>
       <div id="adSlot"></div>
       <div id="facAmt"></div>
       <div id="facList"></div>
@@ -965,11 +965,16 @@
   <section class="screen" id="scr-recycle">
     <div class="scroll">
       <div class="scr-title">再 生 ─ ハ ズ レ 券</div>
-      <div class="note">ハズレ券を再生処理し、自動 TP 生産に永続倍率を付与する。1 レベルごとに ×1.49（複利）。初回（Lv.0→1）のみ 10 枚、以降は従来どおり 200 枚起点・コスト ×12。</div>
+      <div class="note">ハズレ券を再生処理し、自動生産TPに永続倍率を付与する</div>
       <div id="recAmt"></div>
       <div id="recList"></div>
       <div id="paperReport"></div>
     </div>
+  </section>
+
+  <!-- ===== ショップ ===== -->
+  <section class="screen" id="scr-shop">
+    <div class="scroll" id="shopBody"></div>
   </section>
 
   <!-- ===== 極み（超一等後） ===== -->
@@ -989,6 +994,7 @@
   <button class="nv" data-scr="facility"><span class="g">▩</span><span class="l">設備</span><i class="badge" id="bdgF"></i></button>
   <button class="nv" data-scr="life"><span class="g">⌂</span><span class="l">生活</span><i class="badge" id="bdgL"></i></button>
   <button class="nv" data-scr="recycle"><span class="g">♺</span><span class="l">再生</span><i class="badge" id="bdgR"></i></button>
+  <button class="nv" data-scr="shop"><span class="g">◎</span><span class="l">ショップ</span></button>
   <button class="nv" data-scr="apex" id="nvApex" hidden><span class="g">✧</span><span class="l">極み</span><i class="badge" id="bdgA"></i></button>
   <button class="nv" data-scr="record"><span class="g">▤</span><span class="l">記録</span></button>
 </nav>
@@ -1004,8 +1010,14 @@
   </div>
 </div>
 
-<div id="shopModal" class="modal" hidden>
-  <div class="modal-card" id="shopBody"></div>
+<div id="confirmModal" class="modal" hidden>
+  <div class="modal-card unlock-card">
+    <div class="tag">CONFIRM</div>
+    <div class="ttl" style="font-size:22px" id="confirmTitle">購 入 確 認</div>
+    <div class="body" id="confirmBody"></div>
+    <button class="ok" id="confirmOk">購 入 す る</button>
+    <button class="ok secondary" id="confirmCancel">や め る</button>
+  </div>
 </div>
 
 <div id="avatarModal" class="modal" hidden>
@@ -1648,8 +1660,8 @@ const EV_PER_TICKET = TIERS.reduce((s,t)=> s + t.prize*t.count, 0) / UNIT;
    強化定義
 ========================================================== */
 const FACILITIES = [
-  { name:"貯金箱ロボ",      icon:"◈", base:1,      baseCost:200,   costMult:1.22 },
-  { name:"内職マシン",      icon:"◉", base:10,     baseCost:7e4,   costMult:1.24 },
+  { name:"貯金箱ロボ",      icon:"◈", base:0.5,    baseCost:100,   costMult:1.22 },
+  { name:"内職マシン",      icon:"◉", base:10,     baseCost:8e4,   costMult:1.24 },
   { name:"TP 印刷工場",     icon:"▣", base:80,     baseCost:1e7,   costMult:1.26 },
   { name:"AI 労働センター", icon:"◍", base:2500,   baseCost:3e9,   costMult:1.28 },
   { name:"量子タップ炉",    icon:"✦", base:120000, baseCost:1.5e13,costMult:1.30 },
@@ -1667,7 +1679,7 @@ const FAC_POST100_STEP = 10;   /* 100 以降このレベルごと */
 const FAC_POST100_MULT = 1.1;  /* 上記ごとに乗算 */
 const LIFE_LEVELS = [
   { name:"公園のベンチ",     icon:"☗", cost:0,     tap:1,      auto:1 },
-  { name:"ネットカフェ暮らし",icon:"☖", cost:5000,  tap:4,      auto:2 },
+  { name:"ネットカフェ暮らし",icon:"☖", cost:2000,  tap:4,      auto:2 },
   { name:"ボロアパート",     icon:"⌂", cost:1e5,   tap:15,     auto:6 },
   { name:"分譲マンション",   icon:"▤", cost:3e6,   tap:60,     auto:20 },
   { name:"タワマン最上階",   icon:"▥", cost:5e8,   tap:250,    auto:80 },
@@ -1679,7 +1691,7 @@ const LIFE_LEVELS = [
   { name:"パラレルワールド", icon:"∞", cost:1.5e25,tap:1e7,    auto:3500000 },
   { name:"バグ空間",         icon:"※", cost:1.5e29,tap:7e7,    auto:25000000 },
 ];
-const RECYCLE = { firstCost:10, baseCost:200, costMult:12, multPerLv:1.49 };
+const RECYCLE = { firstCost:10, baseCost:500, costMult:13, multPerLv:1.49 };
 /* 枚数は常に 10^e（1,10,…,1兆,10兆,100兆,…,無量大数）。e=0..68 */
 const MAX_EXP = 68;
 const MAX_TICKETS = Math.pow(10, MAX_EXP); /* 無量大数枚 */
@@ -1786,6 +1798,7 @@ const RHC_PRIZE_MULT = 1.5; /* RHC一等 1 枚ごとの通常くじ倍率 */
 const RHC_RATE_DIV = 2;     /* RHC一等 1 枚ごとに確率が 1/2 */
 const TP_HOUR_PACK = { cost:100, minutes:60 }; /* コインで買う自動 TP */
 const AUTO_TP_BOOST_BASE_COST = 200; /* 初回 200C で ×2。以降コスト・倍率とも 2 倍ずつ */
+const COST_CUT = { cost:50, perLv:0.01, maxLv:30 }; /* 設備コスト 1% 減、最大 30%、定額 50C */
 
 /* 三毛猫マスコット：ノーマル 99.7%（白）／レア 0.3%（赤） */
 const MASCOT_NORMAL = [
@@ -1949,6 +1962,7 @@ const DEFAULT_STATE = () => ({
   offlineHours:BASE_OFFLINE_HOURS,
   adBoostOwned:false,
   autoTpBoostLv:0,
+  costCutLv:0,
   starterKitOwned:false,
   adDay:"", adUsed:0,
   shareRewardDay:"",
@@ -2031,6 +2045,8 @@ function load(){
     if(S.simpleLabor == null) S.simpleLabor = false;
     if(S.autoTpBoostLv == null || !isFinite(Number(S.autoTpBoostLv))) S.autoTpBoostLv = 0;
     S.autoTpBoostLv = Math.max(0, Math.floor(Number(S.autoTpBoostLv) || 0));
+    if(S.costCutLv == null || !isFinite(Number(S.costCutLv))) S.costCutLv = 0;
+    S.costCutLv = Math.max(0, Math.min(COST_CUT.maxLv, Math.floor(Number(S.costCutLv) || 0)));
     if(S.starterKitOwned == null) S.starterKitOwned = false;
     if(S.shareRewardDay == null) S.shareRewardDay = "";
     if(S.prodPoints == null || !isFinite(Number(S.prodPoints))) S.prodPoints = 0;
@@ -2440,6 +2456,15 @@ function autoTpBoostNextCost(){
   const c = AUTO_TP_BOOST_BASE_COST * Math.pow(2, autoTpBoostLv());
   return isFinite(c) && c > 0 ? c : Infinity;
 }
+function costCutLv(){
+  return Math.max(0, Math.min(COST_CUT.maxLv, Math.floor(Number(S.costCutLv) || 0)));
+}
+function facCostMult(){
+  return 1 - costCutLv() * COST_CUT.perLv;
+}
+function facEffectiveBase(f){
+  return f.baseCost * facCostMult();
+}
 function autoRate(){
   let s=0;
   for(let i=0;i<FACILITIES.length;i++) s += facProd(i);
@@ -2460,14 +2485,15 @@ function geoMaxLevels(base, mult, lv, budget){
 }
 function facPlan(i){
   const f=FACILITIES[i], lv=S.facLv[i];
-  let k = S.buyAmt==="max" ? Math.max(1, geoMaxLevels(f.baseCost,f.costMult,lv,S.money)) : S.buyAmt;
-  return { k, cost: geoCost(f.baseCost,f.costMult,lv,k) };
+  const base = facEffectiveBase(f);
+  let k = S.buyAmt==="max" ? Math.max(1, geoMaxLevels(base,f.costMult,lv,S.money)) : S.buyAmt;
+  return { k, cost: geoCost(base,f.costMult,lv,k) };
 }
 function recycleCost(lv, k){
   k = Math.max(0, Math.floor(Number(k) || 0));
   lv = Math.max(0, Math.floor(Number(lv) || 0));
   if(k <= 0) return 0;
-  /* Lv.0→1 のみ 10 枚。以降は従来曲線（200 → 200×11 → …）を Lv.1 から適用 */
+  /* Lv.0→1 のみ 10 枚。以降は 500 枚起点・コスト ×13 を Lv.1 から適用 */
   if(lv === 0){
     if(k === 1) return RECYCLE.firstCost;
     return RECYCLE.firstCost + geoCost(RECYCLE.baseCost, RECYCLE.costMult, 0, k - 1);
@@ -2793,6 +2819,7 @@ function spendTicketTP(key, n){
 }
 
 function buyLottery(pool){
+  if(tutorialLocksLottery()) return;
   const key = poolKey(pool);
   const label = pool === "manual" ? "手動" : "自動";
   const want = S.qtyMax ? affordable(pool) : qtyPow(S.qtyExp);
@@ -2917,8 +2944,9 @@ function renderQty(){
   document.getElementById("qtyMax").classList.toggle("on", !!S.qtyMax);
   document.getElementById("qtyDown").disabled = !S.qtyMax && S.qtyExp <= 0;
   document.getElementById("qtyUp").disabled = !!S.qtyMax || S.qtyExp >= MAX_EXP;
-  document.getElementById("buyManual").disabled = !(canMan > 0);
-  document.getElementById("buyAuto").disabled = !(canAuto > 0);
+  const lotteryLocked = tutorialLocksLottery();
+  document.getElementById("buyManual").disabled = lotteryLocked || !(canMan > 0);
+  document.getElementById("buyAuto").disabled = lotteryLocked || !(canAuto > 0);
   document.getElementById("balManual").textContent = "所持 " + fmtTP(S.manualTP);
   document.getElementById("balAuto").textContent = "所持 " + fmtTP(S.autoTP);
 }
@@ -3496,6 +3524,7 @@ function renderScreen(){
   if(screenId === "facility") renderFacility();
   else if(screenId === "life") renderLife();
   else if(screenId === "recycle") renderRecycle();
+  else if(screenId === "shop") renderShop();
   else if(screenId === "apex") renderApex();
   else if(screenId === "record") renderRecord();
   refreshScreen();
@@ -3603,6 +3632,7 @@ function refreshBadges(){
 document.getElementById("screens").addEventListener("click", (e)=>{
   if(e.target.closest("#shareBtn")){ openShare(); return; }
   if(e.target.closest("#avatarSeal")){ openAvatarPicker(); return; }
+  if(e.target.closest("#scr-shop")){ handleShopClick(e); return; }
 
   const apexBtn = e.target.closest(".apex-act");
   if(apexBtn && !apexBtn.disabled){
@@ -4236,16 +4266,18 @@ document.getElementById("reviewModal").addEventListener("click", (e)=>{
   if(e.target.id === "reviewModal") hideReviewModal();
 });
 
-function openShop(){
+function renderShop(){
   const body = document.getElementById("shopBody");
+  if(!body) return;
   const envNote = isNativeApp()
     ? "アプリ内課金でコインを購入できます。購入の復元はメニューから。"
     : "ブラウザ開発中はモック購入になります。ストア版では正規の課金に切り替わります。";
+  const cutLv = costCutLv();
+  const cutPct = Math.round(cutLv * COST_CUT.perLv * 100);
+  const cutMaxed = cutLv >= COST_CUT.maxLv;
+  const cutCan = !cutMaxed && S.coins >= COST_CUT.cost;
   body.innerHTML = `
-    <div class="modal-hd">
-      <span class="t">シ ョ ッ プ</span>
-      <button class="modal-x" id="shopClose">✕</button>
-    </div>
+    <div class="scr-title">シ ョ ッ プ</div>
     <div class="note">所持コイン <b style="color:var(--gold)">${fmt(S.coins)} C</b><br>${envNote}</div>
 
     <div class="scr-title">コ イ ン 購 入</div>
@@ -4267,6 +4299,19 @@ function openShop(){
           <div class="deal">${p.bonus||""}</div>
           <button class="buy-c" data-pack="${i}">購入する</button>
         </div>`).join("")}
+    </div>
+
+    <div class="scr-title" style="margin-top:18px">設 備</div>
+    <div class="shop-row">
+      <div class="info">
+        <div class="nm">コスト削減</div>
+        <div class="ds">設備のアップグレードに必要なコストが 1% 低下する（最大 30%）<br>購入コスト ${COST_CUT.cost} C（レベルが上がっても定額）<br>現在 <b style="color:var(--gold)">-${cutPct}%</b>（Lv.${cutLv} / ${COST_CUT.maxLv}）</div>
+      </div>
+      ${cutMaxed
+        ? `<span class="have">上限</span>`
+        : `<button class="act ${cutCan?"can":""}" data-shop="costcut" ${cutCan?"":"disabled"}>
+             <span class="a1">交換</span><span class="a2 price-c">${COST_CUT.cost} C</span>
+           </button>`}
     </div>
 
     <div class="scr-title" style="margin-top:18px">労 働</div>
@@ -4367,27 +4412,64 @@ function openShop(){
       return html;
     })()}
   `;
-  document.getElementById("shopModal").hidden = false;
 }
-document.getElementById("coinBtn").addEventListener("click", openShop);
-document.getElementById("shopModal").addEventListener("click", (e)=>{
-  if(e.target.id === "shopClose" || e.target === document.getElementById("shopModal")){
-    document.getElementById("shopModal").hidden = true; return;
-  }
+
+let confirmResolver = null;
+function askConfirm(body, title){
+  return new Promise(resolve=>{
+    if(confirmResolver) confirmResolver(false);
+    confirmResolver = resolve;
+    const ttl = document.getElementById("confirmTitle");
+    const msg = document.getElementById("confirmBody");
+    if(ttl) ttl.textContent = title || "購 入 確 認";
+    if(msg) msg.textContent = body;
+    document.getElementById("confirmModal").hidden = false;
+  });
+}
+function closeConfirm(ok){
+  document.getElementById("confirmModal").hidden = true;
+  const r = confirmResolver;
+  confirmResolver = null;
+  if(r) r(!!ok);
+}
+document.getElementById("confirmOk")?.addEventListener("click", ()=> closeConfirm(true));
+document.getElementById("confirmCancel")?.addEventListener("click", ()=> closeConfirm(false));
+document.getElementById("confirmModal")?.addEventListener("click", (e)=>{
+  if(e.target.id === "confirmModal") closeConfirm(false);
+});
+
+let shopBusy = false;
+function afterShopPurchase(){
+  renderHeader();
+  if(screenId === "shop") renderShop();
+  save();
+}
+async function spendCoinsConfirmed(label, cost){
+  if(!(cost > 0) || S.coins < cost) return false;
+  const ok = await askConfirm(`${label} を ${fmt(cost)} C で購入しますか？`);
+  if(!ok) return false;
+  if(S.coins < cost){ toast("コインが足りません"); return false; }
+  S.coins -= cost;
+  return true;
+}
+async function handleShopClick(e){
+  if(shopBusy) return;
   const starter = e.target.closest("[data-starter]");
   if(starter){
     if(S.starterKitOwned){ toast("スターターキットは購入済みです"); return; }
+    shopBusy = true;
     starter.disabled = true;
     StoreBridge.purchaseStarterKit().then(res=>{
       starter.disabled = false;
+      shopBusy = false;
       if(!res || !res.ok) return;
       if(S.starterKitOwned) return;
       S.starterKitOwned = true;
       S.coins += STARTER_KIT.coins;
       sfx.adReward();
       toast(`${STARTER_KIT.label} を購入 +${STARTER_KIT.coins} C` + (res.mocked ? "（開発モック）" : ""));
-      renderHeader(); openShop(); save();
-    });
+      afterShopPurchase();
+    }).catch(()=>{ shopBusy = false; starter.disabled = false; });
     return;
   }
   const pack = e.target.closest("[data-pack]");
@@ -4395,63 +4477,85 @@ document.getElementById("shopModal").addEventListener("click", (e)=>{
     const idx = +pack.dataset.pack;
     const p = COIN_PACKS[idx];
     if(!p) return;
+    shopBusy = true;
     pack.disabled = true;
     StoreBridge.purchaseCoinPack(idx).then(res=>{
       pack.disabled = false;
+      shopBusy = false;
       if(!res || !res.ok) return;
       S.coins += p.coins;
       sfx.adReward();
       toast(`${p.label} を購入した` + (res.mocked ? "（開発モック）" : ""));
-      renderHeader(); openShop(); save();
-    });
+      afterShopPurchase();
+    }).catch(()=>{ shopBusy = false; pack.disabled = false; });
     return;
   }
   const btn = e.target.closest("[data-shop]");
   if(!btn || btn.disabled) return;
-  if(btn.dataset.shop === "combo"){
-    const u = COMBO_UPGRADES.find(x=>x.lv === +btn.dataset.lv);
-    if(!u || S.coins < u.cost) return;
-    if(u.lv === 2 && S.comboTimeLv < 1) return;
-    if(S.comboTimeLv >= u.lv) return;
-    S.coins -= u.cost; S.comboTimeLv = u.lv;
-    toast(`${u.name} を導入した`);
-  } else if(btn.dataset.shop === "simplelabor"){
-    if(S.simpleLabor || S.coins < SIMPLE_LABOR_COST) return;
-    S.coins -= SIMPLE_LABOR_COST;
-    S.simpleLabor = true;
-    combo = 0;
-    buildPads();
-    idleWork();
-    renderCombo();
-    toast("単純労働を導入した　パネルが 1 枚になった");
-  } else if(btn.dataset.shop === "tpboost"){
-    const cost = autoTpBoostNextCost();
-    if(!isFinite(cost) || S.coins < cost) return;
-    S.coins -= cost;
-    S.autoTpBoostLv = autoTpBoostLv() + 1;
-    toast(`自動 TP ブースター ×${fmt(autoTpBoostMult())} になった`);
-  } else if(btn.dataset.shop === "tphour"){
-    if(S.coins < TP_HOUR_PACK.cost) return;
-    S.coins -= TP_HOUR_PACK.cost;
-    const gain = autoRate() * TP_HOUR_PACK.minutes * 60;
-    S.autoTP += gain;
-    toast(`自動 TP ${TP_HOUR_PACK.minutes} 分分を購入 +${fmt(gain)} TP`);
-  } else if(btn.dataset.shop === "adboost"){
-    if(S.adBoostOwned || S.coins < AD_BOOST_COST) return;
-    S.coins -= AD_BOOST_COST;
-    S.adBoostOwned = true;
-    toast(`広告ボーナスを ${AD_MINUTES_BOOSTED} 分に延長した`);
-  } else if(btn.dataset.shop === "offline"){
-    const h = +btn.dataset.h;
-    const idx = OFFLINE_UPGRADES.findIndex(x=>x.hours === h);
-    const u = OFFLINE_UPGRADES[idx];
-    if(!u || S.coins < u.cost || S.offlineHours >= h) return;
-    const need = idx === 0 ? BASE_OFFLINE_HOURS : OFFLINE_UPGRADES[idx-1].hours;
-    if(S.offlineHours < need){ toast("先に下位の延長を購入してください"); return; }
-    S.coins -= u.cost; S.offlineHours = h;
-    toast(`オフライン上限を ${h} 時間に延長`);
+  shopBusy = true;
+  try{
+    if(btn.dataset.shop === "costcut"){
+      const lv = costCutLv();
+      if(lv >= COST_CUT.maxLv || S.coins < COST_CUT.cost) return;
+      if(!await spendCoinsConfirmed(`コスト削減（-${lv+1}%）`, COST_CUT.cost)) return;
+      S.costCutLv = lv + 1;
+      toast(`設備コスト ${costCutLv()}% 削減になった`);
+    } else if(btn.dataset.shop === "combo"){
+      const u = COMBO_UPGRADES.find(x=>x.lv === +btn.dataset.lv);
+      if(!u || S.coins < u.cost) return;
+      if(u.lv === 2 && S.comboTimeLv < 1) return;
+      if(S.comboTimeLv >= u.lv) return;
+      if(!await spendCoinsConfirmed(u.name, u.cost)) return;
+      S.comboTimeLv = u.lv;
+      toast(`${u.name} を導入した`);
+    } else if(btn.dataset.shop === "simplelabor"){
+      if(S.simpleLabor || S.coins < SIMPLE_LABOR_COST) return;
+      if(!await spendCoinsConfirmed("単純労働", SIMPLE_LABOR_COST)) return;
+      S.simpleLabor = true;
+      combo = 0;
+      buildPads();
+      idleWork();
+      renderCombo();
+      toast("単純労働を導入した　パネルが 1 枚になった");
+    } else if(btn.dataset.shop === "tpboost"){
+      const cost = autoTpBoostNextCost();
+      if(!isFinite(cost) || S.coins < cost) return;
+      if(!await spendCoinsConfirmed("自動 TP ブースター", cost)) return;
+      S.autoTpBoostLv = autoTpBoostLv() + 1;
+      toast(`自動 TP ブースター ×${fmt(autoTpBoostMult())} になった`);
+    } else if(btn.dataset.shop === "tphour"){
+      if(S.coins < TP_HOUR_PACK.cost) return;
+      if(!await spendCoinsConfirmed("1 時間分の自動 TP", TP_HOUR_PACK.cost)) return;
+      const gain = autoRate() * TP_HOUR_PACK.minutes * 60;
+      S.autoTP += gain;
+      toast(`自動 TP ${TP_HOUR_PACK.minutes} 分分を購入 +${fmt(gain)} TP`);
+    } else if(btn.dataset.shop === "adboost"){
+      if(S.adBoostOwned || S.coins < AD_BOOST_COST) return;
+      if(!await spendCoinsConfirmed("広告ボーナス延長", AD_BOOST_COST)) return;
+      S.adBoostOwned = true;
+      toast(`広告ボーナスを ${AD_MINUTES_BOOSTED} 分に延長した`);
+    } else if(btn.dataset.shop === "offline"){
+      const h = +btn.dataset.h;
+      const idx = OFFLINE_UPGRADES.findIndex(x=>x.hours === h);
+      const u = OFFLINE_UPGRADES[idx];
+      if(!u || S.coins < u.cost || S.offlineHours >= h) return;
+      const need = idx === 0 ? BASE_OFFLINE_HOURS : OFFLINE_UPGRADES[idx-1].hours;
+      if(S.offlineHours < need){ toast("先に下位の延長を購入してください"); return; }
+      if(!await spendCoinsConfirmed(`オフライン上限 ${h} 時間`, u.cost)) return;
+      S.offlineHours = h;
+      toast(`オフライン上限を ${h} 時間に延長`);
+    } else {
+      return;
+    }
+    afterShopPurchase();
+  } finally {
+    shopBusy = false;
   }
-  renderHeader(); openShop(); save();
+}
+function openShop(){ goToScreen("shop"); }
+document.getElementById("coinBtn").addEventListener("click", ()=>{
+  if(screenId === "shop") return;
+  goToScreen("shop");
 });
 
 /* ==========================================================
@@ -4610,6 +4714,15 @@ function tutorialLocksWork(){
   if(S.tutorialDone || !S.tutorialStep) return false;
   return S.tutorialStep === "seeManualTP" || S.tutorialStep === "seeAutoTP";
 }
+function tutorialLocksLottery(){
+  /* 3/6 の表示が出るまで宝くじ購入ボタンを押せない */
+  if(S.tutorialDone) return false;
+  return S.tutorialStep !== "lottery"
+    && S.tutorialStep !== "navFacility"
+    && S.tutorialStep !== "facility"
+    && S.tutorialStep !== "seeAutoTP"
+    && S.tutorialStep !== "goal";
+}
 function syncTutWorkLock(){
   const card = document.getElementById("workCard");
   if(!card) return;
@@ -4646,6 +4759,7 @@ function showTutCoach(stepKey){
     coach.classList.toggle("tut-pos-bottom", conf.pos === "bottom");
     coach.classList.toggle("has-next", !!conf.next);
     syncTutWorkLock();
+    renderQty();
     requestAnimationFrame(()=> coach.classList.add("is-on"));
   };
 
@@ -4744,6 +4858,7 @@ function finishTutorial(){
   syncTutWorkLock();
   document.getElementById("tutGoalModal").hidden = true;
   sfx.tutComplete();
+  renderQty();
   save();
 }
 document.getElementById("tutGoalOk")?.addEventListener("click", ()=> finishTutorial());
