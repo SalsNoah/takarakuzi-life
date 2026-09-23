@@ -1325,8 +1325,8 @@
   <button class="nv" data-scr="facility"><span class="g">▩</span><span class="l">設備</span><i class="badge" id="bdgF"></i></button>
   <button class="nv" data-scr="life"><span class="g">⌂</span><span class="l">生活</span><i class="badge" id="bdgL"></i></button>
   <button class="nv" data-scr="recycle"><span class="g">♺</span><span class="l">再生</span><i class="badge" id="bdgR"></i></button>
-  <button class="nv" data-scr="shop"><span class="g">◎</span><span class="l">ショップ</span><i class="badge" id="bdgS"></i></button>
   <button class="nv" data-scr="apex" id="nvApex" hidden><span class="g">✧</span><span class="l">極み</span><i class="badge" id="bdgA"></i></button>
+  <button class="nv" data-scr="shop"><span class="g">◎</span><span class="l">ショップ</span><i class="badge" id="bdgS"></i></button>
   <button class="nv" data-scr="record"><span class="g">▤</span><span class="l">記録</span></button>
 </nav>
 
@@ -1348,6 +1348,16 @@
     <div class="body" id="confirmBody"></div>
     <button class="ok" id="confirmOk">購 入 す る</button>
     <button class="ok secondary" id="confirmCancel">や め る</button>
+  </div>
+</div>
+
+<div id="offlineModal" class="modal" hidden>
+  <div class="modal-card unlock-card">
+    <div class="tag">OFFLINE EARNINGS</div>
+    <div class="ttl" style="font-size:22px">放 置 収 益</div>
+    <div class="body" id="offlineBody"></div>
+    <button class="ok" id="offlineClaim">受け取る</button>
+    <button class="ok secondary" id="offlineAdBoost">広告を見て 2 倍にする</button>
   </div>
 </div>
 
@@ -1564,9 +1574,11 @@ const STORE_LINKS = {
 const IAP_PRODUCT_IDS = [
   "starter_kit_500",
   "coins_100",
+  "coins_220",
   "coins_550",
   "coins_1200",
   "coins_6500",
+  "coins_14000",
 ];
 
 const Cap = typeof window !== "undefined" ? window.Capacitor : null;
@@ -2315,10 +2327,12 @@ const STARTER_KIT = {
   productId: IAP_PRODUCT_IDS[0],
 };
 const COIN_PACKS = [
-  { coins:100,  yen:100,  label:"100 C",   productId: IAP_PRODUCT_IDS[1] },
-  { coins:550,  yen:500,  label:"550 C",   bonus:"+10%", productId: IAP_PRODUCT_IDS[2] },
-  { coins:1200, yen:1000, label:"1,200 C", bonus:"+20%", productId: IAP_PRODUCT_IDS[3] },
-  { coins:6500, yen:5000, label:"6,500 C", bonus:"+30%", productId: IAP_PRODUCT_IDS[4] },
+  { coins:100,   yen:100,   label:"100 C",    productId: IAP_PRODUCT_IDS[1] },
+  { coins:220,   yen:200,   label:"220 C",    bonus:"+10%", productId: IAP_PRODUCT_IDS[2] },
+  { coins:550,   yen:500,   label:"550 C",    bonus:"+10%", productId: IAP_PRODUCT_IDS[3] },
+  { coins:1200,  yen:1000,  label:"1,200 C",  bonus:"+20%", productId: IAP_PRODUCT_IDS[4] },
+  { coins:6500,  yen:5000,  label:"6,500 C",  bonus:"+30%", productId: IAP_PRODUCT_IDS[5] },
+  { coins:14000, yen:10000, label:"14,000 C", bonus:"+40%", productId: IAP_PRODUCT_IDS[6] },
 ];
 const COMBO_UPGRADES = [
   { lv:1, name:"ホワイト企業化", cost:100, mult:1.5, desc:"連鎖の持ち時間が 1.5 倍" },
@@ -2332,13 +2346,14 @@ const OFFLINE_UPGRADES = [
 ];
 const BASE_OFFLINE_HOURS = 2;
 const AD_DAILY_LIMIT = 5;
-const AD_MINUTES_BASE = 15;
+const AD_MINUTES_BASE = 20;
 const AD_MINUTES_BOOSTED = 60;
 const AD_BOOST_COST = 200;
 const SHARE_TP_MINUTES = 30; /* 記録シートを X 投稿で 1 日 1 回 */
 const RHC_PRIZE_MULT = 1.5; /* RHC一等 1 枚ごとの通常くじ倍率 */
 const RHC_RATE_DIV = 2;     /* RHC一等 1 枚ごとに確率が 1/2 */
-const TP_HOUR_PACK = { cost:100, minutes:60 }; /* コインで買う自動 TP */
+const TP_HOUR_PACK = { cost:100, minutes:180 }; /* コインで買う自動 TP（3 時間分） */
+const OFFLINE_EARN_RATE = 0.7; /* オフライン収益はオンラインの 70% */
 const DAILY_BONUS_COIN = 5;
 const DAILY_LABOR_TAP_BLOCK = 100;
 const DAILY_LABOR_MAX = 3;
@@ -2566,6 +2581,7 @@ const DEFAULT_STATE = () => ({
   lastTime:Date.now(),
 });
 let S = DEFAULT_STATE();
+let pendingOfflineGain = 0;
 const SAVE_KEY = "takarakuji_life_save_v3";
 
 function todayKey(){
@@ -2724,9 +2740,13 @@ function load(){
     const dt = Math.min(Math.max(0, rawDt), offlineCapSec());
     if(dt > 0) applyProdPointDecay(dt);
     if(dt > 10){
-      const gain = autoRate() * dt;
-      if(gain > 0){ S.autoTP += gain; setTimeout(()=>toast(`放置中の自動生産 +${fmt(gain)} TP`), 600); }
+      const gain = autoRate() * dt * OFFLINE_EARN_RATE;
+      if(gain > 0){
+        S.autoTP += gain;
+        pendingOfflineGain = gain;
+      }
     }
+    S.lastTime = Date.now();
   }catch(e){ console.warn(e); }
 }
 
@@ -3537,7 +3557,7 @@ document.getElementById("pads").addEventListener("pointerdown", (e)=>{
     renderCombo();
     renderHeader();
     advanceWork();
-    if(S.tutorialStep === "labor" && S.manualTP >= TICKET_COST){
+    if(S.tutorialStep === "labor" && S.manualTP >= TICKET_COST * 2){
       advanceTutorial("labor");
     }
   } else if(workActive){
@@ -3612,25 +3632,27 @@ function buyLottery(pool){
   if(tutorialLocksLottery()) return;
   const key = poolKey(pool);
   const label = pool === "manual" ? "手動" : "自動";
-  const want = S.qtyMax ? affordable(pool) : qtyPow(S.qtyExp);
-  const n = buyQty(pool);
-  if(!(n > 0)){
-    toast(`${label} TP が足りません`);
+  const tutLottery = S.tutorialStep === "lottery";
+  const want = tutLottery ? 2 : (S.qtyMax ? affordable(pool) : qtyPow(S.qtyExp));
+  const n = tutLottery ? Math.min(2, affordable(pool)) : buyQty(pool);
+  if(!(n > 0) || (tutLottery && n < 2)){
+    toast(tutLottery ? "2 枚分の TP が必要だ" : `${label} TP が足りません`);
     renderQty();
     return;
   }
 
   const tpBefore = S[key];
   const bought = spendTicketTP(key, n);
-  if(!(bought > 0)){
-    toast(`${label} TP が足りません`);
+  if(!(bought > 0) || (tutLottery && bought < 2)){
+    S[key] = tpBefore;
+    toast(tutLottery ? "2 枚分の TP が必要だ" : `${label} TP が足りません`);
     renderQty();
     return;
   }
 
   let r;
   try{
-    r = drawTickets(bought, pool);
+    r = tutLottery ? drawTutorialLottery() : drawTickets(bought, pool);
   }catch(err){
     S[key] = tpBefore;
     console.error(err);
@@ -3648,7 +3670,7 @@ function buyLottery(pool){
 
   sfx.lotteryBuy();
   renderResult(bought, r);
-  if(isFinite(want) && want > bought * 1.0000001){
+  if(!tutLottery && isFinite(want) && want > bought * 1.0000001){
     toast(`${fmt(bought)} 枚を購入（指定 ${fmt(want)} 枚中）`);
   }
   if(r.jackpot){
@@ -3661,15 +3683,26 @@ function buyLottery(pool){
   }
   checkTicketReviewMilestones(beforeTickets, S.ticketsBought);
   renderHeader(); refreshScreen();
-  if(S.tutorialStep === "lottery"){
-    if(r.totalPrize > 0){
-      advanceTutorial("lottery");
-    } else {
-      toast("ハズレだ。もう一度働いて、買い直そう");
-      syncTutWorkLock();
-    }
+  if(tutLottery){
+    advanceTutorial("lottery");
   }
   save();
+}
+
+/** チュートリアル用：必ず 1 枚ハズレ + 1 枚七等 */
+function drawTutorialLottery(){
+  const seventh = TIERS.find(t => t.key === "seventh");
+  const hits = { seventh: 1 };
+  const totalPrize = seventh.prize;
+  S.tierWins.seventh = (S.tierWins.seventh || 0) + 1;
+  return {
+    hits,
+    totalPrize,
+    losers: 1,
+    jackpot: false,
+    superHit: false,
+    zerothHit: false,
+  };
 }
 
 function renderResult(n, r){
@@ -3721,11 +3754,14 @@ function renderQty(){
   const canMan = affordable("manual");
   const canAuto = affordable("auto");
   const canBest = Math.max(canMan, canAuto);
-  const want = S.qtyMax ? null : qtyPow(S.qtyExp);
-  const nShow = S.qtyMax ? canBest : want;
+  const tutLottery = !S.tutorialDone && S.tutorialStep === "lottery";
+  const want = tutLottery ? 2 : (S.qtyMax ? null : qtyPow(S.qtyExp));
+  const nShow = tutLottery ? 2 : (S.qtyMax ? canBest : want);
 
   document.getElementById("qtyN").textContent = fmt(nShow || 0);
-  if(S.qtyMax){
+  if(tutLottery){
+    document.getElementById("qtyCost").textContent = fmt(2 * TICKET_COST) + " TP";
+  } else if(S.qtyMax){
     document.getElementById("qtyCost").textContent =
       nShow > 0
         ? `最大 ${fmt(nShow)} 枚 / ${fmt(nShow * TICKET_COST)} TP`
@@ -3736,12 +3772,14 @@ function renderQty(){
   } else {
     document.getElementById("qtyCost").textContent = fmt((nShow || 0) * TICKET_COST) + " TP";
   }
-  document.getElementById("qtyMax").classList.toggle("on", !!S.qtyMax);
-  document.getElementById("qtyDown").disabled = !S.qtyMax && S.qtyExp <= 0;
-  document.getElementById("qtyUp").disabled = !!S.qtyMax || S.qtyExp >= MAX_EXP;
+  document.getElementById("qtyMax").classList.toggle("on", !!S.qtyMax && !tutLottery);
+  document.getElementById("qtyDown").disabled = tutLottery || (!S.qtyMax && S.qtyExp <= 0);
+  document.getElementById("qtyUp").disabled = tutLottery || !!S.qtyMax || S.qtyExp >= MAX_EXP;
+  document.getElementById("qtyMax").disabled = tutLottery;
   const lotteryLocked = tutorialLocksLottery();
-  document.getElementById("buyManual").disabled = lotteryLocked || !(canMan > 0);
-  document.getElementById("buyAuto").disabled = lotteryLocked || !(canAuto > 0);
+  const needTut = tutLottery ? 2 : 1;
+  document.getElementById("buyManual").disabled = lotteryLocked || !(canMan >= needTut);
+  document.getElementById("buyAuto").disabled = lotteryLocked || !(canAuto >= needTut);
   document.getElementById("balManual").textContent = "所持 " + fmtTP(S.manualTP);
   document.getElementById("balAuto").textContent = "所持 " + fmtTP(S.autoTP);
 }
@@ -4039,12 +4077,12 @@ function renderApex(){
       </button>
     </div>
 
-    <div class="apex-box zeroth-box ${zerothUnlocked()?"":"is-locked"}">
+    ${zerothUnlocked() ? `
+    <div class="apex-box zeroth-box">
       <div class="apex-hd">
         <span class="nm">零 等</span>
-        <span class="tag">${zerothUnlocked() ? "稼働中" : "未出現"}</span>
+        <span class="tag">稼働中</span>
       </div>
-      ${zerothUnlocked() ? `
       <div class="apex-ds">
         通常の宝くじ 1 枚ごとに、独立して当たる最後のくじ。<br>
         当たると <b>${ZEROTH_PRIZE_LABEL}</b> が入る。
@@ -4052,15 +4090,8 @@ function renderApex(){
       <div class="apex-stat">
         確率 <b>${ZEROTH_ODDS_LABEL}</b>　／　獲得 <b>${fmt(S.zerothWins||0)}</b> 回
       </div>
-      ` : `
-      <div class="apex-ds">
-        RHC一等 と 絶一等を 1 回ずつ当てると、このくじが現れる。
-      </div>
-      <div class="apex-stat">
-        RHC一等 <b>${fmt(S.rhcFirst||0)}</b> / 1　／　絶一等 <b>${fmt(S.zeroWins||0)}</b> / 1
-      </div>
-      `}
     </div>
+    ` : ""}
   `;
 }
 
@@ -5517,7 +5548,7 @@ function renderShop(){
     })()}
     <div class="shop-row">
       <div class="info">
-        <div class="nm">1 時間分の自動 TP</div>
+        <div class="nm">3 時間分の自動 TP</div>
         <div class="ds">現在レートなら +${fmt(autoRate() * TP_HOUR_PACK.minutes * 60)} TP（何度でも購入可）</div>
       </div>
       <button class="act ${S.coins>=TP_HOUR_PACK.cost?"can":""}" data-shop="tphour" ${S.coins<TP_HOUR_PACK.cost?"disabled":""}>
@@ -5595,6 +5626,53 @@ document.getElementById("confirmCancel")?.addEventListener("click", ()=> closeCo
 document.getElementById("confirmModal")?.addEventListener("click", (e)=>{
   if(e.target.id === "confirmModal") closeConfirm(false);
 });
+
+function showOfflineReturnModal(){
+  if(!(pendingOfflineGain > 0)) return;
+  const body = document.getElementById("offlineBody");
+  const modal = document.getElementById("offlineModal");
+  if(!body || !modal) return;
+  body.innerHTML =
+    `離れているあいだに、<b style="color:var(--gold)">+${fmt(pendingOfflineGain)} TP</b> が貯まった。<br>` +
+    `<span style="color:var(--dim)">（オフライン収益は通常の ${Math.round(OFFLINE_EARN_RATE*100)}%）</span><br><br>` +
+    `広告を見ると、この収益を <b style="color:var(--gold)">2 倍</b> にできる。`;
+  const adBtn = document.getElementById("offlineAdBoost");
+  if(adBtn){ adBtn.disabled = false; adBtn.hidden = false; }
+  modal.hidden = false;
+}
+function closeOfflineReturnModal(){
+  pendingOfflineGain = 0;
+  const modal = document.getElementById("offlineModal");
+  if(modal) modal.hidden = true;
+}
+function claimOfflineGain(){
+  const shown = pendingOfflineGain;
+  closeOfflineReturnModal();
+  if(shown > 0) toast(`放置収益 +${fmt(shown)} TP を受け取った`);
+  renderHeader();
+  refreshScreen();
+  save();
+}
+async function boostOfflineGainWithAd(){
+  const base = pendingOfflineGain;
+  if(!(base > 0)) return;
+  const btn = document.getElementById("offlineAdBoost");
+  if(btn) btn.disabled = true;
+  const res = await StoreBridge.showRewardedAd();
+  if(!res || !res.ok){
+    if(btn) btn.disabled = false;
+    toast(res && res.reason === "ads_pending" ? "広告は準備中です" : "広告を視聴できませんでした");
+    return;
+  }
+  S.autoTP += base;
+  closeOfflineReturnModal();
+  toast(`放置収益 2 倍！ 追加 +${fmt(base)} TP`);
+  renderHeader();
+  refreshScreen();
+  save();
+}
+document.getElementById("offlineClaim")?.addEventListener("click", ()=> claimOfflineGain());
+document.getElementById("offlineAdBoost")?.addEventListener("click", ()=>{ boostOfflineGainWithAd(); });
 
 let shopBusy = false;
 function afterShopPurchase(){
@@ -5720,7 +5798,7 @@ async function handleShopClick(e){
       toast(`自動 TP ブースター ×${fmt(autoTpBoostMult())} になった`);
     } else if(btn.dataset.shop === "tphour"){
       if(S.coins < TP_HOUR_PACK.cost) return;
-      if(!await spendCoinsConfirmed("1 時間分の自動 TP", TP_HOUR_PACK.cost)) return;
+      if(!await spendCoinsConfirmed("3 時間分の自動 TP", TP_HOUR_PACK.cost)) return;
       const gain = autoRate() * TP_HOUR_PACK.minutes * 60;
       S.autoTP += gain;
       toast(`自動 TP ${TP_HOUR_PACK.minutes} 分分を購入 +${fmt(gain)} TP`);
@@ -5784,6 +5862,17 @@ setInterval(()=>{
   const now = performance.now();
   const dt = (now - lastTick)/1000;
   lastTick = now;
+  if(dt > 10){
+    applyProdPointDecay(dt);
+    const gain = autoRate() * Math.min(dt, offlineCapSec()) * OFFLINE_EARN_RATE;
+    if(gain > 0 && !(pendingOfflineGain > 0)){
+      S.autoTP += gain;
+      pendingOfflineGain = gain;
+      showOfflineReturnModal();
+      S.lastTime = Date.now();
+    }
+    return;
+  }
   applyProdPointDecay(dt);
   S.autoTP += autoRate() * dt;
   if(!document.hidden) S.playSeconds += dt;
@@ -5791,7 +5880,25 @@ setInterval(()=>{
 }, 120);
 setInterval(refreshScreen, 400);
 setInterval(save, 5000);
-document.addEventListener("visibilitychange", ()=>{ if(document.hidden) save(); });
+document.addEventListener("visibilitychange", ()=>{
+  if(document.hidden){
+    save();
+    return;
+  }
+  const rawDt = (Date.now() - (S.lastTime || Date.now())) / 1000;
+  const dt = Math.min(Math.max(0, rawDt), offlineCapSec());
+  if(dt > 0) applyProdPointDecay(dt);
+  if(dt > 10 && !(pendingOfflineGain > 0)){
+    const gain = autoRate() * dt * OFFLINE_EARN_RATE;
+    if(gain > 0){
+      S.autoTP += gain;
+      pendingOfflineGain = gain;
+      showOfflineReturnModal();
+    }
+  }
+  lastTick = performance.now();
+  save();
+});
 
 document.getElementById("menuBtn").addEventListener("click", ()=> openSettings());
 
@@ -5884,7 +5991,7 @@ let tutHlTimer = null;
 const TUT_SCRIPT = {
   labor: {
     label:"1 / 6", title:"まずは働け",
-    body:"パネルをタップするたび、TP が増える。宝くじ 1 枚分（30 TP）まで稼ごう。",
+    body:"パネルをタップするたび、TP が増える。宝くじ 2 枚分（60 TP）まで稼ごう。",
     pos:"top", next:false
   },
   seeManualTP: {
@@ -5893,8 +6000,8 @@ const TUT_SCRIPT = {
     pos:"bottom", next:true
   },
   lottery: {
-    label:"3 / 6", title:"夢を一枚、買え",
-    body:"貯めた TP で宝くじを買ってみよう。今日の運が、少しだけ顔を出す。",
+    label:"3 / 6", title:"夢を二枚、買え",
+    body:"貯めた TP で宝くじを 2 枚まとめて買ってみよう。くじなので外れることもある——それでも、今日の運が少しだけ顔を出す。",
     pos:"top", next:false
   },
   navFacility: {
@@ -6105,6 +6212,9 @@ function boot(){
   renderCombo();
   renderHeader();
   renderScreen();
+  if(pendingOfflineGain > 0){
+    setTimeout(()=> showOfflineReturnModal(), 500);
+  }
   if(!S.legalAccepted) showLegalModal(false);
   else if(!S.tutorialDone){
     ensureOracleSeen();
