@@ -2174,7 +2174,7 @@ const ZERO_BATCH = 10;      /* 演出は最初の 10 件のみ */
 const ZERO_MAX_BUY = 10000; /* まとめ買い上限（×1〜×1万、MAX は残数） */
 const ZERO_BOOST_MAX_EXP = 68; /* 無量大数倍 = 10^68（MAX_EXP と同値） */
 const ZERO_SKIP_PER_BOOST = 3; /* 10 倍ごとに 1/2 抽選を 3 回スキップ */
-const ZERO_LABOR_MULT_BASE = 1.1; /* 最大到達 n 連で労働 TP ×1.1^n */
+const ZERO_LABOR_MULT_BASE = 1.05; /* 最大到達 n 連で労働 TP ×1.05^n */
 /* 零等：RHC一等 1 回以上 かつ 絶等 1 回以上で解禁される最後のくじ。
    通常くじ 1 枚ごとに独立で 1/無量大数（1e-68）で当たる */
 const ZEROTH_RATE = 1e-68;
@@ -2224,9 +2224,17 @@ const LIFE_LEVELS = [
   { name:"始まりの地",       icon:"☉", cost:1.5e37,tap:1.4e10, auto:1.3e9 },
 ];
 const RECYCLE = { firstCost:10, baseCost:500, costMult:13, multPerLv:1.49 };
-/* 枚数は常に 10^e（1,10,…,1兆,10兆,100兆,…,無量大数）。e=0..68 */
-const MAX_EXP = 68;
-const MAX_TICKETS = Math.pow(10, MAX_EXP); /* 無量大数枚 */
+/* 枚数は常に 10^e（1,10,…,無量大数,…,100,000,000,000+e1000無量大数）。e=0..1079 */
+const MAX_EXP = 1079;
+const LOG10_NUM_MAX = 308; /* IEEE754 で 10^e が有限な概算上限 */
+function pow10(e){
+  e = Math.floor(Number(e) || 0);
+  if(e < 0) return 0;
+  if(e > LOG10_NUM_MAX) return Infinity;
+  const n = Math.pow(10, e);
+  return isFinite(n) && n > 0 ? n : Infinity;
+}
+const MAX_TICKETS = pow10(MAX_EXP); /* 100,000,000,000+e1000 無量大数枚 */
 
 /* 嗜好品：効果は一切ない。買ったという事実だけが残る（全 50 品）
    最終品「終わりのない領収書」= 1 無量大数 G */
@@ -2350,8 +2358,8 @@ const AD_MINUTES_BASE = 20;
 const AD_MINUTES_BOOSTED = 60;
 const AD_BOOST_COST = 200;
 const SHARE_TP_MINUTES = 30; /* 記録シートを X 投稿で 1 日 1 回 */
-const RHC_PRIZE_MULT = 1.5; /* RHC一等 1 枚ごとの通常くじ倍率 */
-const RHC_RATE_DIV = 2;     /* RHC一等 1 枚ごとに確率が 1/2 */
+const RHC_PRIZE_MULT = 1.2; /* RHC一等 1 枚ごとの通常くじ倍率 */
+const RHC_RATE_DIV = 2.5;   /* RHC一等 1 枚ごとに確率が 1/2.5 */
 const TP_HOUR_PACK = { cost:100, minutes:180 }; /* コインで買う自動 TP（3 時間分） */
 const OFFLINE_EARN_RATE = 0.7; /* オフライン収益はオンラインの 70% */
 const DAILY_BONUS_COIN = 5;
@@ -2781,6 +2789,33 @@ function fmtMuryo(n){
   }
   return fmtComma(man) + (extra > 0 ? "+e" + extra : "") + "無量大数";
 }
+/** 10^log10n の表示（float を超える枚数・金額用） */
+function fmtByLog10(log10n){
+  log10n = Number(log10n);
+  if(!isFinite(log10n)) return "∞";
+  if(log10n < 0) return fmt(0);
+  if(log10n <= LOG10_NUM_MAX) return fmt(pow10(log10n));
+  if(log10n < 68){
+    /* 通常単位帯だが Number 化できないことはほぼ無い。フォールバック */
+    return "10^" + Math.floor(log10n);
+  }
+  const logX = log10n - 68; /* n / 1e68 の log10 */
+  if(logX < 11){
+    const x = Math.pow(10, logX);
+    const s = x >= 100
+      ? fmtComma(x)
+      : String(parseFloat(x.toFixed(x >= 10 ? 1 : 2)));
+    return s + "無量大数";
+  }
+  const exp = Math.floor(logX + 1e-12);
+  let extra = Math.max(0, exp - 11);
+  let man = Math.pow(10, logX - extra);
+  if(man >= 9.995e11){
+    extra++;
+    man = Math.pow(10, logX - extra);
+  }
+  return fmtComma(man) + (extra > 0 ? "+e" + extra : "") + "無量大数";
+}
 function fmt(n){
   if(!isFinite(n)) return "∞";
   if(n < 0) return "-" + fmt(-n);
@@ -2832,17 +2867,45 @@ function poisson(l){
   return k-1;
 }
 function binom(n,p){
-  if(!isFinite(n) || n<=0 || p<=0) return 0;
-  n = Math.floor(n);
-  if(n<=0) return 0;
-  if(p>=1) return n;
-  if(n<64){ let c=0; for(let i=0;i<n;i++) if(Math.random()<p) c++; return c; }
-  const mean=n*p;
-  if(!isFinite(mean)) return 0;
-  if(mean<30) return Math.min(n, poisson(mean));
-  const sd = Math.sqrt(Math.max(0, mean*(1-p)));
-  const c = Math.round(mean + sd*gauss());
-  return Math.max(0, Math.min(n, isFinite(c) ? c : Math.round(mean)));
+  if(!(p > 0)) return 0;
+  if(p >= 1){
+    if(!isFinite(n)) return Infinity;
+    n = Math.floor(n);
+    return n > 0 ? n : 0;
+  }
+  let logN;
+  if(n === Infinity){
+    logN = Infinity;
+  } else {
+    if(!isFinite(n) || n <= 0) return 0;
+    n = Math.floor(n);
+    if(n <= 0) return 0;
+    if(n < 64){ let c=0; for(let i=0;i<n;i++) if(Math.random()<p) c++; return c; }
+    logN = Math.log10(n);
+  }
+  return binomFromLog(logN, p);
+}
+/** log10(試行回数) と成功確率 p から二項乱数（巨大 n 対応） */
+function binomFromLog(logN, p){
+  if(!(p > 0)) return 0;
+  if(!(logN >= 0) && logN !== 0) return 0;
+  if(p >= 1) return pow10(logN);
+  const logMean = logN + Math.log10(p);
+  if(!isFinite(logMean)) return 0;
+  if(logMean < -12){
+    /* 期待値が極小：確率 mean で 1 回当たるか */
+    return Math.random() < Math.pow(10, logMean) ? 1 : 0;
+  }
+  if(logMean > LOG10_NUM_MAX) return Infinity;
+  const mean = Math.pow(10, logMean);
+  if(!isFinite(mean) || mean <= 0) return 0;
+  if(mean < 30) return poisson(mean);
+  const sd = Math.sqrt(Math.max(0, mean * (1 - Math.min(p, 0.999999))));
+  const c = Math.round(mean + sd * gauss());
+  const cap = pow10(logN);
+  const v = isFinite(c) ? c : Math.round(mean);
+  if(!isFinite(cap)) return Math.max(0, v);
+  return Math.max(0, Math.min(cap, v));
 }
 
 /* ==========================================================
@@ -2898,41 +2961,88 @@ function applyJackpotShield(hits, superCount, zerothCount, totalPrize, winners){
   return { firstCount, superCount:sc, zerothCount:zc, totalPrize:prize, winners:win };
 }
 
-function drawTickets(n, pool){
+function drawTickets(n, pool, logN){
   const hits={}; let totalPrize=0, winners=0, superCount=0, zerothCount=0;
   const unlocked = S.superUnlocked;
   const beforeTickets = S.ticketsBought || 0;
-  n = Math.floor(Number(n));
-  if(!isFinite(n) || n < 1){
+  const hasLog = isFinite(logN) && logN >= 0;
+  n = Number(n);
+  if(hasLog){
+    n = pow10(logN);
+  } else {
+    n = Math.floor(n);
+    if(!isFinite(n) || n < 1){
+      return { hits, totalPrize:0, losers:0, jackpot:false, superHit:false, zerothHit:false };
+    }
+    logN = Math.log10(n);
+  }
+  if(!(logN >= 0) || (!isFinite(n) && !hasLog)){
     return { hits, totalPrize:0, losers:0, jackpot:false, superHit:false, zerothHit:false };
   }
 
   /* 2 枚目は抽選枠から外し、あとで七等として確定させる（追加当選にしない） */
   const forceSeventh =
     beforeTickets < TUTORIAL_SEVENTH_AT &&
-    beforeTickets + Math.min(n, TUTORIAL_SEVENTH_AT) >= TUTORIAL_SEVENTH_AT
+    beforeTickets + Math.min(isFinite(n) ? n : TUTORIAL_SEVENTH_AT, TUTORIAL_SEVENTH_AT) >= TUTORIAL_SEVENTH_AT
       ? 1 : 0;
-  const randomN = n - forceSeventh;
+  const randomLog = forceSeventh > 0 && isFinite(n) && n > 1
+    ? Math.log10(n - forceSeventh)
+    : (forceSeventh > 0 && isFinite(n) && n === 1 ? -Infinity : logN);
 
-  if(randomN > 0){
+  if(randomLog >= 0 && isFinite(randomLog)){
     for(const t of TIERS){
-      let c = binom(randomN, t.count/UNIT);
+      let c = binomFromLog(randomLog, t.count/UNIT);
       if(t.key==="first" && c>0 && unlocked){
-        superCount = binom(c, SUPER_RATE);
-        c -= superCount;
+        /* 超一等: 一等ヒット数に対する二項。c が巨大なら log で近似 */
+        let sc;
+        if(!isFinite(c)){
+          sc = binomFromLog(randomLog + Math.log10(t.count/UNIT), SUPER_RATE);
+          c = Infinity; /* 残り一等は無限扱いで prize 計算側が吸収 */
+        } else {
+          sc = binom(c, SUPER_RATE);
+          c -= sc;
+        }
+        superCount = sc;
       }
       if(c>0){
-        hits[t.key]=c; totalPrize += t.prize*c; winners += c;
+        hits[t.key]=c; totalPrize += t.prize*c; winners += isFinite(c) ? c : 0;
       }
     }
     if(superCount>0){
       hits.super = superCount;
       totalPrize += SUPER_PRIZE*superCount;
-      winners += superCount;
+      winners += isFinite(superCount) ? superCount : 0;
     }
     /* 零等：1 枚ごとに独立で 1/無量大数（等級とは別枠の追加当選） */
     if(zerothUnlocked()){
-      zerothCount = binom(randomN, ZEROTH_RATE);
+      zerothCount = binomFromLog(randomLog, ZEROTH_RATE);
+      if(zerothCount > 0){
+        hits.zeroth = zerothCount;
+        totalPrize += ZEROTH_PRIZE * zerothCount;
+      }
+    }
+  } else if(randomLog === Infinity || (hasLog && logN > LOG10_NUM_MAX && forceSeventh === 0)){
+    /* float 超えの枚数: log 経路 */
+    for(const t of TIERS){
+      let c = binomFromLog(logN, t.count/UNIT);
+      if(t.key==="first" && c>0 && unlocked){
+        const sc = !isFinite(c)
+          ? binomFromLog(logN + Math.log10(t.count/UNIT), SUPER_RATE)
+          : binom(c, SUPER_RATE);
+        if(isFinite(c)) c -= sc;
+        superCount = sc;
+      }
+      if(c>0){
+        hits[t.key]=c; totalPrize += t.prize*c; winners += isFinite(c) ? c : 0;
+      }
+    }
+    if(superCount>0){
+      hits.super = superCount;
+      totalPrize += SUPER_PRIZE*superCount;
+      winners += isFinite(superCount) ? superCount : 0;
+    }
+    if(zerothUnlocked()){
+      zerothCount = binomFromLog(logN, ZEROTH_RATE);
       if(zerothCount > 0){
         hits.zeroth = zerothCount;
         totalPrize += ZEROTH_PRIZE * zerothCount;
@@ -3042,7 +3152,7 @@ function zeroOddsDenomDigits(streak){
 function zeroWinsDigits(){
   return zeroOddsDenomDigits(S.zeroBestStreak || 0);
 }
-/** 絶等：最大到達 n 連に対する労働 TP 倍率（×1.1^n） */
+/** 絶等：最大到達 n 連に対する労働 TP 倍率（×1.05^n） */
 function zeroLaborMult(){
   const n = Math.max(0, Math.floor(Number(S.zeroBestStreak) || 0));
   if(n <= 0) return 1;
@@ -3148,7 +3258,7 @@ function geomTrialsUntilSuccess(p){
 }
 
 /* RHC：ハズレ券で引く。一等以外は当選金相当のハズレ券、一等は RHC一等。
-   RHC一等が当たるたび、以降の RHC一等確率は 1/2 になる。 */
+   RHC一等が当たるたび、以降の RHC一等確率は 1/2.5 になる。 */
 function drawRHC(n){
   const hits={}; let loseGain=0, winners=0, rhcFirst=0;
   n = Math.floor(Number(n));
@@ -3576,19 +3686,32 @@ document.getElementById("pads").addEventListener("pointerdown", (e)=>{
 const poolKey = pool => pool === "manual" ? "manualTP" : "autoTP";
 
 function qtyPow(exp){
-  const e = Math.max(0, Math.min(MAX_EXP, exp|0));
-  const n = Math.pow(10, e);
-  return isFinite(n) && n > 0 ? n : MAX_TICKETS;
+  return pow10(Math.max(0, Math.min(MAX_EXP, exp|0)));
+}
+function qtyLog(exp){
+  return Math.max(0, Math.min(MAX_EXP, Math.floor(Number(exp) || 0)));
 }
 
-/** 所持 TP から買える枚数（1回あたり無量大数枚まで） */
+/** 所持 TP から買える枚数（1回あたり最大 MAX_EXP 桁の 10 の冪） */
 function ticketsAffordable(tp){
   let x = Number(tp);
-  if(x === Infinity) x = Number.MAX_VALUE;
+  if(x === Infinity) return MAX_TICKETS;
   if(!isFinite(x) || x < TICKET_COST) return 0;
   const can = Math.floor(x / TICKET_COST);
   if(!isFinite(can) || can <= 0) return 0;
-  return can > MAX_TICKETS ? MAX_TICKETS : can;
+  if(can === Infinity) return MAX_TICKETS;
+  /* Number 上限付近では MAX_TICKETS(∞) と比較すると常に小 */
+  return can;
+}
+/** 所持 TP から買える枚数の log10 上限（qty ステップ用） */
+function ticketsAffordableLog(tp){
+  let x = Number(tp);
+  if(x === Infinity) return MAX_EXP;
+  if(!isFinite(x) || x < TICKET_COST) return -1;
+  const can = Math.floor(x / TICKET_COST);
+  if(!(can > 0)) return -1;
+  if(!isFinite(can)) return MAX_EXP;
+  return Math.min(MAX_EXP, Math.floor(Math.log10(can) + 1e-12));
 }
 function affordable(pool){
   return ticketsAffordable(S[poolKey(pool)]);
@@ -3600,27 +3723,45 @@ function qty(pool){
 }
 function buyQty(pool){
   const can = affordable(pool);
-  if(!(can > 0)) return 0;
+  if(!(can > 0) && !(can === Infinity)) return 0;
   if(S.qtyMax) return can;
-  const want = qtyPow(S.qtyExp);
-  return want <= can ? want : can;
+  const wantLog = qtyLog(S.qtyExp);
+  const canLog = ticketsAffordableLog(S[poolKey(pool)]);
+  if(canLog < 0) return 0;
+  const log = Math.min(wantLog, canLog);
+  return pow10(log);
 }
-function qtyCost(pool){ return buyQty(pool) * TICKET_COST; }
+function qtyCost(pool){
+  const n = buyQty(pool);
+  if(!isFinite(n)) return Infinity;
+  return n * TICKET_COST;
+}
 
-function spendTicketTP(key, n){
+function spendTicketTP(key, n, logN){
   const before = Number(S[key]);
-  if(!(n > 0)) return 0;
+  const useLog = isFinite(logN) && logN >= 0;
+  if(useLog) n = pow10(logN);
+  if(!(n > 0) && n !== Infinity) return 0;
   if(before === Infinity){
     /* 無限 TP: 枚数分だけ「消費した」ことにし、残高は無限のまま */
-    return n > MAX_TICKETS ? MAX_TICKETS : n;
+    return useLog ? pow10(Math.min(logN, MAX_EXP)) : n;
   }
   if(!isFinite(before)) return 0;
   const can = ticketsAffordable(before);
-  const bought = n <= can ? n : can;
-  if(!(bought > 0)) return 0;
-  let after = before - bought * TICKET_COST;
-  if(!isFinite(after) || after < 0 || !(after < before)){
-    /* 減算が潰れた＝事実上使い切り */
+  let bought;
+  if(useLog){
+    const canLog = ticketsAffordableLog(before);
+    if(canLog < 0) return 0;
+    const log = Math.min(logN, canLog);
+    bought = pow10(log);
+    logN = log;
+  } else {
+    bought = n <= can || can === Infinity ? n : can;
+  }
+  if(!(bought > 0) && bought !== Infinity) return 0;
+  const cost = !isFinite(bought) ? Infinity : bought * TICKET_COST;
+  let after = before - cost;
+  if(!isFinite(cost) || !isFinite(after) || after < 0 || !(after < before)){
     after = 0;
   }
   if(after < 1e-9) after = 0;
@@ -3633,17 +3774,40 @@ function buyLottery(pool){
   const key = poolKey(pool);
   const label = pool === "manual" ? "手動" : "自動";
   const tutLottery = S.tutorialStep === "lottery";
-  const want = tutLottery ? 2 : (S.qtyMax ? affordable(pool) : qtyPow(S.qtyExp));
-  const n = tutLottery ? Math.min(2, affordable(pool)) : buyQty(pool);
-  if(!(n > 0) || (tutLottery && n < 2)){
+  let logN = null;
+  let want;
+  let n;
+  if(tutLottery){
+    want = 2;
+    n = Math.min(2, affordable(pool));
+  } else if(S.qtyMax){
+    n = affordable(pool);
+    want = n;
+    if(isFinite(n) && n > 0) logN = Math.log10(n);
+    else if(n === Infinity) logN = MAX_EXP;
+  } else {
+    logN = qtyLog(S.qtyExp);
+    const canLog = ticketsAffordableLog(S[key]);
+    if(canLog < 0){
+      toast(`${label} TP が足りません`);
+      renderQty();
+      return;
+    }
+    logN = Math.min(logN, canLog);
+    n = pow10(logN);
+    want = pow10(qtyLog(S.qtyExp));
+  }
+  if((!(n > 0) && n !== Infinity) || (tutLottery && !(n >= 2))){
     toast(tutLottery ? "2 枚分の TP が必要だ" : `${label} TP が足りません`);
     renderQty();
     return;
   }
 
   const tpBefore = S[key];
-  const bought = spendTicketTP(key, n);
-  if(!(bought > 0) || (tutLottery && bought < 2)){
+  const bought = tutLottery
+    ? spendTicketTP(key, n)
+    : spendTicketTP(key, n, logN);
+  if((!(bought > 0) && bought !== Infinity) || (tutLottery && !(bought >= 2))){
     S[key] = tpBefore;
     toast(tutLottery ? "2 枚分の TP が必要だ" : `${label} TP が足りません`);
     renderQty();
@@ -3652,7 +3816,11 @@ function buyLottery(pool){
 
   let r;
   try{
-    r = tutLottery ? drawTutorialLottery() : drawTickets(bought, pool);
+    if(tutLottery) r = drawTutorialLottery();
+    else {
+      const boughtLog = isFinite(bought) ? Math.log10(bought) : (isFinite(logN) ? logN : MAX_EXP);
+      r = drawTickets(bought, pool, boughtLog);
+    }
   }catch(err){
     S[key] = tpBefore;
     console.error(err);
@@ -3669,8 +3837,11 @@ function buyLottery(pool){
   S.totalLose += r.losers;
 
   sfx.lotteryBuy();
-  renderResult(bought, r);
-  if(!tutLottery && isFinite(want) && want > bought * 1.0000001){
+  const resultLog = tutLottery
+    ? null
+    : (isFinite(bought) ? Math.log10(bought) : (isFinite(logN) ? logN : null));
+  renderResult(bought, r, resultLog);
+  if(!tutLottery && isFinite(want) && isFinite(bought) && want > bought * 1.0000001){
     toast(`${fmt(bought)} 枚を購入（指定 ${fmt(want)} 枚中）`);
   }
   if(r.jackpot){
@@ -3705,8 +3876,11 @@ function drawTutorialLottery(){
   };
 }
 
-function renderResult(n, r){
-  document.getElementById("resultTitle").textContent = `抽 選 結 果  ${fmt(n)} 枚`;
+function renderResult(n, r, logN){
+  const nLabel = isFinite(n)
+    ? fmt(n)
+    : (isFinite(logN) ? fmtByLog10(logN) : "∞");
+  document.getElementById("resultTitle").textContent = `抽 選 結 果  ${nLabel} 枚`;
   const sumEl = document.getElementById("resultSum");
   const sumLabel = "+" + moneyLabel(r.totalPrize);
   sumEl.textContent = sumLabel;
@@ -3755,22 +3929,34 @@ function renderQty(){
   const canAuto = affordable("auto");
   const canBest = Math.max(canMan, canAuto);
   const tutLottery = !S.tutorialDone && S.tutorialStep === "lottery";
-  const want = tutLottery ? 2 : (S.qtyMax ? null : qtyPow(S.qtyExp));
+  const wantLog = qtyLog(S.qtyExp);
+  const want = tutLottery ? 2 : (S.qtyMax ? null : qtyPow(wantLog));
   const nShow = tutLottery ? 2 : (S.qtyMax ? canBest : want);
+  const nShowLabel = tutLottery
+    ? fmt(2)
+    : (S.qtyMax
+      ? (isFinite(canBest) ? fmt(canBest || 0) : fmtByLog10(MAX_EXP))
+      : fmtByLog10(wantLog));
 
-  document.getElementById("qtyN").textContent = fmt(nShow || 0);
+  document.getElementById("qtyN").textContent = nShowLabel;
   if(tutLottery){
     document.getElementById("qtyCost").textContent = fmt(2 * TICKET_COST) + " TP";
   } else if(S.qtyMax){
     document.getElementById("qtyCost").textContent =
-      nShow > 0
-        ? `最大 ${fmt(nShow)} 枚 / ${fmt(nShow * TICKET_COST)} TP`
+      (canBest > 0 || canBest === Infinity)
+        ? `最大 ${nShowLabel} 枚 / ${isFinite(canBest) ? fmt(canBest * TICKET_COST) : "∞"} TP`
         : "購入できる枚数なし";
-  } else if(canBest >= 1 && want > canBest){
-    document.getElementById("qtyCost").textContent =
-      `所持なら ${fmt(canBest)} 枚（${fmt(canBest * TICKET_COST)} TP）`;
   } else {
-    document.getElementById("qtyCost").textContent = fmt((nShow || 0) * TICKET_COST) + " TP";
+    const canLog = Math.max(ticketsAffordableLog(S.manualTP), ticketsAffordableLog(S.autoTP));
+    if(canLog >= 0 && wantLog > canLog){
+      const haveN = pow10(canLog);
+      document.getElementById("qtyCost").textContent =
+        `所持なら ${fmtByLog10(canLog)} 枚（${isFinite(haveN) ? fmt(haveN * TICKET_COST) : "∞"} TP）`;
+    } else {
+      const cost = isFinite(want) ? want * TICKET_COST : Infinity;
+      document.getElementById("qtyCost").textContent =
+        (isFinite(cost) ? fmt(cost) : "∞") + " TP";
+    }
   }
   document.getElementById("qtyMax").classList.toggle("on", !!S.qtyMax && !tutLottery);
   document.getElementById("qtyDown").disabled = tutLottery || (!S.qtyMax && S.qtyExp <= 0);
@@ -3778,8 +3964,10 @@ function renderQty(){
   document.getElementById("qtyMax").disabled = tutLottery;
   const lotteryLocked = tutorialLocksLottery();
   const needTut = tutLottery ? 2 : 1;
-  document.getElementById("buyManual").disabled = lotteryLocked || !(canMan >= needTut);
-  document.getElementById("buyAuto").disabled = lotteryLocked || !(canAuto >= needTut);
+  const canBuyMan = tutLottery ? (canMan >= needTut) : (canMan > 0 || canMan === Infinity);
+  const canBuyAuto = tutLottery ? (canAuto >= needTut) : (canAuto > 0 || canAuto === Infinity);
+  document.getElementById("buyManual").disabled = lotteryLocked || !canBuyMan;
+  document.getElementById("buyAuto").disabled = lotteryLocked || !canBuyAuto;
   document.getElementById("balManual").textContent = "所持 " + fmtTP(S.manualTP);
   document.getElementById("balAuto").textContent = "所持 " + fmtTP(S.autoTP);
 }
