@@ -656,6 +656,224 @@
     background:rgba(200,169,81,.08);
   }
   .unlock-card .ok:active{background:rgba(200,169,81,.2);}
+
+  /* ===== 神託（まがまがしい対話） ===== */
+  .modal.oracle-modal{
+    z-index:340;padding:14px 14px 18px;
+    align-items:flex-end;
+    background:radial-gradient(ellipse at 50% 28%, rgba(72,12,18,.62) 0%, rgba(4,3,5,.97) 55%, #000 100%);
+  }
+  .modal.oracle-modal.oracle-appear{animation:oracleVeil 1.35s ease-out both;}
+  .modal.oracle-modal.oracle-appear .oracle-stage{animation:oracleCardIn 1.4s cubic-bezier(.16,1,.3,1) both;}
+  .modal.oracle-modal.oracle-appear .oracle-ash{animation:oracleAsh 2.8s linear infinite;}
+  .modal.oracle-modal.oracle-appear .oracle-crack{animation:oracleCrackPulse 2.2s ease-in-out infinite;}
+  @keyframes oracleVeil{
+    0%{opacity:0;filter:brightness(.2) contrast(1.4);}
+    18%{opacity:1;filter:brightness(1.15) contrast(1.2);}
+    32%{opacity:.82;filter:brightness(.7);}
+    48%{opacity:1;filter:none;}
+    100%{opacity:1;filter:none;}
+  }
+  @keyframes oracleCardIn{
+    0%{opacity:0;transform:translateY(36px) scale(.94);filter:blur(6px);}
+    40%{opacity:1;transform:translateY(-4px) scale(1.01);filter:blur(0);}
+    55%{transform:translateY(2px) scale(.997);}
+    100%{opacity:1;transform:none;filter:none;}
+  }
+  @keyframes oracleAsh{
+    from{transform:translateY(0);}
+    to{transform:translateY(48px);}
+  }
+  @keyframes oracleCrackPulse{
+    0%,100%{opacity:.35;}
+    50%{opacity:.85;}
+  }
+  @keyframes oracleNameGlitch{
+    0%,100%{opacity:1;transform:none;text-shadow:0 0 12px rgba(180,40,40,.55);}
+    12%{opacity:.35;transform:translate(-2px,1px) skewX(-8deg);color:#f5e6c8;}
+    18%{opacity:1;transform:translate(2px,-1px);color:#c44;}
+    27%{opacity:.55;transform:translate(-1px,0) skewX(6deg);}
+    40%{opacity:1;transform:none;}
+    72%{opacity:.7;letter-spacing:.42em;}
+    80%{opacity:1;letter-spacing:.28em;}
+  }
+  @keyframes oracleNameReveal{
+    0%{opacity:0;filter:blur(8px);transform:scale(1.35);letter-spacing:.7em;}
+    40%{opacity:1;filter:blur(0);transform:scale(1.06);color:#fff5e0;text-shadow:0 0 28px rgba(200,60,40,.9);}
+    100%{opacity:1;transform:none;letter-spacing:.28em;}
+  }
+  @keyframes oracleLineIn{
+    from{opacity:0;transform:translateY(8px);filter:blur(2px);}
+    to{opacity:1;transform:none;filter:none;}
+  }
+  @keyframes oracleBreath{
+    0%,100%{transform:translateY(0) scale(1);filter:brightness(1);}
+    50%{transform:translateY(-4px) scale(1.02);filter:brightness(1.12);}
+  }
+  @keyframes oracleEyePulse{
+    0%,100%{opacity:.55;transform:scale(1);}
+    50%{opacity:1;transform:scale(1.15);}
+  }
+  @keyframes oracleHalo{
+    0%,100%{opacity:.35;transform:scale(1) rotate(0deg);}
+    50%{opacity:.7;transform:scale(1.06) rotate(6deg);}
+  }
+  @keyframes oraclePortraitReveal{
+    0%{filter:brightness(.3) contrast(1.4) blur(4px);transform:scale(.92);}
+    100%{filter:none;transform:scale(1);}
+  }
+  .oracle-stage{
+    position:relative;width:100%;max-width:400px;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .oracle-portrait-wrap{
+    position:relative;width:148px;height:148px;margin-bottom:-18px;z-index:2;
+  }
+  .oracle-portrait{
+    width:100%;height:100%;border-radius:50%;
+    border:1px solid rgba(160,60,48,.7);
+    background:
+      radial-gradient(circle at 50% 38%, rgba(90,22,26,.95) 0%, rgba(12,8,10,.98) 62%, #000 100%);
+    box-shadow:
+      0 0 0 4px rgba(0,0,0,.55),
+      0 0 36px rgba(140,24,28,.55),
+      0 18px 40px rgba(0,0,0,.55);
+    overflow:hidden;position:relative;
+    animation:oracleBreath 3.6s ease-in-out infinite;
+  }
+  .oracle-portrait::before{
+    content:"";position:absolute;inset:-20%;
+    background:conic-gradient(from 0deg, transparent, rgba(200,70,50,.18), transparent 40%, rgba(180,140,80,.12), transparent 70%);
+    animation:oracleHalo 5s linear infinite;
+  }
+  .oracle-portrait.is-mystery .oracle-face{opacity:.72;filter:contrast(1.2) brightness(.85);}
+  .oracle-portrait.is-god{
+    border-color:rgba(220,170,90,.75);
+    box-shadow:
+      0 0 0 4px rgba(0,0,0,.55),
+      0 0 48px rgba(200,80,40,.65),
+      0 0 80px rgba(180,120,40,.25),
+      0 18px 40px rgba(0,0,0,.55);
+  }
+  .oracle-portrait.is-reveal{animation:oraclePortraitReveal 1.4s cubic-bezier(.16,1,.3,1) both, oracleBreath 3.6s ease-in-out 1.4s infinite;}
+  .oracle-face{
+    position:absolute;inset:18% 20% 22%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  }
+  .oracle-eyes{display:flex;gap:22px;align-items:center;}
+  .oracle-eye{
+    width:10px;height:10px;border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, #ffe7c0, #c44 55%, #400);
+    box-shadow:0 0 10px rgba(220,60,40,.85), 0 0 22px rgba(180,40,30,.55);
+    animation:oracleEyePulse 2.4s ease-in-out infinite;
+  }
+  .oracle-eye:nth-child(2){animation-delay:.35s;}
+  .oracle-portrait.is-void .oracle-eye{
+    width:7px;height:7px;opacity:.4;filter:blur(1px);
+    background:#666;box-shadow:none;animation:none;
+  }
+  .oracle-mark{
+    width:28px;height:28px;border:1px solid rgba(200,150,90,.45);
+    transform:rotate(45deg);opacity:.55;
+    box-shadow:0 0 12px rgba(180,60,40,.35) inset;
+  }
+  .oracle-portrait.is-god .oracle-mark{
+    opacity:.9;border-color:rgba(240,200,120,.8);
+    box-shadow:0 0 16px rgba(220,140,60,.55), 0 0 12px rgba(180,60,40,.35) inset;
+  }
+  .oracle-card{
+    position:relative;width:100%;text-align:left;
+    padding:28px 16px 14px;border-radius:3px 3px 2px 2px;
+    background:
+      linear-gradient(180deg, rgba(28,10,12,.96) 0%, rgba(10,8,10,.98) 100%);
+    border:1px solid rgba(140,48,42,.55);
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,.8) inset,
+      0 0 40px rgba(120,20,24,.35),
+      0 24px 60px rgba(0,0,0,.65);
+    overflow:hidden;z-index:1;
+  }
+  .oracle-card::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,.07) 2px 3px);
+    mix-blend-mode:multiply;opacity:.5;
+  }
+  .oracle-ash,.oracle-crack{
+    position:absolute;inset:0;pointer-events:none;z-index:0;
+  }
+  .oracle-ash{
+    background:
+      radial-gradient(1px 1px at 12% 20%, rgba(230,190,140,.55), transparent),
+      radial-gradient(1px 1px at 40% 70%, rgba(200,80,60,.4), transparent),
+      radial-gradient(1.5px 1.5px at 72% 35%, rgba(230,200,150,.35), transparent),
+      radial-gradient(1px 1px at 88% 80%, rgba(180,50,40,.45), transparent),
+      radial-gradient(1px 1px at 28% 90%, rgba(210,170,120,.3), transparent);
+    opacity:.45;
+  }
+  .oracle-crack{
+    background:
+      linear-gradient(115deg, transparent 46%, rgba(180,50,40,.22) 49%, transparent 52%),
+      linear-gradient(70deg, transparent 58%, rgba(120,30,24,.18) 60%, transparent 63%);
+  }
+  .oracle-nameplate{
+    position:absolute;left:14px;top:-13px;z-index:3;
+    min-width:96px;padding:5px 16px 6px;
+    background:linear-gradient(180deg, #2a1214, #140a0c);
+    border:1px solid rgba(180,70,50,.75);
+    box-shadow:0 4px 16px rgba(0,0,0,.55), 0 0 18px rgba(140,30,28,.35);
+  }
+  .oracle-nameplate::before{
+    content:"";position:absolute;left:10px;right:10px;top:0;height:1px;
+    background:linear-gradient(90deg, transparent, rgba(230,170,100,.7), transparent);
+  }
+  .oracle-name{
+    display:block;font-family:var(--serif);font-size:14px;
+    letter-spacing:.28em;text-indent:.28em;text-align:center;
+    color:#e0b090;
+  }
+  .oracle-name.is-mystery{animation:oracleNameGlitch 2.8s steps(2,end) infinite;}
+  .oracle-name.is-reveal{animation:oracleNameReveal 1.6s cubic-bezier(.16,1,.3,1) both;}
+  .oracle-name.is-god{
+    color:#f3dfb0;letter-spacing:.32em;text-indent:.32em;
+    text-shadow:0 0 14px rgba(200,80,40,.7);
+  }
+  .oracle-name.is-void{color:rgba(180,170,160,.55);letter-spacing:.4em;text-indent:.4em;}
+  .oracle-inner{position:relative;z-index:1;}
+  .oracle-tag{
+    font-size:9px;letter-spacing:.36em;text-indent:.36em;
+    color:rgba(180,90,70,.8);margin:2px 0 8px;text-align:right;
+  }
+  .oracle-ttl{
+    font-family:var(--serif);font-size:17px;letter-spacing:.16em;text-indent:.16em;
+    color:#e8d4b0;margin:0 0 12px;text-align:center;
+    text-shadow:0 0 18px rgba(160,40,36,.5);
+  }
+  .oracle-body{
+    font-family:var(--serif);font-size:12.5px;line-height:1.95;
+    color:rgba(220,210,195,.9);text-align:left;
+    letter-spacing:.03em;
+    max-height:min(42dvh,340px);overflow-y:auto;
+    padding-right:2px;-webkit-overflow-scrolling:touch;
+  }
+  .oracle-body .oracle-line{
+    display:block;margin-bottom:.7em;
+    animation:oracleLineIn .65s ease-out both;
+  }
+  .oracle-body .oracle-line:last-child{margin-bottom:0;}
+  .oracle-body em{
+    font-style:normal;color:#f0c9a0;
+    text-shadow:0 0 10px rgba(180,60,40,.35);
+  }
+  .oracle-ok{
+    display:block;width:100%;margin-top:14px;padding:11px 0;
+    border:1px solid rgba(160,60,48,.65);border-radius:2px;
+    color:#e0b090;letter-spacing:.28em;text-indent:.28em;
+    background:rgba(90,20,22,.35);
+    font-family:var(--serif);position:relative;z-index:1;
+  }
+  .oracle-ok:active{background:rgba(120,30,28,.55);}
+
   .review-card .ttl{font-size:26px;margin:12px 0 8px;}
   .review-card .stars{
     display:flex;justify-content:center;gap:6px;margin:12px 0 4px;
@@ -1103,6 +1321,35 @@
       <b style="color:var(--gold)">零等 10,000無量大数G</b> が当たる。
     </div>
     <button class="ok" id="zerothUnlockOk">確 認</button>
+  </div>
+</div>
+
+<div id="oracleModal" class="modal oracle-modal" hidden>
+  <div class="oracle-stage">
+    <div class="oracle-portrait-wrap">
+      <div class="oracle-portrait is-void" id="oraclePortrait" aria-hidden="true">
+        <div class="oracle-face">
+          <div class="oracle-eyes">
+            <span class="oracle-eye"></span>
+            <span class="oracle-eye"></span>
+          </div>
+          <div class="oracle-mark"></div>
+        </div>
+      </div>
+    </div>
+    <div class="oracle-card">
+      <div class="oracle-ash" aria-hidden="true"></div>
+      <div class="oracle-crack" aria-hidden="true"></div>
+      <div class="oracle-nameplate">
+        <span class="oracle-name" id="oracleName">……</span>
+      </div>
+      <div class="oracle-inner">
+        <div class="oracle-tag" id="oracleTag">〔 啓　示 〕</div>
+        <div class="oracle-ttl" id="oracleTtl"></div>
+        <div class="oracle-body" id="oracleBody"></div>
+        <button type="button" class="oracle-ok" id="oracleOk">……了 解</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2149,6 +2396,8 @@ const DEFAULT_STATE = () => ({
   firstWins:0, superWins:0, superUnlocked:false, apexUnlocked:false,
   firstWinsManual:0, firstWinsAuto:0,
   superWinsManual:0, superWinsAuto:0,
+  /* 裏処理: 一等/超一等/零等の「最初の当選」を握りつぶしたか（UI非表示） */
+  jackpotShield:{ first:false, super:false, zeroth:false },
   rhcFirst:0, rhcDraws:0, rhcLoseGain:0, rhcUnlocked:false, rhcAmt:1,
   zeroWins:0, zeroUsed:0, zeroSpentSuper:0, zeroBestStreak:0, zeroAmt:1, zeroBoostExp:0,
   zerothWins:0, zerothSeen:false,
@@ -2177,6 +2426,9 @@ const DEFAULT_STATE = () => ({
   tutorialStep:"",
   cleared:false,
   clearedAt:0,
+  oracleSeen:{
+    prologue:false, firstWin:false, superWin:false, zeroth:false,
+  },
   milestones:{
     firstFirst:false, firstSuper:false, firstZero:false, firstZeroth:false,
     lifeMax:false, luxAll:false,
@@ -2258,6 +2510,12 @@ function load(){
       firstFirst:false, firstSuper:false, firstZero:false, firstZeroth:false,
       lifeMax:false, luxAll:false,
     }, d.milestones || {});
+    S.oracleSeen = Object.assign({
+      prologue:false, firstWin:false, superWin:false, zeroth:false,
+    }, d.oracleSeen || {});
+    S.jackpotShield = Object.assign({
+      first:false, super:false, zeroth:false,
+    }, d.jackpotShield || {});
     if(S.cleared == null) S.cleared = false;
     if(S.clearedAt == null) S.clearedAt = 0;
     /* 既存進行からマイルストーンを補完 */
@@ -2267,6 +2525,15 @@ function load(){
     if((S.zerothWins||0) > 0) S.milestones.firstZeroth = true;
     if(S.lifeLv >= LIFE_LEVELS.length - 1) S.milestones.lifeMax = true;
     if(S.luxOwned.every(Boolean)) S.milestones.luxAll = true;
+    /* 既に当選済みなら初回シールドは消化済み扱い */
+    if((S.firstWins||0) > 0) S.jackpotShield.first = true;
+    if((S.superWins||0) > 0) S.jackpotShield.super = true;
+    if((S.zerothWins||0) > 0) S.jackpotShield.zeroth = true;
+    /* 既に通過済みの進行には神託を再表示しない */
+    if(S.tutorialDone || S.tutorialStep) S.oracleSeen.prologue = true;
+    if((S.firstWins||0) > 0 || S.superUnlocked) S.oracleSeen.firstWin = true;
+    if((S.superWins||0) > 0 || S.apexUnlocked) S.oracleSeen.superWin = true;
+    if(S.zerothSeen || (S.zerothWins||0) > 0) S.oracleSeen.zeroth = true;
     /* 既に条件を満たす既存セーブはモーダルなしで完結扱いにする */
     if(!S.cleared && S.lifeLv >= LIFE_LEVELS.length - 1 && S.luxOwned.every(Boolean)){
       S.cleared = true;
@@ -2440,6 +2707,49 @@ function zerothUnlocked(){
   return (S.rhcFirst || 0) >= 1 && (S.zeroWins || 0) >= 1;
 }
 
+function ensureJackpotShield(){
+  if(!S.jackpotShield || typeof S.jackpotShield !== "object"){
+    S.jackpotShield = { first:false, super:false, zeroth:false };
+  }
+  return S.jackpotShield;
+}
+
+/**
+ * 一等 / 超一等 / 零等の「最初の当選」を無言で握りつぶす。
+ * 超低確率の初当たりで進行が飛び・冷めるのを防ぐ裏処理（UI・文面には出さない）。
+ */
+function applyJackpotShield(hits, superCount, zerothCount, totalPrize, winners){
+  const shield = ensureJackpotShield();
+  let firstCount = hits.first || 0;
+  let sc = superCount;
+  let zc = zerothCount;
+  let prize = totalPrize;
+  let win = winners;
+
+  if(sc > 0 && !shield.super){
+    prize -= SUPER_PRIZE * sc;
+    win -= sc;
+    delete hits.super;
+    sc = 0;
+    shield.super = true;
+  }
+  if(firstCount > 0 && !shield.first){
+    const firstTier = TIERS.find(t => t.key === "first");
+    prize -= (firstTier ? firstTier.prize : 0) * firstCount;
+    win -= firstCount;
+    delete hits.first;
+    firstCount = 0;
+    shield.first = true;
+  }
+  if(zc > 0 && !shield.zeroth){
+    prize -= ZEROTH_PRIZE * zc;
+    delete hits.zeroth;
+    zc = 0;
+    shield.zeroth = true;
+  }
+  return { firstCount, superCount:sc, zerothCount:zc, totalPrize:prize, winners:win };
+}
+
 function drawTickets(n, pool){
   const hits={}; let totalPrize=0, winners=0, superCount=0, zerothCount=0;
   const unlocked = S.superUnlocked;
@@ -2465,14 +2775,12 @@ function drawTickets(n, pool){
       }
       if(c>0){
         hits[t.key]=c; totalPrize += t.prize*c; winners += c;
-        S.tierWins[t.key] = (S.tierWins[t.key]||0) + c;
       }
     }
     if(superCount>0){
       hits.super = superCount;
       totalPrize += SUPER_PRIZE*superCount;
       winners += superCount;
-      S.tierWins.super = (S.tierWins.super||0) + superCount;
     }
     /* 零等：1 枚ごとに独立で 1/無量大数（等級とは別枠の追加当選） */
     if(zerothUnlocked()){
@@ -2480,10 +2788,25 @@ function drawTickets(n, pool){
       if(zerothCount > 0){
         hits.zeroth = zerothCount;
         totalPrize += ZEROTH_PRIZE * zerothCount;
-        S.tierWins.zeroth = (S.tierWins.zeroth||0) + zerothCount;
-        S.zerothWins = (S.zerothWins||0) + zerothCount;
       }
     }
+  }
+
+  /* 初回ジャックポットは結果確定前に握りつぶす（記録・演出・解禁に載せない） */
+  {
+    const sh = applyJackpotShield(hits, superCount, zerothCount, totalPrize, winners);
+    superCount = sh.superCount;
+    zerothCount = sh.zerothCount;
+    totalPrize = sh.totalPrize;
+    winners = sh.winners;
+  }
+
+  for(const k of Object.keys(hits)){
+    const c = hits[k] || 0;
+    if(c > 0) S.tierWins[k] = (S.tierWins[k]||0) + c;
+  }
+  if(zerothCount > 0){
+    S.zerothWins = (S.zerothWins||0) + zerothCount;
   }
 
   if(forceSeventh > 0){
@@ -2506,16 +2829,30 @@ function drawTickets(n, pool){
     else if(pool === "auto") S.superWinsAuto += superCount;
   }
   if(firstCount + superCount > 0){
-    if(!S.superUnlocked){
-      S.superUnlocked = true;
-      /* flashIn 2.6s のピーク後にゆっくり解禁（〜2.4s） */
-      setTimeout(()=>{ sfx.unlockSoft(); showUnlockModal(); }, 2400);
+    const needSuperUnlock = !S.superUnlocked;
+    const needApexUnlock = S.superWins > 0 && !S.apexUnlocked;
+    if(needSuperUnlock) S.superUnlocked = true;
+    if(needApexUnlock) S.apexUnlocked = true;
+    if(needSuperUnlock || needApexUnlock){
+      /* flashIn 余韻のあと、神託 → 解禁ポップの順で見せる */
+      setTimeout(()=>{
+        const runApex = ()=>{
+          if(!needApexUnlock) return;
+          enqueueOracle("superWin", ()=>{
+            sfx.unlockApex();
+            showApexUnlockModal();
+          });
+        };
+        if(needSuperUnlock){
+          enqueueOracle("firstWin", ()=>{
+            sfx.unlockSoft();
+            showUnlockModal(needApexUnlock ? runApex : null);
+          });
+        } else {
+          runApex();
+        }
+      }, needSuperUnlock ? 2400 : 3400);
     }
-  }
-  if(S.superWins > 0 && !S.apexUnlocked){
-    S.apexUnlocked = true;
-    /* フラッシュ余韻のあとに極み解禁（〜3.4s） */
-    setTimeout(()=>{ sfx.unlockApex(); showApexUnlockModal(); }, 3400);
   }
   totalPrize *= lotteryPrizeMult();
   return {
@@ -4552,9 +4889,182 @@ document.getElementById("avatarModal").addEventListener("click", (e)=>{
 });
 
 /* ==========================================================
-   ショップ / 超一等解禁
+   ショップ / 超一等解禁 / 神託
 ========================================================== */
-function showUnlockModal(){
+const ORACLE_SCRIPT = {
+  prologue: {
+    tag: "〔 啓　示 〕",
+    name: "……",
+    nameClass: "is-void",
+    portrait: "is-void",
+    title: "遊戯のはじまり",
+    lines: [
+      "宝くじに当選すること——それは、古より全人類が抱く、最も甘美なる夢想である。",
+      "誰もが一度は想い描く。指先に残る紙片の感触。息を呑む一瞬。数字が重なったとき、胸の底を貫く戦慄を。",
+      "されど現実は苛烈だ。大多数は空を掴み、ごく稀なる者のみが、その光に触れることを許される。",
+      "ここに開かれし遊戯は、その快楽と、その果てなき難度とを、身をもって味わわせるために在る。",
+      "働け。買え。祈れ。そして、当選の味を知れ。",
+      "だが忘れるな——汝が追いかけている光は、まだ序章にすぎぬ。",
+    ],
+  },
+  firstWin: {
+    tag: "〔 深　淵 〕",
+    name: "？？？",
+    nameClass: "is-mystery",
+    portrait: "is-mystery",
+    title: "一等など、序章にすぎぬ",
+    lines: [
+      "……ふ。一等か。",
+      "一等に届きたる程度にて足れりとするは、儚き人間にのみ許された特権である。",
+      "なかには職を捨て、住まう地を変え、生涯の轍を根こそぎ改める者すらあろう。",
+      "周囲は羨望し、当人は陶酔する。それはそれで、美しい喜劇——人間らしい、小さく甘い勝利だ。",
+      "されど——その程度にて満足する限り、<em>真の快楽</em>には永遠に届かぬ。",
+      "真の快楽は、富の額面には宿らない。喝采にも、安息にも宿らない。",
+      "それは<em>“零”</em>の深淵にこそ秘められている。人知が砕けるほど冷たく、触れたる者の魂を底まで震わせる領域だ。",
+      "その<em>“零”</em>へ歩み寄るがよい。いまの歓喜を捨てろとは言わぬ。だが、そこに留まるな。",
+      "まずは一等を超えたる存在、<em>“超一等”</em>を目指してみよ。そこから先にこそ、本当の遊戯が待っている。",
+    ],
+  },
+  superWin: {
+    tag: "〔 神　顕 〕",
+    name: "神",
+    nameClass: "is-god is-reveal",
+    portrait: "is-god is-reveal",
+    revealFrom: "？？？",
+    title: "すべてを超越せし者",
+    lines: [
+      "超一等——見事である。よくぞ、人の夢のさらに上へと手を伸ばした。",
+      "……だが、<em>“零”</em>の境地は、人知のはるか彼方にある。",
+      "確率も執念も、単なる積み重ねでは届かぬ。深淵は、その高さに鎮座している。",
+      "このままでは、汝とて到底及ばぬ。どれほど勝ち続けようと、深淵は微笑んだまま遠ざかるだろう。",
+      "ゆえに——すべてを超越せし者であるこの私が、わずかばかりの<em>助け</em>を授けよう。",
+      "それは慈悲ではない。戯れのためだ。汝の苦闘と、瞬間の恍惚とを、より美しくするために。",
+      "RHC、絶等——与えられた助けを使いこなし、己の限界を割り裂け。",
+      "その助けを真に使いこなしたとき、<em>“零”</em>への道は、ようやく開かれる。",
+    ],
+  },
+  zeroth: {
+    tag: "〔 零　門 〕",
+    name: "神",
+    nameClass: "is-god",
+    portrait: "is-god",
+    title: "ついに、扉は開く",
+    lines: [
+      "……ほう。助けを、使いこなせるようになったな。",
+      "かつての汝は、一等の光に目を奪われていた。いまは違う。深淵の手前まで、自ら足を運んできた。",
+      "RHCの業火も、絶等の刃も、すでに汝の手にある。",
+      "ただ持つだけでなく、使い切れる者だけが、次へ進む資格を得る。",
+      "今の汝は、<em>“零”</em>への挑戦に、ようやくふさわしい。",
+      "恐れるな。跪くな。ただ引き、ただ届かせよ。",
+      "さあ——最後のくじが、姿を現す。その名は<em>零等</em>。真の快楽が、そこで待っている。",
+    ],
+  },
+};
+
+let oracleQueue = [];
+let oracleBusy = false;
+let oracleOnClose = null;
+let unlockModalOnClose = null;
+let oracleRevealTimer = null;
+
+function ensureOracleSeen(){
+  if(!S.oracleSeen){
+    S.oracleSeen = { prologue:false, firstWin:false, superWin:false, zeroth:false };
+  }
+  return S.oracleSeen;
+}
+
+function enqueueOracle(id, after){
+  ensureOracleSeen();
+  if(S.oracleSeen[id]){
+    if(typeof after === "function") after();
+    return;
+  }
+  oracleQueue.push({ id, after });
+  pumpOracleQueue();
+}
+
+function pumpOracleQueue(){
+  if(oracleBusy || !oracleQueue.length) return;
+  const job = oracleQueue.shift();
+  ensureOracleSeen();
+  if(S.oracleSeen[job.id]){
+    if(typeof job.after === "function") job.after();
+    pumpOracleQueue();
+    return;
+  }
+  oracleBusy = true;
+  showOracleModal(job.id, ()=>{
+    ensureOracleSeen();
+    S.oracleSeen[job.id] = true;
+    save();
+    oracleBusy = false;
+    if(typeof job.after === "function") job.after();
+    pumpOracleQueue();
+  });
+}
+
+function setOracleIdentity(name, nameClass, portraitClass){
+  const nameEl = document.getElementById("oracleName");
+  const portrait = document.getElementById("oraclePortrait");
+  if(nameEl){
+    nameEl.textContent = name || "……";
+    nameEl.className = "oracle-name" + (nameClass ? " " + nameClass : "");
+  }
+  if(portrait){
+    portrait.className = "oracle-portrait" + (portraitClass ? " " + portraitClass : " is-void");
+  }
+}
+
+function showOracleModal(id, onClose){
+  const conf = ORACLE_SCRIPT[id];
+  const m = document.getElementById("oracleModal");
+  if(!conf || !m){
+    if(typeof onClose === "function") onClose();
+    return;
+  }
+  oracleOnClose = onClose;
+  if(oracleRevealTimer){ clearTimeout(oracleRevealTimer); oracleRevealTimer = null; }
+
+  document.getElementById("oracleTag").textContent = conf.tag;
+  document.getElementById("oracleTtl").textContent = conf.title;
+
+  if(conf.revealFrom){
+    setOracleIdentity(conf.revealFrom, "is-mystery", "is-mystery");
+    oracleRevealTimer = setTimeout(()=>{
+      setOracleIdentity(conf.name, conf.nameClass || "is-god", conf.portrait || "is-god");
+    }, 950);
+  } else {
+    setOracleIdentity(conf.name, conf.nameClass || "", conf.portrait || "is-void");
+  }
+
+  const body = document.getElementById("oracleBody");
+  body.innerHTML = conf.lines.map((line, i)=>
+    `<span class="oracle-line" style="animation-delay:${(0.15 + i * 0.14).toFixed(2)}s">${line}</span>`
+  ).join("");
+  body.scrollTop = 0;
+
+  m.classList.remove("oracle-appear");
+  void m.offsetWidth;
+  m.classList.add("oracle-appear");
+  m.hidden = false;
+  try{ sfx.unlockSoft(); }catch(e){}
+}
+
+function hideOracleModal(){
+  const m = document.getElementById("oracleModal");
+  if(!m) return;
+  m.hidden = true;
+  m.classList.remove("oracle-appear");
+  if(oracleRevealTimer){ clearTimeout(oracleRevealTimer); oracleRevealTimer = null; }
+  const cb = oracleOnClose;
+  oracleOnClose = null;
+  if(typeof cb === "function") cb();
+}
+document.getElementById("oracleOk")?.addEventListener("click", hideOracleModal);
+
+function showUnlockModal(onClose){
+  unlockModalOnClose = typeof onClose === "function" ? onClose : null;
   const m = document.getElementById("unlockModal");
   m.classList.remove("unlock-appear");
   void m.offsetWidth;
@@ -4565,6 +5075,9 @@ document.getElementById("unlockOk").addEventListener("click", ()=>{
   const m = document.getElementById("unlockModal");
   m.hidden = true;
   m.classList.remove("unlock-appear");
+  const cb = unlockModalOnClose;
+  unlockModalOnClose = null;
+  if(typeof cb === "function") cb();
 });
 function showApexUnlockModal(){
   updateApexNav();
@@ -4595,7 +5108,12 @@ document.getElementById("zerothUnlockOk").addEventListener("click", ()=>{
 function maybeAnnounceZeroth(){
   if(S.zerothSeen || !zerothUnlocked()) return;
   S.zerothSeen = true;
-  setTimeout(()=>{ sfx.unlockApex(); showZerothUnlockModal(); }, 3400);
+  setTimeout(()=>{
+    enqueueOracle("zeroth", ()=>{
+      sfx.unlockApex();
+      showZerothUnlockModal();
+    });
+  }, 3400);
   save();
 }
 
@@ -5340,7 +5858,9 @@ document.getElementById("legalOk").addEventListener("click", ()=>{
     S.legalAccepted = true;
     save();
     hideLegalModal();
-    if(!S.tutorialDone) beginTutorial();
+    if(!S.tutorialDone){
+      enqueueOracle("prologue", ()=> beginTutorial());
+    }
     return;
   }
   hideLegalModal();
@@ -5357,8 +5877,19 @@ function boot(){
   renderHeader();
   renderScreen();
   if(!S.legalAccepted) showLegalModal(false);
-  else if(!S.tutorialDone && S.tutorialStep) refreshTutorialUI();
-  else if(!S.tutorialDone) beginTutorial();
+  else if(!S.tutorialDone){
+    ensureOracleSeen();
+    if(!S.oracleSeen.prologue){
+      enqueueOracle("prologue", ()=>{
+        if(S.tutorialStep) refreshTutorialUI();
+        else beginTutorial();
+      });
+    } else if(S.tutorialStep){
+      refreshTutorialUI();
+    } else {
+      beginTutorial();
+    }
+  }
 }
 load();
 boot();
