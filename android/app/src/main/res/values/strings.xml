@@ -4,4 +4,5 @@
     <string name="title_activity_main">宝くじ生活</string>
     <string name="package_name">jp.takarakuzi.life</string>
     <string name="custom_url_scheme">jp.takarakuzi.life</string>
+    <string name="admob_app_id">ca-app-pub-6500908956743607~8494937185</string>
 </resources>

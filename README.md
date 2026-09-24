@@ -16,20 +16,27 @@ npm run preview
 
 ## ストア向けセットアップ
 
-1. note で利用規約・プライバシーを公開し、`www/index.html` の `STORE_LINKS` を実URLに変更  
+課金は `@capgo/native-purchases`（Play Billing / StoreKit 2）、広告は `@capacitor-community/admob` のリワード広告です。ブラウザではモックのままです。
+
+1. note で利用規約・プライバシー・サポートを公開し、`www/index.html` の `STORE_LINKS` を実URLに変更  
    （下書きの要点は `docs/store-note-draft.md`）
-2. 依存関係とネイティブプロジェクト:
+2. AdMob でアプリとリワード広告ユニットを作り、`store.config.json` に ID を入れる。提出ビルドでは `useTestAds` を `false` にする
+3. App Store Connect / Play Console に、コードと同じ製品 ID でアプリ内課金を作る  
+   - `starter_kit_500` … 非消耗型（買い切り。付与後に consume しない）  
+   - `coins_100` `coins_220` `coins_550` `coins_1200` `coins_6500` `coins_14000` … 消耗型（付与を保存してから Android で consume）
+4. ネイティブプロジェクトへ反映:
 
 ```bash
 npm install
-npx cap add android
-npx cap add ios          # macOS + Xcode が必要
 npm run sync
+npm run check:store
 npx cap open android
 npx cap open ios
 ```
 
-3. 本番の課金・広告は `StoreBridge`（`www/index.html` 内）にプラグインを接続
+`npm run package:store` は、テスト広告 ID と仮の規約 URL が残っていると失敗します。提出前の確認用です。
+
+iOS は Xcode で In-App Purchase を有効にし、署名して Archive します。Android は自分のアップロード鍵でリリース用 AAB を作ります。鍵はリポジトリに置きません。
 
 ## 遊び方（概要）
 

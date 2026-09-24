@@ -1146,6 +1146,12 @@
     .pad{height:44px;}
     .nv{padding:6px 0 7px;}
   }
+  #playtestTimeBadge{
+    position:fixed;left:8px;bottom:calc(56px + env(safe-area-inset-bottom));
+    z-index:500;pointer-events:none;
+    padding:4px 8px;border:1px solid var(--gold-lo);border-radius:3px;
+    background:rgba(14,16,19,.92);color:var(--gold);font-size:9px;letter-spacing:.12em;
+  }
 </style>
 </head>
 <body>
@@ -1325,8 +1331,8 @@
   <button class="nv" data-scr="facility"><span class="g">▩</span><span class="l">設備</span><i class="badge" id="bdgF"></i></button>
   <button class="nv" data-scr="life"><span class="g">⌂</span><span class="l">生活</span><i class="badge" id="bdgL"></i></button>
   <button class="nv" data-scr="recycle"><span class="g">♺</span><span class="l">再生</span><i class="badge" id="bdgR"></i></button>
-  <button class="nv" data-scr="shop"><span class="g">◎</span><span class="l">ショップ</span><i class="badge" id="bdgS"></i></button>
   <button class="nv" data-scr="apex" id="nvApex" hidden><span class="g">✧</span><span class="l">極み</span><i class="badge" id="bdgA"></i></button>
+  <button class="nv" data-scr="shop"><span class="g">◎</span><span class="l">ショップ</span><i class="badge" id="bdgS"></i></button>
   <button class="nv" data-scr="record"><span class="g">▤</span><span class="l">記録</span></button>
 </nav>
 
@@ -1348,6 +1354,16 @@
     <div class="body" id="confirmBody"></div>
     <button class="ok" id="confirmOk">購 入 す る</button>
     <button class="ok secondary" id="confirmCancel">や め る</button>
+  </div>
+</div>
+
+<div id="offlineModal" class="modal" hidden>
+  <div class="modal-card unlock-card">
+    <div class="tag">OFFLINE EARNINGS</div>
+    <div class="ttl" style="font-size:22px">放 置 収 益</div>
+    <div class="body" id="offlineBody"></div>
+    <button class="ok" id="offlineClaim">受け取る</button>
+    <button class="ok secondary" id="offlineAdBoost">広告を見て 2 倍にする</button>
   </div>
 </div>
 
@@ -1455,7 +1471,10 @@
       実在の宝くじ・抽選機関とは一切関係ありません。<br><br>
       ゲーム内の当選金・コインに換金性はなく、<br>
       現実の賭博・投資ではありません。<br><br>
-      続行で <b>利用規約</b>・<b>プライバシーポリシー</b> に同意したものとみなします。
+      続行で <b>利用規約</b>・<b>プライバシーポリシー</b> に同意したものとみなします。<br><br>
+      アプリ内課金は Apple / Google のストアが処理します。<br>
+      広告を見る場合は、同意のうえ広告識別子が使われることがあります。<br>
+      セーブデータは端末内にのみ保存されます。
     </div>
     <button class="ok" id="legalOk">同 意 し て は じ め る</button>
     <button class="ok secondary" id="legalTerms" style="margin-top:8px">利用規約を見る</button>
@@ -1544,6 +1563,7 @@
   </div>
 </div>
 
+<script src="store.config.js"></script>
 <script>
 "use strict";
 
@@ -1551,6 +1571,16 @@
    ストア設定（note 公開後に URL を差し替え）
 ========================================================== */
 const APP_VERSION = "1.0.0";
+/* エージェント／プレイテスト専用: ?agentplay=1 → 時間経過×1000（労働制限時間は据え置き）
+   任意倍率: ?timescale=1000 */
+const PLAYTEST_TIME_SCALE = (()=>{
+  try{
+    const q = new URLSearchParams(location.search);
+    if(q.get("agentplay") === "1" || q.get("playtest") === "1") return 1000;
+    const v = Number(q.get("timescale") || q.get("timeScale") || 1);
+    return (isFinite(v) && v > 0) ? v : 1;
+  }catch(e){ return 1; }
+})();
 const STORE_LINKS = {
   /* note で公開した記事URLに書き換えてください */
   terms: "https://note.com/",
@@ -1564,9 +1594,11 @@ const STORE_LINKS = {
 const IAP_PRODUCT_IDS = [
   "starter_kit_500",
   "coins_100",
+  "coins_220",
   "coins_550",
   "coins_1200",
   "coins_6500",
+  "coins_14000",
 ];
 
 const Cap = typeof window !== "undefined" ? window.Capacitor : null;
@@ -1601,51 +1633,434 @@ async function openStoreReviewPage(){
   /* ネイティブ未設定時は何もしない（特典付与は呼び出し側） */
 }
 /**
- * 課金・広告の差し替え口。
- * 本番は Capacitor プラグイン接続後にここを差し替える。
- * ブラウザ開発時のみモック購入・モック広告を許可する。
+ * ストア課金・リワード広告。
+ * ネイティブは Play Billing / StoreKit と AdMob。ブラウザだけモック。
+ * コインは消耗型（付与を保存してから consume）。スターターキットは非消耗型。
  */
+const TEST_REWARDED_AD = {
+  android: "ca-app-pub-3940256099942544/5224354917",
+  ios: "ca-app-pub-3940256099942544/1712485313",
+};
+function nativePlatform(){
+  try{
+    if(Cap && typeof Cap.getPlatform === "function") return Cap.getPlatform();
+  }catch(e){}
+  return "web";
+}
+function capPlugin(name){
+  try{ return Cap && Cap.Plugins ? Cap.Plugins[name] : null; }
+  catch(e){ return null; }
+}
+function storeConfig(){
+  const c = (typeof window !== "undefined" && window.STORE_CONFIG) || {};
+  const admob = c.admob || {};
+  return {
+    useTestAds: !!c.useTestAds,
+    rewardedAndroid: admob.rewardedAndroid || "",
+    rewardedIos: admob.rewardedIos || "",
+  };
+}
+function rewardedAdUnitId(){
+  const cfg = storeConfig();
+  const plat = nativePlatform();
+  if(cfg.useTestAds) return TEST_REWARDED_AD[plat] || "";
+  return plat === "ios" ? cfg.rewardedIos : cfg.rewardedAndroid;
+}
+function iapMessage(err){
+  const msg = String((err && (err.message || err.errorMessage || err.code)) || err || "");
+  return msg;
+}
+function iapReason(err){
+  const msg = iapMessage(err).toLowerCase();
+  if(/cancel|canceled|cancelled/.test(msg)) return "cancel";
+  if(/pending/.test(msg)) return "pending";
+  if(/already owned|item_already_owned|already_owned/.test(msg)) return "owned";
+  if(/not purchased/.test(msg)) return "unconfirmed";
+  if(/product not found/.test(msg)) return "missing_product";
+  if(/billing is not available|billing_unavailable|feature is not supported/.test(msg)) return "billing";
+  if(/unavailable|disconnected|network|internet/.test(msg)) return "network";
+  return "error";
+}
+function iapFailToast(reason){
+  if(reason === "cancel" || reason === "unconfirmed") return;
+  if(reason === "pending"){
+    toast("お支払いの確認中です。完了するとコインに反映されます");
+    return;
+  }
+  if(reason === "missing_product"){
+    toast("ストアにこの商品がありません");
+    return;
+  }
+  if(reason === "billing"){
+    toast("この端末ではアプリ内課金を利用できません");
+    return;
+  }
+  if(reason === "network"){
+    toast("ストアに接続できませんでした");
+    return;
+  }
+  toast("購入を完了できませんでした");
+}
+function adFailToast(res){
+  const reason = res && res.reason;
+  if(reason === "consent"){
+    toast("広告の表示には同意が必要です");
+    return;
+  }
+  if(reason === "ads_unconfigured"){
+    toast("広告ユニットIDが未設定です");
+    return;
+  }
+  if(reason === "dismissed"){
+    toast("広告は最後まで視聴すると報酬がもらえます");
+    return;
+  }
+  toast("広告を視聴できませんでした");
+}
+function isStorePurchased(tx){
+  if(!tx || !tx.transactionId) return false;
+  if(nativePlatform() !== "android") return true;
+  const s = String(tx.purchaseState == null ? "" : tx.purchaseState);
+  return s === "1" || s === "PURCHASED";
+}
+function grantKey(tx){
+  return tx && tx.transactionId ? String(tx.transactionId) : "";
+}
+function hasIapGrant(id){
+  return !!id && Array.isArray(S.iapGrantIds) && S.iapGrantIds.indexOf(id) >= 0;
+}
+function rememberIapGrant(id){
+  if(!id) return;
+  if(!Array.isArray(S.iapGrantIds)) S.iapGrantIds = [];
+  if(S.iapGrantIds.indexOf(id) >= 0) return;
+  S.iapGrantIds.push(id);
+  if(S.iapGrantIds.length > 400) S.iapGrantIds.splice(0, S.iapGrantIds.length - 400);
+}
+function coinPackById(productId){
+  return COIN_PACKS.find(p => p.productId === productId) || null;
+}
 const StoreBridge = {
+  prices: {},
+  pricesReady: false,
+  canRequestAds: false,
+  privacyOptionsRequired: false,
+  _adsInit: null,
+  _buyLock: false,
+  _adLock: false,
+  _txListener: false,
+  _pendingIds: {},
+  priceLabel(productId, yen){
+    const live = this.prices && this.prices[productId];
+    if(live) return live;
+    return "¥" + Number(yen || 0).toLocaleString("ja-JP");
+  },
+  boot(){
+    if(!isNativeApp()) return;
+    this.initAds();
+    this.bindTransactionUpdates();
+    this.reconcilePurchases(true);
+    this.refreshPrices();
+  },
+  async initAds(){
+    if(!isNativeApp()) return;
+    if(this._adsInit) return this._adsInit;
+    this._adsInit = this._initAds().catch(err=>{
+      this._adsInit = null;
+      console.warn(err);
+    });
+    return this._adsInit;
+  },
+  async _initAds(){
+    const AdMob = capPlugin("AdMob");
+    if(!AdMob) return;
+    await AdMob.initialize({
+      initializeForTesting: storeConfig().useTestAds,
+      tagForChildDirectedTreatment: false,
+      tagForUnderAgeOfConsent: false,
+      maxAdContentRating: "Teen",
+    });
+    try{
+      if(typeof sfx !== "undefined" && sfx.isMuted && sfx.isMuted()){
+        await AdMob.setApplicationMuted({ muted: true });
+      }
+    }catch(e){}
+    let consent = null;
+    try{ consent = await AdMob.requestConsentInfo(); }
+    catch(e){ console.warn(e); }
+    if(consent && consent.isConsentFormAvailable && consent.status === "REQUIRED"){
+      try{ consent = await AdMob.showConsentForm(); }
+      catch(e){ console.warn(e); }
+    }
+    this._readConsent(consent);
+  },
+  _readConsent(consent){
+    this.canRequestAds = !!(consent && consent.canRequestAds);
+    this.privacyOptionsRequired = !!(consent && consent.privacyOptionsRequirementStatus === "REQUIRED");
+  },
+  async showPrivacyOptions(){
+    const AdMob = capPlugin("AdMob");
+    if(!AdMob){ toast("広告の設定を開けません"); return; }
+    try{
+      await AdMob.showPrivacyOptionsForm();
+      const consent = await AdMob.requestConsentInfo();
+      this._readConsent(consent);
+    }catch(e){
+      toast("広告のプライバシー設定を開けませんでした");
+    }
+  },
+  async showRewardedAd(){
+    if(!isNativeApp()){
+      await new Promise(r=>setTimeout(r, 600));
+      return { ok:true, mocked:true };
+    }
+    if(this._adLock) return { ok:false, reason:"busy" };
+    this._adLock = true;
+    try{
+      await this.initAds();
+      const AdMob = capPlugin("AdMob");
+      if(!AdMob) return { ok:false, reason:"error" };
+      if(!this.canRequestAds){
+        try{
+          const again = await AdMob.showConsentForm();
+          this._readConsent(again);
+        }catch(e){}
+      }
+      if(!this.canRequestAds) return { ok:false, reason:"consent" };
+      const adId = rewardedAdUnitId();
+      if(!adId) return { ok:false, reason:"ads_unconfigured" };
+      await AdMob.prepareRewardVideoAd({
+        adId,
+        isTesting: storeConfig().useTestAds,
+        immersiveMode: true,
+      });
+      const reward = await AdMob.showRewardVideoAd();
+      if(!reward || !(Number(reward.amount) > 0)) return { ok:false, reason:"dismissed" };
+      return { ok:true };
+    }catch(err){
+      const msg = iapMessage(err).toLowerCase();
+      if(/cancel|dismiss|closed/.test(msg)) return { ok:false, reason:"dismissed" };
+      console.warn(err);
+      return { ok:false, reason:"error" };
+    }finally{
+      this._adLock = false;
+    }
+  },
   async purchaseCoinPack(packIndex){
     const p = COIN_PACKS[packIndex];
     if(!p) return { ok:false, reason:"invalid" };
-    if(isNativeApp()){
-      /* TODO: @capacitor-community/in-app-purchases 等で productId 課金 */
-      toast("アプリ内課金は準備中です");
-      return { ok:false, reason:"iap_pending" };
+    if(!isNativeApp()){
+      if(!confirm(`${p.label}（¥${p.yen.toLocaleString()}）を開発用モック購入しますか？`)){
+        return { ok:false, reason:"cancel" };
+      }
+      return { ok:true, mocked:true, coins:p.coins };
     }
-    if(!confirm(`${p.label}（¥${p.yen.toLocaleString()}）を開発用モック購入しますか？`)){
-      return { ok:false, reason:"cancel" };
-    }
-    return { ok:true, mocked:true };
+    return this._buy(p.productId, true, (qty)=>{
+      const n = Math.max(1, qty || 1);
+      S.coins += p.coins * n;
+      return p.coins * n;
+    });
   },
   async purchaseStarterKit(){
     if(S.starterKitOwned) return { ok:false, reason:"owned" };
-    if(isNativeApp()){
-      toast("アプリ内課金は準備中です");
-      return { ok:false, reason:"iap_pending" };
+    if(!isNativeApp()){
+      if(!confirm(`${STARTER_KIT.label}（¥${STARTER_KIT.yen.toLocaleString()} → ${STARTER_KIT.coins} C）を開発用モック購入しますか？\n※購入は 1 回のみ`)){
+        return { ok:false, reason:"cancel" };
+      }
+      return { ok:true, mocked:true, coins:STARTER_KIT.coins };
     }
-    if(!confirm(`${STARTER_KIT.label}（¥${STARTER_KIT.yen.toLocaleString()} → ${STARTER_KIT.coins} C）を開発用モック購入しますか？\n※購入は 1 回のみ`)){
-      return { ok:false, reason:"cancel" };
+    return this._buy(STARTER_KIT.productId, false, ()=>{
+      if(S.starterKitOwned) return 0;
+      S.starterKitOwned = true;
+      S.coins += STARTER_KIT.coins;
+      return STARTER_KIT.coins;
+    });
+  },
+  async _buy(productId, consumable, apply){
+    if(this._buyLock) return { ok:false, reason:"busy" };
+    const NP = capPlugin("NativePurchases");
+    if(!NP){
+      toast("課金プラグインが未接続です");
+      return { ok:false, reason:"error" };
     }
-    return { ok:true, mocked:true };
+    this._buyLock = true;
+    try{
+      let supported = true;
+      try{
+        const sup = await NP.isBillingSupported();
+        supported = !sup || sup.isBillingSupported !== false;
+      }catch(e){}
+      if(!supported){
+        iapFailToast("billing");
+        return { ok:false, reason:"billing" };
+      }
+      const tx = await NP.purchaseProduct({
+        productIdentifier: productId,
+        productType: "inapp",
+        quantity: 1,
+        isConsumable: false,
+        autoAcknowledgePurchases: false,
+      });
+      const applied = await this._settle(tx, consumable, apply, false);
+      return applied;
+    }catch(err){
+      const reason = iapReason(err);
+      if(reason === "unconfirmed" || reason === "owned"){
+        const recovered = await this.reconcilePurchases(true);
+        if(recovered > 0 || (productId === STARTER_KIT.productId && S.starterKitOwned)){
+          return { ok:true, recovered:true, coins:0 };
+        }
+        if(reason === "unconfirmed") return { ok:false, reason:"cancel" };
+      }
+      iapFailToast(reason);
+      if(reason !== "cancel" && reason !== "unconfirmed") console.warn(err);
+      return { ok:false, reason };
+    }finally{
+      this._buyLock = false;
+    }
+  },
+  async _settle(tx, consumable, apply, fromRecovery){
+    if(!isStorePurchased(tx)) return { ok:false, reason:"pending" };
+    const id = grantKey(tx);
+    const pack = coinPackById(tx.productIdentifier);
+    const isStarter = tx.productIdentifier === STARTER_KIT.productId;
+    if(!pack && !isStarter) return { ok:false, reason:"invalid" };
+    if(id && this._pendingIds[id]) return { ok:true, duplicate:true, coins:0 };
+    if(id) this._pendingIds[id] = true;
+    try{
+      if(consumable && nativePlatform() === "android" && tx.isAcknowledged !== false && fromRecovery){
+        return { ok:true, duplicate:true, coins:0 };
+      }
+      if(hasIapGrant(id) || (isStarter && S.starterKitOwned)){
+        await this._finish(tx, consumable && !isStarter);
+        return { ok:true, duplicate:true, coins:0 };
+      }
+      if(consumable && fromRecovery && nativePlatform() !== "android" && !tx._unfinished){
+        return { ok:true, duplicate:true, coins:0 };
+      }
+      const qty = Math.max(1, Math.floor(Number(tx.quantity) || 1));
+      const coins = apply(qty) || 0;
+      rememberIapGrant(id);
+      save();
+      await this._finish(tx, consumable && !isStarter);
+      return { ok:true, coins, transactionId:id };
+    }finally{
+      if(id) delete this._pendingIds[id];
+    }
+  },
+  async _finish(tx, consumable){
+    const NP = capPlugin("NativePurchases");
+    if(!NP || !tx) return;
+    const token = tx.purchaseToken || tx.transactionId;
+    if(!token) return;
+    try{
+      if(consumable && nativePlatform() === "android"){
+        await NP.consumePurchase({ purchaseToken: token });
+        return;
+      }
+      if(tx.isAcknowledged === true && nativePlatform() === "android") return;
+      await NP.acknowledgePurchase({ purchaseToken: token });
+    }catch(e){
+      console.warn(e);
+    }
+  },
+  async bindTransactionUpdates(){
+    if(this._txListener || nativePlatform() !== "ios") return;
+    const NP = capPlugin("NativePurchases");
+    if(!NP || !NP.addListener) return;
+    this._txListener = true;
+    try{
+      await NP.addListener("transactionUpdated", (tx)=>{
+        const unfinished = Object.assign({}, tx, { _unfinished:true });
+        this._settle(unfinished, unfinished.productIdentifier !== STARTER_KIT.productId, (qty)=>{
+          return this._applyCatalog(unfinished, qty);
+        }, true).then(res=>{
+          if(res && res.ok && res.coins > 0){
+            toast(`未反映の購入を反映 +${fmt(res.coins)} C`);
+            if(typeof afterShopPurchase === "function") afterShopPurchase();
+          }
+        }).catch(err=>console.warn(err));
+      });
+    }catch(e){
+      this._txListener = false;
+    }
+  },
+  _applyCatalog(tx, qty){
+    if(tx.productIdentifier === STARTER_KIT.productId){
+      if(S.starterKitOwned) return 0;
+      S.starterKitOwned = true;
+      S.coins += STARTER_KIT.coins;
+      return STARTER_KIT.coins;
+    }
+    const pack = coinPackById(tx.productIdentifier);
+    if(!pack) return 0;
+    const n = Math.max(1, qty || 1);
+    S.coins += pack.coins * n;
+    return pack.coins * n;
+  },
+  async reconcilePurchases(quiet){
+    if(!isNativeApp()) return 0;
+    const NP = capPlugin("NativePurchases");
+    if(!NP) return 0;
+    let coins = 0;
+    try{
+      const res = await NP.getPurchases({ productType: "inapp" });
+      const list = (res && res.purchases) || [];
+      for(const tx of list){
+        const consumable = tx.productIdentifier !== STARTER_KIT.productId;
+        if(consumable && nativePlatform() !== "android") continue;
+        const settled = await this._settle(tx, consumable, (qty)=> this._applyCatalog(tx, qty), true);
+        if(settled && settled.coins > 0) coins += settled.coins;
+      }
+    }catch(e){
+      if(!quiet) console.warn(e);
+    }
+    if(coins > 0){
+      toast(`未反映の購入を反映 +${fmt(coins)} C`);
+      if(typeof afterShopPurchase === "function") afterShopPurchase();
+    }
+    return coins;
   },
   async restorePurchases(){
-    if(isNativeApp()){
-      toast("購入の復元は準備中です");
-      return { ok:false, reason:"iap_pending" };
+    if(!isNativeApp()){
+      toast("ブラウザ版では復元対象がありません");
+      return { ok:true, restored:0 };
     }
-    toast("ブラウザ版では復元対象がありません");
-    return { ok:true, restored:0 };
+    const NP = capPlugin("NativePurchases");
+    if(!NP){
+      toast("課金プラグインが未接続です");
+      return { ok:false, reason:"error" };
+    }
+    const before = !!S.starterKitOwned;
+    try{ await NP.restorePurchases(); }
+    catch(e){ console.warn(e); }
+    const coins = await this.reconcilePurchases(true);
+    const restoredKit = !before && !!S.starterKitOwned;
+    if(restoredKit) toast("スターターキットを復元しました");
+    else if(!(coins > 0)) toast("復元できる買い切り購入はありません");
+    if(typeof afterShopPurchase === "function") afterShopPurchase();
+    return { ok:true, restored: restoredKit ? 1 : 0 };
   },
-  async showRewardedAd(){
-    if(isNativeApp()){
-      /* TODO: AdMob Rewarded 接続 */
-      toast("広告は準備中です");
-      return { ok:false, reason:"ads_pending" };
+  async refreshPrices(){
+    if(!isNativeApp()) return;
+    const NP = capPlugin("NativePurchases");
+    if(!NP) return;
+    try{
+      const ids = [STARTER_KIT.productId].concat(COIN_PACKS.map(p => p.productId));
+      const res = await NP.getProducts({ productIdentifiers: ids, productType: "inapp" });
+      const next = {};
+      for(const product of (res && res.products) || []){
+        const id = product.identifier || product.productIdentifier;
+        if(id && product.priceString) next[id] = product.priceString;
+      }
+      this.prices = next;
+      this.pricesReady = true;
+      if(typeof screenId !== "undefined" && screenId === "shop" && typeof renderShop === "function"){
+        renderShop();
+      }
+    }catch(e){
+      this.pricesReady = true;
+      console.warn(e);
     }
-    await new Promise(r=>setTimeout(r, 600));
-    return { ok:true, mocked:true };
   },
 };
 
@@ -2315,10 +2730,12 @@ const STARTER_KIT = {
   productId: IAP_PRODUCT_IDS[0],
 };
 const COIN_PACKS = [
-  { coins:100,  yen:100,  label:"100 C",   productId: IAP_PRODUCT_IDS[1] },
-  { coins:550,  yen:500,  label:"550 C",   bonus:"+10%", productId: IAP_PRODUCT_IDS[2] },
-  { coins:1200, yen:1000, label:"1,200 C", bonus:"+20%", productId: IAP_PRODUCT_IDS[3] },
-  { coins:6500, yen:5000, label:"6,500 C", bonus:"+30%", productId: IAP_PRODUCT_IDS[4] },
+  { coins:100,   yen:100,   label:"100 C",    productId: IAP_PRODUCT_IDS[1] },
+  { coins:220,   yen:200,   label:"220 C",    bonus:"+10%", productId: IAP_PRODUCT_IDS[2] },
+  { coins:550,   yen:500,   label:"550 C",    bonus:"+10%", productId: IAP_PRODUCT_IDS[3] },
+  { coins:1200,  yen:1000,  label:"1,200 C",  bonus:"+20%", productId: IAP_PRODUCT_IDS[4] },
+  { coins:6500,  yen:5000,  label:"6,500 C",  bonus:"+30%", productId: IAP_PRODUCT_IDS[5] },
+  { coins:14000, yen:10000, label:"14,000 C", bonus:"+40%", productId: IAP_PRODUCT_IDS[6] },
 ];
 const COMBO_UPGRADES = [
   { lv:1, name:"ホワイト企業化", cost:100, mult:1.5, desc:"連鎖の持ち時間が 1.5 倍" },
@@ -2332,13 +2749,14 @@ const OFFLINE_UPGRADES = [
 ];
 const BASE_OFFLINE_HOURS = 2;
 const AD_DAILY_LIMIT = 5;
-const AD_MINUTES_BASE = 15;
+const AD_MINUTES_BASE = 20;
 const AD_MINUTES_BOOSTED = 60;
 const AD_BOOST_COST = 200;
 const SHARE_TP_MINUTES = 30; /* 記録シートを X 投稿で 1 日 1 回 */
 const RHC_PRIZE_MULT = 1.5; /* RHC一等 1 枚ごとの通常くじ倍率 */
 const RHC_RATE_DIV = 2;     /* RHC一等 1 枚ごとに確率が 1/2 */
-const TP_HOUR_PACK = { cost:100, minutes:60 }; /* コインで買う自動 TP */
+const TP_HOUR_PACK = { cost:100, minutes:180 }; /* コインで買う自動 TP（3 時間分） */
+const OFFLINE_EARN_RATE = 0.7; /* オフライン収益はオンラインの 70% */
 const DAILY_BONUS_COIN = 5;
 const DAILY_LABOR_TAP_BLOCK = 100;
 const DAILY_LABOR_MAX = 3;
@@ -2537,6 +2955,7 @@ const DEFAULT_STATE = () => ({
   autoTpBoostLv:0,
   costCutLv:0,
   starterKitOwned:false,
+  iapGrantIds:[],
   adDay:"", adUsed:0,
   dailyBonusDay:"",
   dailyLoginClaimed:false,
@@ -2566,7 +2985,8 @@ const DEFAULT_STATE = () => ({
   lastTime:Date.now(),
 });
 let S = DEFAULT_STATE();
-const SAVE_KEY = "takarakuji_life_save_v3";
+let pendingOfflineGain = 0;
+const SAVE_KEY = "takarakuji_life_save_v3" + (PLAYTEST_TIME_SCALE !== 1 ? ("_ts" + PLAYTEST_TIME_SCALE) : "");
 
 function todayKey(){
   const d = new Date();
@@ -2691,6 +3111,9 @@ function load(){
     if(S.costCutLv == null || !isFinite(Number(S.costCutLv))) S.costCutLv = 0;
     S.costCutLv = Math.max(0, Math.min(COST_CUT.maxLv, Math.floor(Number(S.costCutLv) || 0)));
     if(S.starterKitOwned == null) S.starterKitOwned = false;
+    S.iapGrantIds = Array.isArray(d.iapGrantIds)
+      ? d.iapGrantIds.filter(x => typeof x === "string").slice(-400)
+      : [];
     if(S.shareRewardDay == null) S.shareRewardDay = "";
     if(S.dailyBonusDay == null) S.dailyBonusDay = "";
     if(S.dailyLoginClaimed == null) S.dailyLoginClaimed = false;
@@ -2724,9 +3147,13 @@ function load(){
     const dt = Math.min(Math.max(0, rawDt), offlineCapSec());
     if(dt > 0) applyProdPointDecay(dt);
     if(dt > 10){
-      const gain = autoRate() * dt;
-      if(gain > 0){ S.autoTP += gain; setTimeout(()=>toast(`放置中の自動生産 +${fmt(gain)} TP`), 600); }
+      const gain = autoRate() * dt * OFFLINE_EARN_RATE;
+      if(gain > 0){
+        S.autoTP += gain;
+        pendingOfflineGain = gain;
+      }
     }
+    S.lastTime = Date.now();
   }catch(e){ console.warn(e); }
 }
 
@@ -3537,7 +3964,7 @@ document.getElementById("pads").addEventListener("pointerdown", (e)=>{
     renderCombo();
     renderHeader();
     advanceWork();
-    if(S.tutorialStep === "labor" && S.manualTP >= TICKET_COST){
+    if(S.tutorialStep === "labor" && S.manualTP >= TICKET_COST * 2){
       advanceTutorial("labor");
     }
   } else if(workActive){
@@ -3572,6 +3999,13 @@ function ticketsAffordable(tp){
 }
 function affordable(pool){
   return ticketsAffordable(S[poolKey(pool)]);
+}
+/** 枚数表示：1 の位まで表示できる範囲は丸めずカンマ区切り、それ以上は単位表記 */
+function fmtTickets(n){
+  n = Math.floor(Number(n) || 0);
+  if(n < 0) n = 0;
+  if(n < 1e15) return n.toLocaleString("en-US");
+  return fmt(n);
 }
 
 function qty(pool){
@@ -3612,25 +4046,27 @@ function buyLottery(pool){
   if(tutorialLocksLottery()) return;
   const key = poolKey(pool);
   const label = pool === "manual" ? "手動" : "自動";
-  const want = S.qtyMax ? affordable(pool) : qtyPow(S.qtyExp);
-  const n = buyQty(pool);
-  if(!(n > 0)){
-    toast(`${label} TP が足りません`);
+  const tutLottery = S.tutorialStep === "lottery";
+  const want = tutLottery ? 2 : (S.qtyMax ? affordable(pool) : qtyPow(S.qtyExp));
+  const n = tutLottery ? Math.min(2, affordable(pool)) : buyQty(pool);
+  if(!(n > 0) || (tutLottery && n < 2)){
+    toast(tutLottery ? "2 枚分の TP が必要だ" : `${label} TP が足りません`);
     renderQty();
     return;
   }
 
   const tpBefore = S[key];
   const bought = spendTicketTP(key, n);
-  if(!(bought > 0)){
-    toast(`${label} TP が足りません`);
+  if(!(bought > 0) || (tutLottery && bought < 2)){
+    S[key] = tpBefore;
+    toast(tutLottery ? "2 枚分の TP が必要だ" : `${label} TP が足りません`);
     renderQty();
     return;
   }
 
   let r;
   try{
-    r = drawTickets(bought, pool);
+    r = tutLottery ? drawTutorialLottery() : drawTickets(bought, pool);
   }catch(err){
     S[key] = tpBefore;
     console.error(err);
@@ -3648,8 +4084,8 @@ function buyLottery(pool){
 
   sfx.lotteryBuy();
   renderResult(bought, r);
-  if(isFinite(want) && want > bought * 1.0000001){
-    toast(`${fmt(bought)} 枚を購入（指定 ${fmt(want)} 枚中）`);
+  if(!tutLottery && isFinite(want) && want > bought * 1.0000001){
+    toast(`${fmtTickets(bought)} 枚を購入（指定 ${fmtTickets(want)} 枚中）`);
   }
   if(r.jackpot){
     vibrateJackpot(r.superHit || r.zerothHit);
@@ -3661,19 +4097,30 @@ function buyLottery(pool){
   }
   checkTicketReviewMilestones(beforeTickets, S.ticketsBought);
   renderHeader(); refreshScreen();
-  if(S.tutorialStep === "lottery"){
-    if(r.totalPrize > 0){
-      advanceTutorial("lottery");
-    } else {
-      toast("ハズレだ。もう一度働いて、買い直そう");
-      syncTutWorkLock();
-    }
+  if(tutLottery){
+    advanceTutorial("lottery");
   }
   save();
 }
 
+/** チュートリアル用：必ず 1 枚ハズレ + 1 枚七等 */
+function drawTutorialLottery(){
+  const seventh = TIERS.find(t => t.key === "seventh");
+  const hits = { seventh: 1 };
+  const totalPrize = seventh.prize;
+  S.tierWins.seventh = (S.tierWins.seventh || 0) + 1;
+  return {
+    hits,
+    totalPrize,
+    losers: 1,
+    jackpot: false,
+    superHit: false,
+    zerothHit: false,
+  };
+}
+
 function renderResult(n, r){
-  document.getElementById("resultTitle").textContent = `抽 選 結 果  ${fmt(n)} 枚`;
+  document.getElementById("resultTitle").textContent = `抽 選 結 果  ${fmtTickets(n)} 枚`;
   const sumEl = document.getElementById("resultSum");
   const sumLabel = "+" + moneyLabel(r.totalPrize);
   sumEl.textContent = sumLabel;
@@ -3709,6 +4156,14 @@ document.getElementById("qtyDown").addEventListener("click", ()=>{
 });
 document.getElementById("qtyUp").addEventListener("click", ()=>{
   if(S.qtyMax) return;
+  const can = Math.max(affordable("manual"), affordable("auto"));
+  const nextExp = S.qtyExp + 1;
+  /* 次の10倍が所持を超えるなら、端数まで含めて買える枚数へ */
+  if(can > qtyPow(S.qtyExp) && (nextExp > MAX_EXP || qtyPow(nextExp) > can)){
+    S.qtyMax = true;
+    renderQty(); save();
+    return;
+  }
   if(S.qtyExp < MAX_EXP){ S.qtyExp++; renderQty(); save(); }
 });
 document.getElementById("qtyMax").addEventListener("click", ()=>{
@@ -3721,27 +4176,35 @@ function renderQty(){
   const canMan = affordable("manual");
   const canAuto = affordable("auto");
   const canBest = Math.max(canMan, canAuto);
-  const want = S.qtyMax ? null : qtyPow(S.qtyExp);
-  const nShow = S.qtyMax ? canBest : want;
+  const tutLottery = !S.tutorialDone && S.tutorialStep === "lottery";
+  const want = tutLottery ? 2 : (S.qtyMax ? null : qtyPow(S.qtyExp));
+  /* 指定が所持を超えるときは、実際に買える枚数を表示する */
+  const nShow = tutLottery ? 2
+    : (S.qtyMax ? canBest
+      : (canBest > 0 && want > canBest ? canBest : want));
 
-  document.getElementById("qtyN").textContent = fmt(nShow || 0);
-  if(S.qtyMax){
+  document.getElementById("qtyN").textContent = fmtTickets(nShow || 0);
+  if(tutLottery){
+    document.getElementById("qtyCost").textContent = fmt(2 * TICKET_COST) + " TP";
+  } else if(S.qtyMax){
     document.getElementById("qtyCost").textContent =
       nShow > 0
-        ? `最大 ${fmt(nShow)} 枚 / ${fmt(nShow * TICKET_COST)} TP`
+        ? `最大 ${fmtTickets(nShow)} 枚 / ${fmtTickets(nShow * TICKET_COST)} TP`
         : "購入できる枚数なし";
   } else if(canBest >= 1 && want > canBest){
     document.getElementById("qtyCost").textContent =
-      `所持なら ${fmt(canBest)} 枚（${fmt(canBest * TICKET_COST)} TP）`;
+      `所持なら ${fmtTickets(canBest)} 枚（${fmtTickets(canBest * TICKET_COST)} TP）`;
   } else {
     document.getElementById("qtyCost").textContent = fmt((nShow || 0) * TICKET_COST) + " TP";
   }
-  document.getElementById("qtyMax").classList.toggle("on", !!S.qtyMax);
-  document.getElementById("qtyDown").disabled = !S.qtyMax && S.qtyExp <= 0;
-  document.getElementById("qtyUp").disabled = !!S.qtyMax || S.qtyExp >= MAX_EXP;
+  document.getElementById("qtyMax").classList.toggle("on", !!S.qtyMax && !tutLottery);
+  document.getElementById("qtyDown").disabled = tutLottery || (!S.qtyMax && S.qtyExp <= 0);
+  document.getElementById("qtyUp").disabled = tutLottery || !!S.qtyMax || S.qtyExp >= MAX_EXP;
+  document.getElementById("qtyMax").disabled = tutLottery;
   const lotteryLocked = tutorialLocksLottery();
-  document.getElementById("buyManual").disabled = lotteryLocked || !(canMan > 0);
-  document.getElementById("buyAuto").disabled = lotteryLocked || !(canAuto > 0);
+  const needTut = tutLottery ? 2 : 1;
+  document.getElementById("buyManual").disabled = lotteryLocked || !(canMan >= needTut);
+  document.getElementById("buyAuto").disabled = lotteryLocked || !(canAuto >= needTut);
   document.getElementById("balManual").textContent = "所持 " + fmtTP(S.manualTP);
   document.getElementById("balAuto").textContent = "所持 " + fmtTP(S.autoTP);
 }
@@ -4039,12 +4502,12 @@ function renderApex(){
       </button>
     </div>
 
-    <div class="apex-box zeroth-box ${zerothUnlocked()?"":"is-locked"}">
+    ${zerothUnlocked() ? `
+    <div class="apex-box zeroth-box">
       <div class="apex-hd">
         <span class="nm">零 等</span>
-        <span class="tag">${zerothUnlocked() ? "稼働中" : "未出現"}</span>
+        <span class="tag">稼働中</span>
       </div>
-      ${zerothUnlocked() ? `
       <div class="apex-ds">
         通常の宝くじ 1 枚ごとに、独立して当たる最後のくじ。<br>
         当たると <b>${ZEROTH_PRIZE_LABEL}</b> が入る。
@@ -4052,15 +4515,8 @@ function renderApex(){
       <div class="apex-stat">
         確率 <b>${ZEROTH_ODDS_LABEL}</b>　／　獲得 <b>${fmt(S.zerothWins||0)}</b> 回
       </div>
-      ` : `
-      <div class="apex-ds">
-        RHC一等 と 絶一等を 1 回ずつ当てると、このくじが現れる。
-      </div>
-      <div class="apex-stat">
-        RHC一等 <b>${fmt(S.rhcFirst||0)}</b> / 1　／　絶一等 <b>${fmt(S.zeroWins||0)}</b> / 1
-      </div>
-      `}
     </div>
+    ` : ""}
   `;
 }
 
@@ -4493,6 +4949,7 @@ document.getElementById("screens").addEventListener("click", (e)=>{
     StoreBridge.showRewardedAd().then(res=>{
       if(!res || !res.ok){
         btn.disabled = false;
+        adFailToast(res);
         renderFacility();
         return;
       }
@@ -5427,8 +5884,9 @@ function renderShop(){
   const body = document.getElementById("shopBody");
   if(!body) return;
   const envNote = isNativeApp()
-    ? "アプリ内課金でコインを購入できます。購入の復元はメニューから。"
-    : "ブラウザ開発中はモック購入になります。ストア版では正規の課金に切り替わります。";
+    ? "価格はストアの表示が優先されます。コインは何度でも購入でき、スターターキットは買い切りです。復元はメニューから。"
+    : "ブラウザ開発中はモック購入になります。ストア版では Apple / Google の課金に切り替わります。";
+  if(isNativeApp() && !StoreBridge.pricesReady) StoreBridge.refreshPrices();
   const cutLv = costCutLv();
   const cutPct = Math.round(cutLv * COST_CUT.perLv * 100);
   const cutMaxed = cutLv >= COST_CUT.maxLv;
@@ -5447,13 +5905,13 @@ function renderShop(){
       </div>
       ${S.starterKitOwned
         ? `<span class="have">購入済</span>`
-        : `<button class="buy-c" data-starter="1">¥${STARTER_KIT.yen.toLocaleString()}</button>`}
+        : `<button class="buy-c" data-starter="1">${StoreBridge.priceLabel(STARTER_KIT.productId, STARTER_KIT.yen)}</button>`}
     </div>
     <div class="pack-grid">
       ${COIN_PACKS.map((p,i)=>`
         <div class="pack">
           <div class="amt">${p.label}</div>
-          <div class="yen">¥${p.yen.toLocaleString()}</div>
+          <div class="yen">${StoreBridge.priceLabel(p.productId, p.yen)}</div>
           <div class="deal">${p.bonus||""}</div>
           <button class="buy-c" data-pack="${i}">購入する</button>
         </div>`).join("")}
@@ -5517,7 +5975,7 @@ function renderShop(){
     })()}
     <div class="shop-row">
       <div class="info">
-        <div class="nm">1 時間分の自動 TP</div>
+        <div class="nm">3 時間分の自動 TP</div>
         <div class="ds">現在レートなら +${fmt(autoRate() * TP_HOUR_PACK.minutes * 60)} TP（何度でも購入可）</div>
       </div>
       <button class="act ${S.coins>=TP_HOUR_PACK.cost?"can":""}" data-shop="tphour" ${S.coins<TP_HOUR_PACK.cost?"disabled":""}>
@@ -5596,6 +6054,53 @@ document.getElementById("confirmModal")?.addEventListener("click", (e)=>{
   if(e.target.id === "confirmModal") closeConfirm(false);
 });
 
+function showOfflineReturnModal(){
+  if(!(pendingOfflineGain > 0)) return;
+  const body = document.getElementById("offlineBody");
+  const modal = document.getElementById("offlineModal");
+  if(!body || !modal) return;
+  body.innerHTML =
+    `離れているあいだに、<b style="color:var(--gold)">+${fmt(pendingOfflineGain)} TP</b> が貯まった。<br>` +
+    `<span style="color:var(--dim)">（オフライン収益は通常の ${Math.round(OFFLINE_EARN_RATE*100)}%）</span><br><br>` +
+    `広告を見ると、この収益を <b style="color:var(--gold)">2 倍</b> にできる。`;
+  const adBtn = document.getElementById("offlineAdBoost");
+  if(adBtn){ adBtn.disabled = false; adBtn.hidden = false; }
+  modal.hidden = false;
+}
+function closeOfflineReturnModal(){
+  pendingOfflineGain = 0;
+  const modal = document.getElementById("offlineModal");
+  if(modal) modal.hidden = true;
+}
+function claimOfflineGain(){
+  const shown = pendingOfflineGain;
+  closeOfflineReturnModal();
+  if(shown > 0) toast(`放置収益 +${fmt(shown)} TP を受け取った`);
+  renderHeader();
+  refreshScreen();
+  save();
+}
+async function boostOfflineGainWithAd(){
+  const base = pendingOfflineGain;
+  if(!(base > 0)) return;
+  const btn = document.getElementById("offlineAdBoost");
+  if(btn) btn.disabled = true;
+  const res = await StoreBridge.showRewardedAd();
+  if(!res || !res.ok){
+    if(btn) btn.disabled = false;
+    adFailToast(res);
+    return;
+  }
+  S.autoTP += base;
+  closeOfflineReturnModal();
+  toast(`放置収益 2 倍！ 追加 +${fmt(base)} TP`);
+  renderHeader();
+  refreshScreen();
+  save();
+}
+document.getElementById("offlineClaim")?.addEventListener("click", ()=> claimOfflineGain());
+document.getElementById("offlineAdBoost")?.addEventListener("click", ()=>{ boostOfflineGainWithAd(); });
+
 let shopBusy = false;
 function afterShopPurchase(){
   renderHeader();
@@ -5631,7 +6136,7 @@ async function handleDailyBonusClick(kind, btn){
   if(btn) btn.disabled = true;
   try{
     const res = await StoreBridge.showRewardedAd();
-    if(!res || !res.ok) return;
+    if(!res || !res.ok){ adFailToast(res); return; }
     ensureDailyBonus();
     if(S.dailyAdClaimed) return;
     S.dailyAdClaimed = true;
@@ -5658,11 +6163,15 @@ async function handleShopClick(e){
       starter.disabled = false;
       shopBusy = false;
       if(!res || !res.ok) return;
-      if(S.starterKitOwned) return;
-      S.starterKitOwned = true;
-      S.coins += STARTER_KIT.coins;
-      sfx.adReward();
-      toast(`${STARTER_KIT.label} を購入 +${STARTER_KIT.coins} C` + (res.mocked ? "（開発モック）" : ""));
+      if(res.mocked){
+        if(S.starterKitOwned) return;
+        S.starterKitOwned = true;
+        S.coins += STARTER_KIT.coins;
+      }
+      if(res.mocked || (res.coins > 0)){
+        sfx.adReward();
+        toast(`${STARTER_KIT.label} を購入 +${STARTER_KIT.coins} C` + (res.mocked ? "（開発モック）" : ""));
+      }
       afterShopPurchase();
     }).catch(()=>{ shopBusy = false; starter.disabled = false; });
     return;
@@ -5678,9 +6187,11 @@ async function handleShopClick(e){
       pack.disabled = false;
       shopBusy = false;
       if(!res || !res.ok) return;
-      S.coins += p.coins;
-      sfx.adReward();
-      toast(`${p.label} を購入した` + (res.mocked ? "（開発モック）" : ""));
+      if(res.mocked) S.coins += p.coins;
+      if(res.mocked || (res.coins > 0)){
+        sfx.adReward();
+        toast(`${p.label} を購入した` + (res.mocked ? "（開発モック）" : ""));
+      }
       afterShopPurchase();
     }).catch(()=>{ shopBusy = false; pack.disabled = false; });
     return;
@@ -5720,7 +6231,7 @@ async function handleShopClick(e){
       toast(`自動 TP ブースター ×${fmt(autoTpBoostMult())} になった`);
     } else if(btn.dataset.shop === "tphour"){
       if(S.coins < TP_HOUR_PACK.cost) return;
-      if(!await spendCoinsConfirmed("1 時間分の自動 TP", TP_HOUR_PACK.cost)) return;
+      if(!await spendCoinsConfirmed("3 時間分の自動 TP", TP_HOUR_PACK.cost)) return;
       const gain = autoRate() * TP_HOUR_PACK.minutes * 60;
       S.autoTP += gain;
       toast(`自動 TP ${TP_HOUR_PACK.minutes} 分分を購入 +${fmt(gain)} TP`);
@@ -5782,8 +6293,20 @@ function renderHeader(){
 let lastTick = performance.now();
 setInterval(()=>{
   const now = performance.now();
-  const dt = (now - lastTick)/1000;
+  const dt = ((now - lastTick)/1000) * PLAYTEST_TIME_SCALE;
   lastTick = now;
+  if(dt > 10){
+    /* 長時間停止のフォールバック（通常は visibilitychange で処理） */
+    applyProdPointDecay(dt);
+    const gain = autoRate() * Math.min(dt, offlineCapSec() * PLAYTEST_TIME_SCALE) * OFFLINE_EARN_RATE;
+    if(gain > 0 && !(pendingOfflineGain > 0)){
+      S.autoTP += gain;
+      pendingOfflineGain = gain;
+      showOfflineReturnModal();
+      S.lastTime = Date.now();
+    }
+    return;
+  }
   applyProdPointDecay(dt);
   S.autoTP += autoRate() * dt;
   if(!document.hidden) S.playSeconds += dt;
@@ -5791,7 +6314,25 @@ setInterval(()=>{
 }, 120);
 setInterval(refreshScreen, 400);
 setInterval(save, 5000);
-document.addEventListener("visibilitychange", ()=>{ if(document.hidden) save(); });
+document.addEventListener("visibilitychange", ()=>{
+  if(document.hidden){
+    save();
+    return;
+  }
+  const rawDt = (Date.now() - (S.lastTime || Date.now())) / 1000;
+  const dt = Math.min(Math.max(0, rawDt), offlineCapSec());
+  if(dt > 0) applyProdPointDecay(dt);
+  if(dt > 10 && !(pendingOfflineGain > 0)){
+    const gain = autoRate() * dt * OFFLINE_EARN_RATE;
+    if(gain > 0){
+      S.autoTP += gain;
+      pendingOfflineGain = gain;
+      showOfflineReturnModal();
+    }
+  }
+  lastTick = performance.now();
+  save();
+});
 
 document.getElementById("menuBtn").addEventListener("click", ()=> openSettings());
 
@@ -5811,6 +6352,7 @@ function openSettings(){
       <button type="button" data-set="privacy">プライバシーポリシー</button>
       <button type="button" data-set="support">サポート</button>
       <button type="button" data-set="restore">購入を復元</button>
+      ${StoreBridge.privacyOptionsRequired ? `<button type="button" data-set="adprivacy">広告のプライバシー設定</button>` : ""}
       <button type="button" data-set="legal">免責事項をもう一度見る</button>
       <button type="button" class="danger" data-set="reset">データを削除して最初から</button>
     </div>
@@ -5861,6 +6403,7 @@ document.getElementById("settingsModal").addEventListener("click", (e)=>{
   else if(act === "privacy") openExternalUrl(STORE_LINKS.privacy);
   else if(act === "support") openExternalUrl(STORE_LINKS.support);
   else if(act === "restore") StoreBridge.restorePurchases();
+  else if(act === "adprivacy") StoreBridge.showPrivacyOptions();
   else if(act === "legal"){ closeSettings(); showLegalModal(true); }
   else if(act === "reset") resetAllData();
 });
@@ -5884,7 +6427,7 @@ let tutHlTimer = null;
 const TUT_SCRIPT = {
   labor: {
     label:"1 / 6", title:"まずは働け",
-    body:"パネルをタップするたび、TP が増える。宝くじ 1 枚分（30 TP）まで稼ごう。",
+    body:"パネルをタップするたび、TP が増える。宝くじ 2 枚分（60 TP）まで稼ごう。",
     pos:"top", next:false
   },
   seeManualTP: {
@@ -5893,8 +6436,8 @@ const TUT_SCRIPT = {
     pos:"bottom", next:true
   },
   lottery: {
-    label:"3 / 6", title:"夢を一枚、買え",
-    body:"貯めた TP で宝くじを買ってみよう。今日の運が、少しだけ顔を出す。",
+    label:"3 / 6", title:"夢を二枚、買え",
+    body:"貯めた TP で宝くじを 2 枚まとめて買ってみよう。くじなので外れることもある——それでも、今日の運が少しだけ顔を出す。",
     pos:"top", next:false
   },
   navFacility: {
@@ -6105,6 +6648,20 @@ function boot(){
   renderCombo();
   renderHeader();
   renderScreen();
+  if(PLAYTEST_TIME_SCALE !== 1){
+    let badge = document.getElementById("playtestTimeBadge");
+    if(!badge){
+      badge = document.createElement("div");
+      badge.id = "playtestTimeBadge";
+      document.body.appendChild(badge);
+    }
+    badge.textContent = `TIME ×${PLAYTEST_TIME_SCALE}`;
+    setTimeout(()=>toast(`プレイテスト: 時間経過 ×${PLAYTEST_TIME_SCALE}`), 800);
+  }
+  if(pendingOfflineGain > 0){
+    setTimeout(()=> showOfflineReturnModal(), 500);
+  }
+  StoreBridge.boot();
   if(!S.legalAccepted) showLegalModal(false);
   else if(!S.tutorialDone){
     ensureOracleSeen();
