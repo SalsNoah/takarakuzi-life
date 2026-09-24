@@ -2638,6 +2638,8 @@ function pow10(e){
   return isFinite(n) && n > 0 ? n : Infinity;
 }
 const MAX_TICKETS = pow10(MAX_EXP); /* 100,000,000,000+e1000 無量大数枚 */
+/* MAX 購入で 1 の位まで正確に買う上限。これを超えると枚数×当選金が Number を溢れるため 10^n 経路にする */
+const MAX_EXACT_TICKETS = 1e290;
 
 /* 嗜好品：効果は一切ない。買ったという事実だけが残る（全 50 品）
    最終品「終わりのない領収書」= 1 無量大数 G */
@@ -4196,10 +4198,16 @@ function buyLottery(pool){
     n = Math.min(2, affordable(pool));
   } else if(S.qtyMax){
     /* MAX: 1 の位まで買える枚数をそのまま買う。
-       有限枚数では logN を渡さない（10^n に丸められて端数が消えるため） */
+       有限枚数では logN を渡さない（10^n に丸められて端数が消えるため）。
+       ただし Number の上限に近い巨大枚数は当選金計算が溢れるため 10^n 経路へ */
     n = affordable(pool);
     want = n;
     if(n === Infinity) logN = MAX_EXP;
+    else if(n > MAX_EXACT_TICKETS){
+      logN = Math.min(MAX_EXP, ticketsAffordableLog(S[key]));
+      n = pow10(logN);
+      want = n;
+    }
   } else {
     logN = qtyLog(S.qtyExp);
     const canLog = ticketsAffordableLog(S[key]);
@@ -4355,12 +4363,18 @@ function renderQty(){
   const wantLog = qtyLog(S.qtyExp);
   const want = tutLottery ? 2 : (S.qtyMax ? null : qtyPow(wantLog));
   const nShow = tutLottery ? 2 : (S.qtyMax ? canBest : want);
-  /* MAX は 1 の位まで丸めずに表示する */
+  /* MAX は 1 の位まで丸めずに表示する（巨大枚数は実際に買う 10^n を表示） */
+  const maxLabel = () => {
+    if(!isFinite(canBest)) return fmtByLog10(MAX_EXP);
+    if(canBest > MAX_EXACT_TICKETS){
+      const lg = Math.max(ticketsAffordableLog(S.manualTP), ticketsAffordableLog(S.autoTP));
+      return fmtByLog10(Math.min(MAX_EXP, lg));
+    }
+    return fmtTickets(canBest || 0);
+  };
   const nShowLabel = tutLottery
     ? fmt(2)
-    : (S.qtyMax
-      ? (isFinite(canBest) ? fmtTickets(canBest || 0) : fmtByLog10(MAX_EXP))
-      : fmtByLog10(wantLog));
+    : (S.qtyMax ? maxLabel() : fmtByLog10(wantLog));
 
   document.getElementById("qtyN").textContent = nShowLabel;
   if(tutLottery){
